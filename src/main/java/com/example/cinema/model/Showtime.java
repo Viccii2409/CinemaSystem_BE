@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.sql.Time;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -36,7 +37,7 @@ public class Showtime {
     private Boolean status;
 
     @OneToMany(mappedBy = "showtime")
-    private Set<TicketBought> ticketsBought;
+    private List<TicketBought> ticketsBought;
 
     @ManyToOne
     @JoinColumn(name = "MovieID", nullable = false)
@@ -47,7 +48,7 @@ public class Showtime {
     private Room room;
 
     @OneToMany(mappedBy = "showtime")
-    private Set<SeatAvailability> seatAvailabilities;
+    private List<SeatAvailability> seatAvailabilities;
 
 
     // Các getter và setter

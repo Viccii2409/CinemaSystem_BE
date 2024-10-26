@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -32,7 +33,7 @@ public class BasePrice {
     private Date updatedAt;
 
     @OneToMany(mappedBy = "basePrice")
-    private Set<SeatTicket> seatTickets;
+    private List<SeatTicket> seatTickets;
 
     // Các getter và setter
 }

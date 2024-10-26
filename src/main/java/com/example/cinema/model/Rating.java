@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -27,6 +28,6 @@ public class Rating {
     private String description;
 
     @OneToMany(mappedBy = "rating")
-    private Set<Feedback> feedbacks;
+    private List<Feedback> feedbacks;
     // Các getter và setter
 }

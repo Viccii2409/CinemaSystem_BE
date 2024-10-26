@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -25,7 +26,7 @@ public class TypeDiscount {
     private String name;
 
     @OneToMany(mappedBy = "typeDiscount")
-    private Set<Discount> discounts;
+    private List<Discount> discounts;
 
     // Các getter và setter
 }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -26,7 +27,7 @@ public class Role {
 
     // Quan hệ nhiều-nhiều với bảng Position
     @ManyToMany(mappedBy = "roles")
-    private Set<Position> positions;
+    private List<Position> positions;
 
     // Các getter và setter
 }

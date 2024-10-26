@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -34,6 +35,6 @@ public class DayOfWeek {
     private float surcharge;
 
     @OneToMany(mappedBy = "dayOfWeek")
-    private Set<SeatTicket> seatTickets;
+    private List<SeatTicket> seatTickets;
     // Các getter và setter
 }

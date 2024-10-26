@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -36,10 +37,10 @@ public class Room {
     private TypeRoom typeRoom;
     // Quan hệ với bảng Showtime
     @OneToMany(mappedBy = "room")
-    private Set<Showtime> showtimes;
+    private List<Showtime> showtimes;
 
     @OneToMany(mappedBy = "room")
-    private Set<Seat> seats;
+    private List<Seat> seats;
 
     // Các getter và setter
 }

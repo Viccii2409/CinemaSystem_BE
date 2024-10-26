@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -26,7 +27,7 @@ public class Language {
 
     // Quan hệ với Movie
     @OneToMany(mappedBy = "language")
-    private Set<Movie> movies;
+    private List<Movie> movies;
 
     // Các getter và setter
 }

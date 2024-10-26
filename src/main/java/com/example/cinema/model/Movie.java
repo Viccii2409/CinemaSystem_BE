@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import javax.swing.*;
 import java.sql.Date;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -44,20 +45,20 @@ public class Movie {
     // Quan hệ với bảng Movie_Genre
 
     @ManyToMany(mappedBy = "movie")
-    private Set<Genre> genres;
+    private List<Genre> genres;
 
     @OneToMany(mappedBy = "movie")
-    private Set<Feedback> feedbacks;
+    private List<Feedback> feedbacks;
     // Quan hệ với bảng Showtime
     @OneToMany(mappedBy = "movie")
-    private Set<Showtime> showtimes;
+    private List<Showtime> showtimes;
 
     @OneToMany(mappedBy = "movie")
-    private Set<Image> images;
+    private List<Image> images;
     // Các getter và setter
 
     @ManyToMany(mappedBy = "movies")
-    private Set<Cast> casts;
+    private List<Cast> casts;
 
     @OneToOne(mappedBy = "movie")
     private Trailer trailer;

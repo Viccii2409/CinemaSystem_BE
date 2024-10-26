@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -42,11 +43,11 @@ public class Seat {
     private TypeSeat typeSeat;
 
     @OneToMany(mappedBy = "seat")
-    private Set<SeatReservation> seatReservations;
+    private List<SeatReservation> seatReservations;
 
     @OneToMany(mappedBy = "seat")
-    private Set<SeatTicket> seatTickets;
+    private List<SeatTicket> seatTickets;
     // Các getter và setter
     @OneToMany(mappedBy = "seat")
-    private Set<SeatAvailability> seatAvailabilities;
+    private List<SeatAvailability> seatAvailabilities;
 }

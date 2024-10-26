@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -42,7 +43,7 @@ public class Discount {
     // Quan hệ với bảng User_Discount
     @ManyToMany(mappedBy = "discounts")
     @Column(name = "UserID", nullable = false)
-    private Set<User> users;
+    private List<User> users;
 
     @ManyToOne
     @JoinColumn(name = "TypeDiscountID", nullable = false)

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -26,7 +27,7 @@ public class Cast {
 
     // Quan hệ với bảng Movie_Cast
     @ManyToMany(mappedBy = "casts")
-    private Set<Movie> movies;
+    private List<Movie> movies;
 
     // Các getter và setter
 }

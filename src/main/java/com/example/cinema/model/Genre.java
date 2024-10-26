@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -31,10 +32,10 @@ public class Genre {
     private boolean status; // Đảm bảo thuộc tính status là kiểu boolean
 
     @ManyToMany(mappedBy = "genres")
-    private Set<Movie> movies;
+    private List<Movie> movies;
 
     @ManyToMany(mappedBy = "genres")
-    private Set<User> users;
+    private List<User> users;
 
 
 }

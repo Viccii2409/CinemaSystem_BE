@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Time;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -35,6 +36,6 @@ public class TimeFrame {
     private float surcharge;
 
     @OneToMany(mappedBy = "timeFrame")
-    private Set<SeatTicket> seatTickets;
+    private List<SeatTicket> seatTickets;
     // Các getter và setter
 }

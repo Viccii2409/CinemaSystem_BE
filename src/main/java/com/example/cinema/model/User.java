@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -95,22 +96,22 @@ public class User {
 
     // Quan hệ với bảng TicketBought
     @OneToMany(mappedBy = "user")
-    private Set<TicketBought> ticketsBought;
+    private List<TicketBought> ticketsBought;
 
     @OneToMany(mappedBy = "user")
-    private Set<SeatReservation> seatsReservation;
+    private List<SeatReservation> seatsReservation;
 
     @OneToMany(mappedBy = "user")
-    private Set<Payment> payments;
+    private List<Payment> payments;
 
     @ManyToMany(mappedBy = "users")
-    private Set<Notification> notifications;
+    private List<Notification> notifications;
 
     @ManyToMany(mappedBy = "users")
-    private Set<Discount> discounts;
+    private List<Discount> discounts;
 
     @ManyToMany(mappedBy = "users")
-    private Set<Genre> genres;
+    private List<Genre> genres;
     // Các getter và setter
 
 }

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -61,7 +62,7 @@ public class Payment {
     private Discount discount;
 
     @OneToMany(mappedBy = "payment")
-    private Set<TicketBought> ticketsBought;
+    private List<TicketBought> ticketsBought;
 
     @ManyToOne
     @JoinColumn(name = "TypePayID", nullable = false)
