@@ -26,8 +26,8 @@ public class Role {
     private String name;
 
     // Quan hệ nhiều-nhiều với bảng Position
-    @ManyToMany(mappedBy = "roles")
-    private List<Position> positions;
+    @OneToMany(mappedBy = "role")
+    private List<PositionRole> positionRoles;
 
     // Các getter và setter
 }

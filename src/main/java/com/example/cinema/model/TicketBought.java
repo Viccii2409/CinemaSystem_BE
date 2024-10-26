@@ -39,8 +39,7 @@ public class TicketBought {
     @OneToOne(mappedBy = "ticketBought")
     private SeatTicket seatTicket;
 
-    @OneToOne(mappedBy = "ticketBought")
-    private Feedback feedback;
+
 
     // Các getter và setter
 }

@@ -26,8 +26,8 @@ public class Cast {
     private String name;
 
     // Quan hệ với bảng Movie_Cast
-    @ManyToMany(mappedBy = "casts")
-    private List<Movie> movies;
+    @OneToMany(mappedBy = "cast")
+    private List<MovieCast> movieCasts;
 
     // Các getter và setter
 }

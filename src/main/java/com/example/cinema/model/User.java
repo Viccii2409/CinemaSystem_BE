@@ -91,7 +91,8 @@ public class User {
     private Theater theater;
 
     // Quan hệ với bảng Account
-    @OneToOne(mappedBy = "user")
+    @OneToOne
+    @JoinColumn(name = "AccountID")
     private Account account;
 
     // Quan hệ với bảng TicketBought
@@ -104,14 +105,14 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Payment> payments;
 
-    @ManyToMany(mappedBy = "users")
-    private List<Notification> notifications;
+    @OneToMany(mappedBy = "user")
+    private List<UserNotification> userNotifications;
 
-    @ManyToMany(mappedBy = "users")
-    private List<Discount> discounts;
+    @OneToMany(mappedBy = "user")
+    private List<UserDiscount>userDiscounts;
 
-    @ManyToMany(mappedBy = "users")
-    private List<Genre> genres;
+    @OneToMany(mappedBy = "user")
+    private List<UserGenre> userGenres;
     // Các getter và setter
 
 }

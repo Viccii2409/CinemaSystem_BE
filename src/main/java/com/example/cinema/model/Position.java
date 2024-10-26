@@ -29,7 +29,7 @@ public class Position {
     @OneToMany(mappedBy = "position")
     private List<User> users;
 
-    @ManyToMany(mappedBy = "positions")
-    private List<Role> roles;
+    @OneToMany(mappedBy = "position")
+    private List<PositionRole> positionRoles;
     // Các getter và setter
 }

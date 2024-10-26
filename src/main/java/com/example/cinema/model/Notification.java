@@ -30,8 +30,8 @@ public class Notification {
     @Column(name = "Date", nullable = false)
     private String date;
 
-    @ManyToMany(mappedBy = "notifications")
-    private List<User> users;
+    @OneToMany (mappedBy = "notification")
+    private List<UserNotification> userNotifications;
 
     // Các getter và setter
 }

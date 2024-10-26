@@ -41,9 +41,8 @@ public class Discount {
     private boolean status;
 
     // Quan hệ với bảng User_Discount
-    @ManyToMany(mappedBy = "discounts")
-    @Column(name = "UserID", nullable = false)
-    private List<User> users;
+    @OneToMany(mappedBy = "discount")
+    private List<UserDiscount> userDiscounts;
 
     @ManyToOne
     @JoinColumn(name = "TypeDiscountID", nullable = false)

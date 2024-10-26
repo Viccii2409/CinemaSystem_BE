@@ -35,7 +35,8 @@ public class Feedback {
     @JoinColumn(name = "MovieID", nullable = false)
     private Movie movie;
 
-    @OneToOne(mappedBy = "feedback")
+    @OneToOne
+    @JoinColumn(name = "FeedbackID")
     private TicketBought ticketBought;
 
 

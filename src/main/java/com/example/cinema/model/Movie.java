@@ -44,8 +44,8 @@ public class Movie {
 
     // Quan hệ với bảng Movie_Genre
 
-    @ManyToMany(mappedBy = "movie")
-    private List<Genre> genres;
+    @OneToMany(mappedBy = "movie")
+    private List<MovieGenre> movieGenres;
 
     @OneToMany(mappedBy = "movie")
     private List<Feedback> feedbacks;
@@ -57,8 +57,8 @@ public class Movie {
     private List<Image> images;
     // Các getter và setter
 
-    @ManyToMany(mappedBy = "movies")
-    private List<Cast> casts;
+    @OneToMany(mappedBy = "movie")
+    private List<MovieCast> movieCasts;
 
     @OneToOne(mappedBy = "movie")
     private Trailer trailer;
