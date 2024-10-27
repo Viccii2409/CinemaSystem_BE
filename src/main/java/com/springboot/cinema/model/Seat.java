@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.EqualsAndHashCode;
 
 import java.util.Set;
 
@@ -16,7 +15,6 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"room", "typeSeat", "seatReservations", "seatTickets", "seatAvailabilities"})
 public class Seat {
 
     @Id
@@ -30,8 +28,8 @@ public class Seat {
     @Column(name = "SeatNumber", nullable = false)
     private Integer seatNumber;
 
-    @Column(name = "RowNumber", nullable = false)
-    private String rowNumber;
+    @Column(name = "RowNum", nullable = false)
+    private String rowNum;
 
     @Column(name = "Status")
     private boolean status;
