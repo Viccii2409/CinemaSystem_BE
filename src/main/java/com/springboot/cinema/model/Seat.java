@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
 import java.util.Set;
 
 @Entity
-@Table(name = "CinemaSeat")
+@Table(name = "Seat")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -34,10 +34,6 @@ public class Seat {
     @Column(name = "RowNum", nullable = false)
     private String rowNum;
 
-    @Column(name = "RowNumber", nullable = false)
-    private String rowNumber;
-
-
     @Column(name = "Status")
     private boolean status;
 
@@ -57,8 +53,6 @@ public class Seat {
 
     @OneToMany(mappedBy = "seat")
     private Set<SeatAvailability> seatAvailabilities;
-<<<<<<< HEAD
+
 }
-=======
-}
->>>>>>> 616121cc6fafd4fa479165f129e1c13a04cfb049
+
