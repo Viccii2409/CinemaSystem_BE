@@ -5,16 +5,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.EqualsAndHashCode;
 
-import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "Seat")
+@Table(name = "CinemaSeat")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"room", "typeSeat", "seatReservations", "seatTickets", "seatAvailabilities"})
 public class Seat {
 
     @Id
@@ -29,7 +30,7 @@ public class Seat {
     private Integer seatNumber;
 
     @Column(name = "RowNumber", nullable = false)
-    private char rowNumber;
+    private String rowNumber;
 
     @Column(name = "Status")
     private boolean status;
@@ -43,11 +44,11 @@ public class Seat {
     private TypeSeat typeSeat;
 
     @OneToMany(mappedBy = "seat")
-    private List<SeatReservation> seatReservations;
+    private Set<SeatReservation> seatReservations;
 
     @OneToMany(mappedBy = "seat")
-    private List<SeatTicket> seatTickets;
-    // Các getter và setter
+    private Set<SeatTicket> seatTickets;
+
     @OneToMany(mappedBy = "seat")
-    private List<SeatAvailability> seatAvailabilities;
+    private Set<SeatAvailability> seatAvailabilities;
 }
