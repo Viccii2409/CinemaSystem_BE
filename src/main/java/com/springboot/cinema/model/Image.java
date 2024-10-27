@@ -1,14 +1,10 @@
-package com.example.cinema.model;
+package com.springboot.cinema.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import javax.swing.*;
-import java.sql.Date;
-import java.util.Set;
 
 @Entity
 @Table(name = "Image")

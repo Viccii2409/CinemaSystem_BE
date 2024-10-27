@@ -1,7 +1,7 @@
-package com.example.cinema.service;
+package com.springboot.cinema.service;
 
-import com.example.cinema.model.Genre;
-import com.example.cinema.repository.GenreRepository;
+import com.springboot.cinema.model.Genre;
+import com.springboot.cinema.repository.GenreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

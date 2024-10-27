@@ -57,7 +57,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.33</version> <!-- Kiểm tra phiên bản mới nhất trên Maven Central -->
+            <version>8.0.33</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -65,8 +65,11 @@
             <version>1.18.30</version>
             <scope>provided</scope>
         </dependency>
-
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+            <version>${spring.boot.version}</version> <!-- Thêm phiên bản cho actuator -->
+        </dependency>
     </dependencies>
 
     <build>
@@ -88,7 +91,7 @@
                     <execution>
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.example.cinema.HelloApplication</mainClass>
+                            <mainClass>com.springboot.cinema.HelloApplication</mainClass>
                         </configuration>
                     </execution>
                 </executions>

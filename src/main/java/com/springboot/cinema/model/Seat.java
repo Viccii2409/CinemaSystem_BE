@@ -1,4 +1,4 @@
-package com.example.cinema.model;
+package com.springboot.cinema.model;
 
 import com.springboot.cinema.model.*;
 import jakarta.persistence.*;

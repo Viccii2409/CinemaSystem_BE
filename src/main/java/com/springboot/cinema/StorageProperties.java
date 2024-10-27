@@ -1,4 +1,4 @@
-package com.example.cinema;
+package com.springboot.cinema;
 
 public class StorageProperties {
 }

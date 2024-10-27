@@ -1,4 +1,4 @@
-package com.example.cinema.model;
+package com.springboot.cinema.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,7 +9,6 @@ import lombok.Setter;
 import java.sql.Time;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "Showtime")
