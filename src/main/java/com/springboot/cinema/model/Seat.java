@@ -6,15 +6,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.EqualsAndHashCode;
 
 import java.util.Set;
 
 @Entity
-@Table(name = "Seat")
+@Table(name = "CinemaSeat")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"room", "typeSeat", "seatReservations", "seatTickets", "seatAvailabilities"})
 public class Seat {
 
     @Id
@@ -28,8 +30,13 @@ public class Seat {
     @Column(name = "SeatNumber", nullable = false)
     private Integer seatNumber;
 
+
     @Column(name = "RowNum", nullable = false)
     private String rowNum;
+
+    @Column(name = "RowNumber", nullable = false)
+    private String rowNumber;
+
 
     @Column(name = "Status")
     private boolean status;
@@ -50,4 +57,8 @@ public class Seat {
 
     @OneToMany(mappedBy = "seat")
     private Set<SeatAvailability> seatAvailabilities;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 616121cc6fafd4fa479165f129e1c13a04cfb049
