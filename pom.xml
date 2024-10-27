@@ -88,7 +88,7 @@
                     <execution>
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.example.cinema.HelloApplication</mainClass>
+                            <mainClass>com.springboot.cinema.HelloApplication</mainClass>
                         </configuration>
                     </execution>
                 </executions>
