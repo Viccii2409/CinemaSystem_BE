@@ -21,7 +21,7 @@ public class TicketBought {
 	private Showtime showtime;
 
 	@ManyToOne
-	@JoinColumn(name = "customerID")
+	@JoinColumn(name = "userID")
 	private Customer customer;
 
 	@ManyToOne

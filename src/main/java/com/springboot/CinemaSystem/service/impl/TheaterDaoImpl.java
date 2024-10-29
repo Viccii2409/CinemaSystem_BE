@@ -1,21 +1,43 @@
 package com.springboot.CinemaSystem.service.impl;
 
 import com.springboot.CinemaSystem.entity.*;
+import com.springboot.CinemaSystem.exception.DataProcessingException;
+import com.springboot.CinemaSystem.exception.NotFoundException;
+import com.springboot.CinemaSystem.repository.TheaterRepository;
 import com.springboot.CinemaSystem.service.TheaterDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
 
+@Service
 public class TheaterDaoImpl implements TheaterDao {
+
+	@Autowired
+	private TheaterRepository theaterRepository;
 
 	@Override
 	public boolean addTheater(Theater theater) {
-		return false;
+		try {
+			theaterRepository.save(theater);
+			return true;
+		} catch (Exception e) {
+			throw new DataProcessingException("Failed to add theater: " + e.getMessage());
+		}
 	}
 
 	@Override
 	public boolean updaeTheater(Theater theater) {
-		return false;
+		if (!theaterRepository.existsById(theater.getID())) {
+			throw new NotFoundException("Cannot update: Theater not found with ID: " + theater.getID());
+		}
+		try {
+			theaterRepository.save(theater);
+			return true;
+		} catch (Exception e) {
+			throw new DataProcessingException("Failed to update theater: " + e.getMessage());
+		}
 	}
 
 	@Override
@@ -25,12 +47,17 @@ public class TheaterDaoImpl implements TheaterDao {
 
 	@Override
 	public Theater getTheaterByID(int theaterID) {
-		return null;
+		return theaterRepository.findById((long) theaterID)
+				.orElseThrow(() -> new NotFoundException("Theater not found with ID: " + theaterID));
 	}
 
 	@Override
 	public List<Theater> getAllTheaters() {
-		return List.of();
+		try {
+			return theaterRepository.findAll();
+		} catch (Exception e) {
+			throw new DataProcessingException("Failed to retrieve theaters: " + e.getMessage());
+		}
 	}
 
 	@Override
