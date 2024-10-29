@@ -1,40 +1,43 @@
 package com.springboot.cinema.controller;
 
 import com.springboot.cinema.model.Genre;
-import com.springboot.cinema.repository.GenreRepository;
+import com.springboot.cinema.service.GenreService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Service // Thêm @Service để Spring Boot quản lý lớp này như một service
+@RestController
+@RequestMapping("/api/genres")
 public class GenreController {
     @Autowired
-    private GenreRepository genreRepository;
+    private GenreService genreService;
 
-    public List<Genre> getAllGenres() {
-        return genreRepository.findAll();
+    @GetMapping
+    public List<Genre> getAllGenres(){
+        return genreService.getAllGenres();
     }
 
-    public List<Genre> searchGenres(String name) {
-        return genreRepository.findByNameContaining(name);
+    @GetMapping("/search")
+    public List<Genre> searchGenres(@RequestParam("name") String name){
+        return genreService.searchGenres(name);
     }
 
-    public Genre addGenre(Genre genre) {
-        return genreRepository.save(genre);
+    @PostMapping
+    public Genre addGenre(@RequestBody Genre genre){
+        return genreService.addGenre(genre);
     }
 
-    public Genre updateGenre(int id, Genre genreDetails) {
-        Genre genre = genreRepository.findById(id).orElseThrow(); // Tìm kiếm genre theo ID, ném ngoại lệ nếu không tìm thấy
-        genre.setName(genreDetails.getName());
-        genre.setDescription(genreDetails.getDescription()); // Thiết lập lại thuộc tính "describe"
-        genre.setStatus(genreDetails.isStatus()); // Cập nhật trạng thái genre
-        return genreRepository.save(genre); // Lưu lại genre sau khi chỉnh sửa
+    @PutMapping("/{id}")
+    public Genre updateGenre(@PathVariable Long id, @RequestBody Genre genreDetails){
+        return genreService.updateGenre(id, genreDetails);
     }
 
-    public void hideGenre(int id) {
-        Genre genre = genreRepository.findById(id).orElseThrow(); // Tìm kiếm genre theo ID, ném ngoại lệ nếu không tìm thấy
-        genre.setStatus(false); // Đặt trạng thái genre thành "ẩn" (false)
-        genreRepository.save(genre); // Lưu lại trạng thái mới
+    @PutMapping("/{id}/hide")
+    public ResponseEntity<String> hideGenre(@PathVariable Long id) {
+        genreService.hideGenre(id);
+        return ResponseEntity.ok("Chuyển trạng thái thành công");
+
     }
 }
