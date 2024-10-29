@@ -1,5 +1,8 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -22,20 +25,25 @@ public class Movie {
 	private float rating;
 
 	@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonBackReference
 	private List<Showtime> showtime;
 
 	@ManyToOne
 	@JoinColumn(name = "directorID")
+	@JsonManagedReference
 	private Director director;
 
 	@ManyToOne
 	@JoinColumn(name = "languageID")
+	@JsonManagedReference
 	private Language language;
 
 	@OneToOne(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
 	private Trailer trailer;
 
 	@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
 	private List<Image> image;
 
 	@ManyToMany
@@ -44,6 +52,7 @@ public class Movie {
 			joinColumns = @JoinColumn(name = "movieID"),
 			inverseJoinColumns = @JoinColumn(name = "castID")
 	)
+	@JsonManagedReference
 	private List<Cast> cast;
 
 	@ManyToMany
@@ -52,9 +61,11 @@ public class Movie {
 			joinColumns = @JoinColumn(name = "movieID"),
 			inverseJoinColumns = @JoinColumn(name = "genreID")
 	)
+	@JsonManagedReference
 	private List<Genre> genre;
 
 	@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
 	private List<Feedback> feedback;
 
 }

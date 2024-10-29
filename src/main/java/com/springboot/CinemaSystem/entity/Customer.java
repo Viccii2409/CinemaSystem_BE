@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -22,6 +23,7 @@ public class Customer extends User {
 			joinColumns = @JoinColumn(name = "userID"),
 			inverseJoinColumns = @JoinColumn(name = "genreID")
 	)
+	@JsonManagedReference
 	private List<Genre> genre;
 
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)

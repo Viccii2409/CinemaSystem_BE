@@ -1,6 +1,7 @@
 package com.springboot.CinemaSystem.service.impl;
 
 import com.springboot.CinemaSystem.entity.Movie;
+import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.repository.MovieRepository;
 import com.springboot.CinemaSystem.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,12 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public void changeStatus(Long id) {
 
+    }
+
+    @Override
+    public Movie getMovieByID(long id) {
+        return movieRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("khong tim thay"));
     }
 
 

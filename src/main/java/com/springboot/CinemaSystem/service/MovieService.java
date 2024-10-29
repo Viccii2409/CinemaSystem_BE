@@ -11,4 +11,5 @@ public interface MovieService {
     Movie addMovie(Movie movie);
     Movie updateMovie(Long id, Movie movie);
     void changeStatus(Long id);
+    public Movie getMovieByID(long id);
 }

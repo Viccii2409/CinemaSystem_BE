@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -27,6 +28,7 @@ public class Showtime {
 
 	@ManyToOne
 	@JoinColumn(name = "movieID")
+	@JsonManagedReference
 	private Movie movie;
 
 	@OneToMany(mappedBy = "showtime", cascade = CascadeType.ALL)
