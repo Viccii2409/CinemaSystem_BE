@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,6 +24,7 @@ public class User {
 	private Date startDate;
 
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
 	private Account account;
 
 	@Embedded
@@ -34,6 +36,7 @@ public class User {
 			joinColumns = @JoinColumn(name = "userID"), // Khóa ngoại từ bảng User
 			inverseJoinColumns = @JoinColumn(name = "notificationID") // Khóa ngoại từ bảng Notification
 	)
+	@JsonManagedReference
 	private List<Notification> notification;
 
 }

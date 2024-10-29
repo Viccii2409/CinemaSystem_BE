@@ -1,6 +1,7 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -21,10 +22,12 @@ public class Feedback {
 
 	@OneToOne
 	@JoinColumn(name = "ticketBoughtID")
+	@JsonManagedReference
 	private TicketBought ticketBought;
 
 	@ManyToOne
 	@JoinColumn(name = "ratingID")
+	@JsonManagedReference
 	private Rating rating;
 
 }

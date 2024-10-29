@@ -1,6 +1,8 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.Formula;
@@ -25,9 +27,11 @@ public class Theater {
 	private boolean status;
 
 	@OneToMany(mappedBy = "theater")
+	@JsonBackReference
 	private List<Agent> agent;
 
 	@OneToMany(mappedBy = "theater", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
 	private List<Room> room;
 
 	@Embedded

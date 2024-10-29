@@ -15,6 +15,7 @@ public class Customer extends User {
 
 	@ManyToOne
 	@JoinColumn(name = "levelID")
+	@JsonManagedReference
 	private Level level;
 
 	@ManyToMany
@@ -27,6 +28,7 @@ public class Customer extends User {
 	private List<Genre> genre;
 
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
 	private List<TicketBought> ticketBought;
 
 	@ManyToMany
@@ -35,9 +37,11 @@ public class Customer extends User {
 			joinColumns = @JoinColumn(name = "userID"),
 			inverseJoinColumns = @JoinColumn(name = "discountID")
 	)
+	@JsonManagedReference
 	private List<Discount> discount;
 
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
 	private List<SeatReservation> seatReservation;
 
 }

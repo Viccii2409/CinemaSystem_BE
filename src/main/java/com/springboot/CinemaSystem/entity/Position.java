@@ -1,5 +1,7 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,6 +18,7 @@ public class Position {
 	private boolean status;
 
 	@OneToMany(mappedBy = "position", cascade = CascadeType.ALL)
+	@JsonBackReference
 	private List<Employee> employee;
 
 	@ManyToMany
@@ -24,6 +27,7 @@ public class Position {
 			joinColumns = @JoinColumn(name = "positionID"),
 			inverseJoinColumns = @JoinColumn(name = "roleID")
 	)
+	@JsonManagedReference
 	private List<Role> role;
 
 

@@ -1,5 +1,7 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,10 +17,12 @@ public class SeatReservation {
 
 	@ManyToOne
 	@JoinColumn(name = "userID")
+	@JsonBackReference
 	private Customer customer;
 
 	@ManyToOne
 	@JoinColumn(name = "seatID")
+	@JsonManagedReference
 	private Seat seat;
 
 }

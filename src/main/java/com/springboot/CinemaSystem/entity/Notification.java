@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,6 +18,7 @@ public class Notification {
 	private String date;
 
 	@ManyToMany(mappedBy = "notification")
+	@JsonBackReference
 	private List<User> user;
 
 }

@@ -1,5 +1,7 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -20,13 +22,16 @@ public class Discount {
 	private boolean status;
 
 	@ManyToMany(mappedBy = "discount")
+	@JsonBackReference
 	private List<Customer> customer;
 
 	@ManyToOne
 	@JoinColumn(name = "typeDiscountID")
+	@JsonManagedReference
 	private TypeDiscount typeDiscount;
 
 	@OneToMany(mappedBy = "discount", cascade = CascadeType.ALL)
+	@JsonBackReference
 	private List<Payment> payment;
 
 }
