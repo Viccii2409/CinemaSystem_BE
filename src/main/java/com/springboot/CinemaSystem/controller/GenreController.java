@@ -1,7 +1,7 @@
 package com.springboot.CinemaSystem.controller;
 
+import com.springboot.CinemaSystem.entity.Genre;
 import com.springboot.CinemaSystem.service.GenreService;
-import com.springboot.cinema.model.Genre;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

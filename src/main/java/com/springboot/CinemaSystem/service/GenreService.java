@@ -1,6 +1,7 @@
 package com.springboot.CinemaSystem.service;
 
-import com.springboot.cinema.model.Genre;
+
+import com.springboot.CinemaSystem.entity.Genre;
 
 import java.util.List;
 

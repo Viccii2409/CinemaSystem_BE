@@ -1,6 +1,6 @@
 package com.springboot.CinemaSystem.repository;
 
-import com.springboot.cinema.model.Genre;
+import com.springboot.CinemaSystem.entity.Genre;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

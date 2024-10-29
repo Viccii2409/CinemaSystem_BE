@@ -1,6 +1,7 @@
 package com.springboot.CinemaSystem.service;
 
-import com.springboot.cinema.model.Movie;
+
+import com.springboot.CinemaSystem.entity.Movie;
 
 import java.util.List;
 

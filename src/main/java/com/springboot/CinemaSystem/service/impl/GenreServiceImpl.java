@@ -1,6 +1,6 @@
 package com.springboot.CinemaSystem.service.impl;
 
-import com.springboot.cinema.model.Genre;
+import com.springboot.CinemaSystem.entity.Genre;
 import com.springboot.CinemaSystem.repository.GenreRepository;
 import com.springboot.CinemaSystem.service.GenreService;
 import org.springframework.beans.factory.annotation.Autowired;
