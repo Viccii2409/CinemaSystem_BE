@@ -1,7 +1,9 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.Formula;
 
 import java.util.*;
 
@@ -18,7 +20,7 @@ public class Theater {
 	private String email;
 	private String image;
 
-	@Transient
+	@Formula("(SELECT COUNT(r.roomid) from Room r where r.theaterid = theaterID)")
 	private int quantityRoom;
 	private boolean status;
 

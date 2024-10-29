@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.controller;
 
+import com.springboot.CinemaSystem.dto.TheaterDto;
 import com.springboot.CinemaSystem.entity.Theater;
 import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.service.TheaterDao;
@@ -16,16 +17,21 @@ public class TheaterController {
     private TheaterDao theaterDao;
 
     @GetMapping("")
-    public List<Theater> getListTheater(){
-        List<Theater> theaters = theaterDao.getAllTheaters();
+    public List<TheaterDto> getListTheater(){
+        List<TheaterDto> theaters = theaterDao.getAllTheaterDto();
         if(theaters.isEmpty()){
             throw new NotFoundException("No theaters found.");
         }
         return theaters;
     }
 
+    @PutMapping("/{id}/updatestatus")
+    public boolean updateStatusTheater(@PathVariable("id") long id){
+        return theaterDao.updateStatusTheater(id);
+    }
+
     @GetMapping("/{id}")
-    public Theater getTheaterById(@PathVariable("id") int id){
+    public Theater getTheaterById(@PathVariable("id") long id){
         Theater theater = theaterDao.getTheaterByID(id);
         if(theater != null ){
             return theater;

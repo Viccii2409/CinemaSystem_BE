@@ -2,7 +2,9 @@ package com.springboot.CinemaSystem.entity;
 
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
+import lombok.Data;
 
+@Data
 @Embeddable
 public class Address {
 

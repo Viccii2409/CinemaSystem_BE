@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.service.impl;
 
+import com.springboot.CinemaSystem.dto.TheaterDto;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.exception.NotFoundException;
@@ -41,12 +42,16 @@ public class TheaterDaoImpl implements TheaterDao {
 	}
 
 	@Override
-	public Theater updateStatusTheater(int theaterID) {
-		return null;
+	public boolean updateStatusTheater(long theaterID) {
+		Theater theater = theaterRepository.findById((long) theaterID)
+				.orElseThrow(() -> new NotFoundException("Theater not found with ID: " + theaterID));
+		theater.setStatus(!theater.isStatus());
+		theaterRepository.save(theater);
+		return true;
 	}
 
 	@Override
-	public Theater getTheaterByID(int theaterID) {
+	public Theater getTheaterByID(long theaterID) {
 		return theaterRepository.findById((long) theaterID)
 				.orElseThrow(() -> new NotFoundException("Theater not found with ID: " + theaterID));
 	}
@@ -61,27 +66,36 @@ public class TheaterDaoImpl implements TheaterDao {
 	}
 
 	@Override
+	public List<TheaterDto> getAllTheaterDto() {
+		try {
+			return theaterRepository.getListTheaterDto();
+		} catch (Exception e) {
+			throw new DataProcessingException("Failed to retrieve theaters: " + e.getMessage());
+		}
+	}
+
+	@Override
 	public boolean addRoom(Room room) {
 		return false;
 	}
 
 	@Override
-	public boolean updateStatusRoom(int roomID) {
+	public boolean updateStatusRoom(long roomID) {
 		return false;
 	}
 
 	@Override
-	public List<Room> getRoomByTheater(int theaterID) {
+	public List<Room> getRoomByTheater(long theaterID) {
 		return List.of();
 	}
 
 	@Override
-	public Room getRoomByID(int roomID) {
+	public Room getRoomByID(long roomID) {
 		return null;
 	}
 
 	@Override
-	public List<Room> getRoomsByTypeRoom(int typeRoomID, int theaterID) {
+	public List<Room> getRoomsByTypeRoom(long typeRoomID, long theaterID) {
 		return List.of();
 	}
 
@@ -91,7 +105,7 @@ public class TheaterDaoImpl implements TheaterDao {
 	}
 
 	@Override
-	public TypeRoom getTypeRoomByID(int typeRoomID) {
+	public TypeRoom getTypeRoomByID(long typeRoomID) {
 		return null;
 	}
 
@@ -111,12 +125,12 @@ public class TheaterDaoImpl implements TheaterDao {
 	}
 
 	@Override
-	public List<Seat> getSeatByRoom(int roomID) {
+	public List<Seat> getSeatByRoom(long roomID) {
 		return List.of();
 	}
 
 	@Override
-	public Seat getSeatByID(int seatID) {
+	public Seat getSeatByID(long seatID) {
 		return null;
 	}
 
@@ -126,7 +140,7 @@ public class TheaterDaoImpl implements TheaterDao {
 	}
 
 	@Override
-	public TypeSeat getTypeSeatByID(int typeSeatID) {
+	public TypeSeat getTypeSeatByID(long typeSeatID) {
 		return null;
 	}
 
@@ -139,4 +153,5 @@ public class TheaterDaoImpl implements TheaterDao {
 	public float getTheaterStat(Date startDate, Date endDate) {
 		return 0;
 	}
+
 }
