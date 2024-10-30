@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.controller;
 
+
 import com.springboot.CinemaSystem.dto.TheaterAddDto;
 import com.springboot.CinemaSystem.dto.TheaterDto;
 import com.springboot.CinemaSystem.dto.TheaterEditDto;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+
 import java.util.List;
 
 @RestController
@@ -21,6 +23,7 @@ public class TheaterController {
 
     @Autowired
     private TheaterDao theaterDao;
+
 
     @Autowired
     private FileStorageService fileStorageService;
@@ -33,6 +36,8 @@ public class TheaterController {
         }
         return theaters;
     }
+  
+  
 
     @PutMapping("/{id}/updatestatus")
     public boolean updateStatusTheater(@PathVariable("id") long id){

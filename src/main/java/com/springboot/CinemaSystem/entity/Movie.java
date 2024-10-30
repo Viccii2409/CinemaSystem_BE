@@ -20,8 +20,10 @@ public class Movie {
 	private int duration;
 	private Date releaseDate;
 
+
 	@Lob
 	@Column(name = "description", columnDefinition = "TEXT")
+
 	private String description;
 	private boolean status;
 	@Transient

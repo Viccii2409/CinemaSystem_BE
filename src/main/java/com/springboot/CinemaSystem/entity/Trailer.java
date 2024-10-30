@@ -13,8 +13,10 @@ public class Trailer {
 	private long ID;
 	private String link;
 
+
 	@Lob
 	@Column(name = "description", columnDefinition = "TEXT")
+
 	private String description;
 
 	@OneToOne

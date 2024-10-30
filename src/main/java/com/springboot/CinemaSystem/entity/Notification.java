@@ -15,8 +15,10 @@ public class Notification {
 	private long ID;
 	private String title;
 
+
 	@Lob
 	@Column(name = "content", columnDefinition = "TEXT")
+
 	private String content;
 	private String date;
 

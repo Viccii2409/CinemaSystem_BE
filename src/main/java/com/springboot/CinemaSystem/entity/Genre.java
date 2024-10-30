@@ -17,6 +17,7 @@ public class Genre {
 
 	@Lob
 	@Column(name = "description", columnDefinition = "TEXT")
+
 	private String description;
 	private boolean status;
 

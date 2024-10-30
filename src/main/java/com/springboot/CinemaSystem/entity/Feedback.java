@@ -15,6 +15,7 @@ public class Feedback {
 
 	@Lob
 	@Column(name = "text", columnDefinition = "TEXT")
+
 	private String text;
 	private String date;
 

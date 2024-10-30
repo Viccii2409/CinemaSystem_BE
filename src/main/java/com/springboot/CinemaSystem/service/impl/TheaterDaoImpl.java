@@ -19,21 +19,26 @@ public class TheaterDaoImpl implements TheaterDao {
 	private TheaterRepository theaterRepository;
 
 	@Override
+
 	public Theater addTheater(Theater theater) {
 		try {
 			return theaterRepository.save(theater);
+
 		} catch (Exception e) {
 			throw new DataProcessingException("Failed to add theater: " + e.getMessage());
 		}
 	}
 
 	@Override
+
 	public Theater updateTheater(Theater theater) {
 		if (!theaterRepository.existsById(theater.getID())) {
 			throw new NotFoundException("Cannot update: Theater not found with ID: " + theater.getID());
 		}
 		try {
+
 			return theaterRepository.save(theater);
+
 		} catch (Exception e) {
 			throw new DataProcessingException("Failed to update theater: " + e.getMessage());
 		}
@@ -41,6 +46,7 @@ public class TheaterDaoImpl implements TheaterDao {
 
 	@Override
 	public boolean updateStatusTheater(long theaterID) {
+
 		Theater theater = theaterRepository.findById(theaterID)
 				.orElseThrow(() -> new NotFoundException("Theater not found with ID: " + theaterID));
 		theater.setStatus(!theater.isStatus());
@@ -51,15 +57,18 @@ public class TheaterDaoImpl implements TheaterDao {
 	@Override
 	public Theater getTheaterByID(long theaterID) {
 		return theaterRepository.findById(theaterID)
+
 				.orElseThrow(() -> new NotFoundException("Theater not found with ID: " + theaterID));
 	}
 
 	@Override
+
 	public long getCountTheater() {
 		return theaterRepository.count();
 	}
 
 	@Override
+
 	public List<Theater> getAllTheaters() {
 		try {
 			return theaterRepository.findAll();
