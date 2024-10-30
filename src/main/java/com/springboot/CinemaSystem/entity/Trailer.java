@@ -12,6 +12,9 @@ public class Trailer {
 	@Column(name = "trailerID")
 	private long ID;
 	private String link;
+
+	@Lob
+	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
 
 	@OneToOne

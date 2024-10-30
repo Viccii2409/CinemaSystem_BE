@@ -33,13 +33,6 @@ public class TheaterDaoImpl implements TheaterDao {
 			throw new NotFoundException("Cannot update: Theater not found with ID: " + theater.getID());
 		}
 		try {
-			Theater existingTheater = theaterRepository.findById(theater.getID())
-					.orElseThrow(() -> new NotFoundException("Theater not found with ID: " + theater.getID()));
-
-			if (theater.getRoom() == null || theater.getRoom().isEmpty()) {
-				theater.setRoom(existingTheater.getRoom());
-			}
-
 			return theaterRepository.save(theater);
 		} catch (Exception e) {
 			throw new DataProcessingException("Failed to update theater: " + e.getMessage());

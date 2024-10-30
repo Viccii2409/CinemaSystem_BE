@@ -14,6 +14,9 @@ public class Notification {
 	@Column(name = "notificationID")
 	private long ID;
 	private String title;
+
+	@Lob
+	@Column(name = "description", columnDefinition = "TEXT")
 	private String content;
 	private String date;
 

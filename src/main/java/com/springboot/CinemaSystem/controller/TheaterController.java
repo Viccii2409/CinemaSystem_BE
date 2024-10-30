@@ -62,8 +62,11 @@ public class TheaterController {
                                   @RequestParam(value = "file", required = false) MultipartFile file){
         try {
             Theater theater = TheaterMapper.toTheaterEdit(theaterEditDto);
-            String imageUrl_old = theaterDao.getTheaterByID(theater.getID()).getImage();
-            theater.setImage(imageUrl_old);
+            Theater theater_old = theaterDao.getTheaterByID(theater.getID());
+            theater.setImage(theater_old.getImage());
+            theater.setQuantityRoom(theater_old.getQuantityRoom());
+            theater.setStatus(theater_old.isStatus());
+            theater.setRoom(theater_old.getRoom());
             if(file != null && !file.isEmpty()){
                 String imageUrl = fileStorageService.updateFile(file, theater.getID());
                 theater.setImage(imageUrl);

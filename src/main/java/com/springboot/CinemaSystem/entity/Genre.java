@@ -14,6 +14,9 @@ public class Genre {
 	@Column(name = "genreID")
 	private long ID;
 	private String name;
+
+	@Lob
+	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
 	private boolean status;
 

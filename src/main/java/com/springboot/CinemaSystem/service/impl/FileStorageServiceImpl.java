@@ -56,8 +56,9 @@ public class FileStorageServiceImpl implements FileStorageService {
 
             Map map = this.cloudinary.uploader().upload(file.getBytes(),
                     ObjectUtils.asMap(
+                            "folder", "Image",
                             "public_id", publicId,
-                            "resource_type", "auto"));
+                            "resource_type", "image"));
             return  (String) map.get("secure_url");
 
         } catch (IOException e) {
@@ -80,8 +81,8 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public void deleteFileFromCloudinary(long id) {
         try {
-            String publicId = "image_" + String.valueOf(id);
-            Map result = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+            String publicId = "Image/image_" + String.valueOf(id);
+            Map result = cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("invalidate", true));
             if ("ok".equals(result.get("result"))) {
                 System.out.println("Đã xóa tệp trên Cloudinary: " + publicId);
             } else {

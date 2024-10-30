@@ -14,6 +14,9 @@ public class Rating {
 	@Column(name = "ratingID")
 	private long ID;
 	private int star;
+
+	@Lob
+	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
 
 	@OneToMany(mappedBy = "rating", cascade = CascadeType.ALL)

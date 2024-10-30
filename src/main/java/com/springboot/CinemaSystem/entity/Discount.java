@@ -18,6 +18,9 @@ public class Discount {
 	private float reducedValue;
 	private String discountCode;
 	private String image;
+
+	@Lob
+	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
 	private boolean status;
 
