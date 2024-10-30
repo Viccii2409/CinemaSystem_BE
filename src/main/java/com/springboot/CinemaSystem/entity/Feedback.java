@@ -14,7 +14,7 @@ public class Feedback {
 	private long ID;
 
 	@Lob
-	@Column(name = "description", columnDefinition = "TEXT")
+	@Column(name = "text", columnDefinition = "TEXT")
 	private String text;
 	private String date;
 

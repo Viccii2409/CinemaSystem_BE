@@ -16,7 +16,7 @@ public class Notification {
 	private String title;
 
 	@Lob
-	@Column(name = "description", columnDefinition = "TEXT")
+	@Column(name = "content", columnDefinition = "TEXT")
 	private String content;
 	private String date;
 
