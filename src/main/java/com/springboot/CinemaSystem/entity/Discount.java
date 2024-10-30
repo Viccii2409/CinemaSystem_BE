@@ -19,7 +19,7 @@ public class Discount {
 	private String discountCode;
 	private String image;
 
-	@Lob
+  @Lob
 	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
 	private boolean status;

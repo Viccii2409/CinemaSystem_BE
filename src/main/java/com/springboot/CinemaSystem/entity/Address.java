@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class Address {
 
 	private String addressDetail;

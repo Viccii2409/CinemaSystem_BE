@@ -18,8 +18,10 @@ public class Theater {
 	private long ID;
 	private String name;
 
+
 	@Lob
 	@Column(name = "description", columnDefinition = "TEXT")
+
 	private String description;
 	private String phone;
 	private String email;
