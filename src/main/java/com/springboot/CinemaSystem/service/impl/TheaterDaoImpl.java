@@ -55,6 +55,11 @@ public class TheaterDaoImpl implements TheaterDao {
 	}
 
 	@Override
+	public long getCountTheater() {
+		return theaterRepository.count();
+	}
+
+	@Override
 	public List<Theater> getAllTheaters() {
 		try {
 			return theaterRepository.findAll();

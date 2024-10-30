@@ -11,6 +11,7 @@
 		public Theater updateTheater(Theater theater);
 		public boolean updateStatusTheater(long theaterID);
 		public Theater getTheaterByID(long theaterID);
+		public long getCountTheater();
 		public List<Theater> getAllTheaters();
 		public List<TheaterDto> getAllTheaterDto();
 		public boolean addRoom(Room room);
