@@ -1,5 +1,7 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,6 +17,7 @@ public class Director {
 	private String name;
 
 	@OneToMany(mappedBy = "director", cascade = CascadeType.ALL)
+	@JsonBackReference
 	private List<Movie> movie;
 
 }

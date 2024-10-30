@@ -19,23 +19,28 @@ public class TheaterDaoImpl implements TheaterDao {
 	private TheaterRepository theaterRepository;
 
 	@Override
-	public boolean addTheater(Theater theater) {
+	public Theater addTheater(Theater theater) {
 		try {
-			theaterRepository.save(theater);
-			return true;
+			return theaterRepository.save(theater);
 		} catch (Exception e) {
 			throw new DataProcessingException("Failed to add theater: " + e.getMessage());
 		}
 	}
 
 	@Override
-	public boolean updaeTheater(Theater theater) {
+	public Theater updateTheater(Theater theater) {
 		if (!theaterRepository.existsById(theater.getID())) {
 			throw new NotFoundException("Cannot update: Theater not found with ID: " + theater.getID());
 		}
 		try {
-			theaterRepository.save(theater);
-			return true;
+			Theater existingTheater = theaterRepository.findById(theater.getID())
+					.orElseThrow(() -> new NotFoundException("Theater not found with ID: " + theater.getID()));
+
+			if (theater.getRoom() == null || theater.getRoom().isEmpty()) {
+				theater.setRoom(existingTheater.getRoom());
+			}
+
+			return theaterRepository.save(theater);
 		} catch (Exception e) {
 			throw new DataProcessingException("Failed to update theater: " + e.getMessage());
 		}
@@ -43,7 +48,7 @@ public class TheaterDaoImpl implements TheaterDao {
 
 	@Override
 	public boolean updateStatusTheater(long theaterID) {
-		Theater theater = theaterRepository.findById((long) theaterID)
+		Theater theater = theaterRepository.findById(theaterID)
 				.orElseThrow(() -> new NotFoundException("Theater not found with ID: " + theaterID));
 		theater.setStatus(!theater.isStatus());
 		theaterRepository.save(theater);
@@ -52,7 +57,7 @@ public class TheaterDaoImpl implements TheaterDao {
 
 	@Override
 	public Theater getTheaterByID(long theaterID) {
-		return theaterRepository.findById((long) theaterID)
+		return theaterRepository.findById(theaterID)
 				.orElseThrow(() -> new NotFoundException("Theater not found with ID: " + theaterID));
 	}
 

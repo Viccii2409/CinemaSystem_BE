@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,6 +23,7 @@ public class Account {
 	@OneToOne
 	@MapsId
 	@JoinColumn(name = "userID")
+	@JsonBackReference
 	private User user;
 
 }

@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,6 +16,7 @@ public class TypeRoom {
 	private String name;
 
 	@OneToMany(mappedBy = "typeRoom", cascade = CascadeType.ALL)
+	@JsonBackReference
 	List<Room> room;
 
 }

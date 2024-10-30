@@ -7,8 +7,8 @@
 	import java.util.List;
 
 	public interface TheaterDao {
-		public boolean addTheater(Theater theater);
-		public boolean updaeTheater(Theater theater);
+		public Theater addTheater(Theater theater);
+		public Theater updateTheater(Theater theater);
 		public boolean updateStatusTheater(long theaterID);
 		public Theater getTheaterByID(long theaterID);
 		public List<Theater> getAllTheaters();

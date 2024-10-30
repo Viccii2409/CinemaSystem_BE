@@ -1,5 +1,7 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,9 +16,11 @@ public class Agent extends Employee {
 
 	@ManyToOne
 	@JoinColumn(name = "theaterID")
+	@JsonManagedReference
 	private Theater theater;
 
 	@OneToMany(mappedBy = "agent", cascade = CascadeType.ALL)
+	@JsonBackReference
 	private List<Payment> payment;
 
 }

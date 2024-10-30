@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,6 +19,7 @@ public class DayOfWeek {
 	private float surcharge;
 
 	@OneToMany(mappedBy = "dayOfWeek", cascade = CascadeType.ALL)
+	@JsonBackReference
 	private List<SeatTicket> seatTicket;
 
 }

@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,6 +17,7 @@ public class Rating {
 	private String description;
 
 	@OneToMany(mappedBy = "rating", cascade = CascadeType.ALL)
+	@JsonBackReference
 	private List<Feedback> feedback;
 
 }
