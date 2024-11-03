@@ -1,6 +1,9 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,7 +19,7 @@ public class Language {
 	private String name;
 
 	@OneToMany(mappedBy = "language", cascade = CascadeType.ALL)
-	@JsonBackReference
+	@JsonIgnoreProperties("language")
 	private List<Movie> movie;
 
 }

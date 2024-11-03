@@ -1,7 +1,10 @@
 package com.springboot.CinemaSystem.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -26,17 +29,14 @@ public class Payment {
 	private int agentID;
 
 	@OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonManagedReference
 	private List<TicketBought> ticketBought;
 
 	@ManyToOne
 	@JoinColumn(name = "agentID")
-	@JsonManagedReference
 	private Agent agent;
 
 	@ManyToOne
 	@JoinColumn(name = "discountID")
-	@JsonManagedReference
 	private Discount discount;
 
 }

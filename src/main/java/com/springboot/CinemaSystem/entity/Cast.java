@@ -1,6 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,7 +16,7 @@ public class Cast {
 	private String name;
 
 	@ManyToMany(mappedBy = "cast")
-	@JsonBackReference
+	@JsonIgnoreProperties("cast")
 	private List<Movie> movie;
 
 }
