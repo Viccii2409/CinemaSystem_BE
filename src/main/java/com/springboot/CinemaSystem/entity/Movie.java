@@ -21,6 +21,9 @@ public class Movie {
 	private String title;
 	private int duration;
 	private LocalDate releaseDate;
+
+	@Lob
+	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
 	private boolean status;
 	@Transient

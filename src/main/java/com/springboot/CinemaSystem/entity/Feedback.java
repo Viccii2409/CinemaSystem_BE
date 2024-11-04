@@ -12,6 +12,10 @@ public class Feedback {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "feedbackID")
 	private long ID;
+
+	@Lob
+	@Column(name = "text", columnDefinition = "TEXT")
+
 	private String text;
 	private String date;
 

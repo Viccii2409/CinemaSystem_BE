@@ -17,8 +17,8 @@ import java.util.Map;
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
 
-    @Autowired
     private Cloudinary cloudinary;
+
     @Autowired
     public FileStorageServiceImpl(Cloudinary cloudinary) {
         this.cloudinary = cloudinary;
@@ -52,6 +52,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             throw new DataProcessingException("Không lưu được tệp: " + e.getMessage());
         }
     }
+
 
     public String saveFileFromCloudinary(MultipartFile file, long id) {
         try {

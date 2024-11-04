@@ -6,6 +6,7 @@ import com.springboot.CinemaSystem.entity.*;
 import java.util.Date;
 import java.util.List;
 
+
 public interface TheaterDao {
 	public Theater addTheater(Theater theater);
 	public Theater updateTheater(Theater theater);
