@@ -32,6 +32,7 @@ public class TicketBought {
 	private Payment payment;
 
 	@OneToOne(mappedBy = "ticketBought")
+	@JsonIgnoreProperties("ticketBought")
 	private Feedback feedback;
 
 }

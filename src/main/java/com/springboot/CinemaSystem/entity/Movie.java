@@ -1,11 +1,13 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
+import com.springboot.CinemaSystem.dto.FeedbackDto;
+import com.springboot.CinemaSystem.dto.GenreDto;
+import com.springboot.CinemaSystem.dto.MovieDetailDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Data
@@ -35,12 +37,10 @@ public class Movie {
 
 	@ManyToOne
 	@JoinColumn(name = "directorID")
-	@JsonIgnoreProperties("movie")	// Bỏ qua thuộc tính "movies" của "director" để tránh vòng lặp
 	private Director director;
 
 	@ManyToOne
 	@JoinColumn(name = "languageID")
-	@JsonIgnoreProperties("movie")
 	private Language language;
 
 	@OneToOne(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -56,7 +56,6 @@ public class Movie {
 			joinColumns = @JoinColumn(name = "movieID"),
 			inverseJoinColumns = @JoinColumn(name = "castID")
 	)
-	@JsonIgnoreProperties("movie")
 	private List<Cast> cast;
 
 	@ManyToMany
@@ -72,11 +71,29 @@ public class Movie {
 	@JsonIgnoreProperties("movie")
 	private List<Feedback> feedback;
 
+	@OneToOne(mappedBy = "movie", cascade = CascadeType.ALL)
+	@JsonIgnoreProperties("movie")
+	private Slideshow slideshow;
+
 	public long getId() {
 		return ID;
 	}
 
 	public void setId(long ID) {
 		this.ID = ID;
+	}
+
+	public MovieDetailDto toMovieDetailDto(){
+		List<GenreDto> genreDtos = new ArrayList<>();
+		List<FeedbackDto> feebackDtos = new ArrayList<>();
+		for(Genre g : this.genre){
+			genreDtos.add(g.toGenreDto());
+		}
+		for(Feedback f : this.feedback) {
+			feebackDtos.add(f.toFeedbackDto());
+		}
+		return new MovieDetailDto(this.ID, this.title, this.duration, this.releaseDate,
+				this.description, this.status, this.rating, this.director, this.language,
+				this.trailer, this.image, this.cast, genreDtos, feebackDtos);
 	}
 }

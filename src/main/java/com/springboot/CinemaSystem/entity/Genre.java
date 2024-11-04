@@ -1,6 +1,7 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
+import com.springboot.CinemaSystem.dto.GenreDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -27,5 +28,9 @@ public class Genre {
 	@ManyToMany(mappedBy = "genre")
 	@JsonIgnoreProperties("genre")
 	private List<Customer> customer;
+
+	public GenreDto toGenreDto(){
+		return new GenreDto(this.ID, this.name);
+	}
 
 }
