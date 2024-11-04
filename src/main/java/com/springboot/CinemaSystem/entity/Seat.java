@@ -42,20 +42,20 @@ public class Seat {
 	@JsonBackReference(value = "room-seat")
 	private Room room;
 
-	@OneToMany(mappedBy = "seat", cascade = CascadeType.ALL)
-	@JsonIdentityReference(alwaysAsId = true)
+	@OneToMany(mappedBy = "seat")
+	@JsonIgnore
 	private List<SeatTicket> seatTicket;
 
 	@OneToMany(mappedBy = "seat", cascade = CascadeType.ALL)
-	@JsonIdentityReference(alwaysAsId = true)
+	@JsonIgnore
 	private List<SeatAvailability> seatAvailability;
 
 	@OneToMany(mappedBy = "seat", cascade = CascadeType.ALL)
-	@JsonIdentityReference(alwaysAsId = true)
+	@JsonIgnore
 	private List<SeatReservation> seatReservation;
 
 	public SeatDto toSeatDto() {
-		return new SeatDto(this.ID, this.name, this.seatNum, this.rowNum, this.status, this.typeSeat.toTypeSeatDto());
+		return new SeatDto(this.getID(), this.getName(), this.seatNum, this.rowNum, this.status, this.typeSeat.toTypeSeatDto());
 	}
 
 }

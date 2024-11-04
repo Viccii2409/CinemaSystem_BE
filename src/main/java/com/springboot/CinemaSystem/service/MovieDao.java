@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.service;
 
+import com.springboot.CinemaSystem.dto.MovieDto;
 import com.springboot.CinemaSystem.entity.*;
 
 import java.util.Date;
@@ -8,21 +9,26 @@ import java.util.List;
 public interface MovieDao {
 	public boolean addMovie(Movie movie);
 	public boolean editMovie(Movie movie);
-	public List<Movie> getCommingSoonMovie();
-	public List<Movie> getShowingNowMovie();
+	public List<MovieDto> getCommingSoonMovie();
+	public List<MovieDto> getShowingNowMovie();
 	public boolean updateStatusMovie(int movieID);
 	public Movie getMovieByID(int movieID);
 	public List<Movie> getAllMovies();
+	public List<Movie> searchMovies(String title);
+	public Movie getMovieByID(long id);
+
 	public List<Movie> getMoviesByGenre(int genreID);
 	public List<Movie> getMoviesByLanguage(int languageID);
 	public List<Movie> searchMoviesByTitle(String title);
 	public List<Movie> getMoviesByCastID(int castID);
 	public List<Movie> getMoviesByDirectorID(int directorID);
 
-	public boolean addGenre(Genre genre);
-	public boolean updateGenre(Genre genre);
-	public boolean updateStatusGenre(int genreID);
-	public Genre getGenreByID(int genreID);
+	public Genre addGenre(Genre genre);
+	public  List<Genre> searchGenres(String name);
+	public Genre updateGenre(Long id, Genre genre);
+	public void hideGenre(Long id);
+	public boolean updateStatusGenre(long genreID);
+	public Genre getGenreByID(long genreID);
 	public List<Genre> getAllGenres();
 	public boolean deleteGenreMovie(int movieID, int genreID);
 

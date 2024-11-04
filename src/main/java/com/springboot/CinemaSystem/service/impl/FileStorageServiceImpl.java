@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,12 +18,9 @@ import java.util.Map;
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
 
+    @Autowired
     private Cloudinary cloudinary;
 
-    @Autowired
-    public FileStorageServiceImpl(Cloudinary cloudinary) {
-        this.cloudinary = cloudinary;
-    }
     private final String uploadDir = "uploads/";
 
     @Override
@@ -53,10 +51,9 @@ public class FileStorageServiceImpl implements FileStorageService {
         }
     }
 
-
-    public String saveFileFromCloudinary(MultipartFile file, long id) {
+    public String saveFileFromCloudinary(MultipartFile file) {
         try {
-            String publicId = "image_" + String.valueOf(id);
+            String publicId = "image_" + System.currentTimeMillis();
 
             Map map = this.cloudinary.uploader().upload(file.getBytes(),
                     ObjectUtils.asMap(
@@ -73,19 +70,25 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public String updateFile(MultipartFile file, long id) {
+    public String updateFile(MultipartFile file, String image) {
         try{
-            deleteFileFromCloudinary(id);
-            return saveFileFromCloudinary(file, id);
+            deleteFileFromCloudinary(image);
+            return saveFileFromCloudinary(file);
         }catch (Exception e){
             throw new DataProcessingException("Không cập nhật được tệp: " + e.getMessage());
         }
     }
 
     @Override
-    public void deleteFileFromCloudinary(long id) {
+    public void deleteFileFromCloudinary(String image) {
         try {
-            String publicId = "Image/image_" + String.valueOf(id);
+            URL url = new URL(image);
+            String path = url.getPath();
+            String[] segments = path.split("/");
+            String filename = segments[segments.length - 1];
+            String imageName = filename.substring(0, filename.lastIndexOf('.'));
+            String publicId = "Image/" + imageName;
+
             Map result = cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("invalidate", true));
             if ("ok".equals(result.get("result"))) {
                 System.out.println("Đã xóa tệp trên Cloudinary: " + publicId);

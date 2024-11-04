@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,4 +17,9 @@ public class Slideshow {
     @Column(name = "slideshowID")
     private long ID;
     private String url;
+
+    @OneToOne
+    @JoinColumn(name="movieID")
+    @JsonIgnoreProperties("slideshow")
+    private Movie movie;
 }

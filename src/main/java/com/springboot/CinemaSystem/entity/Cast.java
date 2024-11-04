@@ -16,7 +16,7 @@ public class Cast {
 	private String name;
 
 	@ManyToMany(mappedBy = "cast")
-	@JsonIgnoreProperties("cast")
+	@JsonIgnore
 	private List<Movie> movie;
 
 }

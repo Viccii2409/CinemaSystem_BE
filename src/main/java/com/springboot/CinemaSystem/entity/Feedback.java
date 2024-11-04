@@ -1,6 +1,7 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
+import com.springboot.CinemaSystem.dto.FeedbackDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -19,7 +20,6 @@ public class Feedback {
 
 	@ManyToOne
 	@JoinColumn(name = "ratingID")
-	@JsonIdentityReference(alwaysAsId = true)
 	private Rating rating;
 
 	@ManyToOne
@@ -29,8 +29,12 @@ public class Feedback {
 
 	@OneToOne
 	@JoinColumn(name = "ticketBoughtID")
-	@JsonIdentityReference(alwaysAsId = true)
+	@JsonIgnoreProperties("feedback")
 	private TicketBought ticketBought;
+
+	public FeedbackDto toFeedbackDto() {
+		return new FeedbackDto(this.ID, this.text, this.date, this.rating);
+	}
 
 
 }
