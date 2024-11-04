@@ -51,7 +51,7 @@ public class TheaterController {
             Theater theater = TheaterMapper.toTheaterAdd(theaterAddDto);
             theater.setStatus(false);
             if(file != null && !file.isEmpty()){
-                String imageUrl = fileStorageService.saveFileFromCloudinary(file);
+                String imageUrl = fileStorageService.saveFileFromCloudinary(file, theater.getID());
                 theater.setImage(imageUrl);
             }
             Theater saveTheater = theaterDao.addTheater(theater);
@@ -73,7 +73,7 @@ public class TheaterController {
             theater.setStatus(theater_old.isStatus());
             theater.setRoom(theater_old.getRoom());
             if(file != null && !file.isEmpty()){
-                String imageUrl = fileStorageService.updateFile(file, theater_old.getImage());
+                String imageUrl = fileStorageService.updateFile(file, theater.getID());
                 theater.setImage(imageUrl);
             }
             Theater updateTheater = theaterDao.updateTheater(theater);

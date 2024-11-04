@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Data
@@ -18,12 +20,10 @@ public class Movie {
 	private long ID;
 	private String title;
 	private int duration;
-	private Date releaseDate;
-
+	private LocalDate releaseDate;
 
 	@Lob
 	@Column(name = "description", columnDefinition = "TEXT")
-
 	private String description;
 	private boolean status;
 	@Transient
@@ -73,4 +73,11 @@ public class Movie {
 	@JsonManagedReference
 	private List<Feedback> feedback;
 
+	public long getId() {
+		return ID;
+	}
+
+	public void setId(long ID) {
+		this.ID = ID;
+	}
 }
