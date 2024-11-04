@@ -5,7 +5,7 @@ import com.springboot.CinemaSystem.entity.Genre;
 
 import java.util.List;
 
-public interface GenreService {
+public interface GenreDao {
     List<Genre> getAllGenres();
     List<Genre> searchGenres(String name);
     Genre addGenre(Genre genre);

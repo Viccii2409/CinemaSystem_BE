@@ -1,6 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,15 +14,18 @@ public class Genre {
 	@Column(name = "genreID")
 	private long ID;
 	private String name;
+
+	@Lob
+	@Column(name = "description", columnDefinition = "TEXT", nullable = true)
 	private String description;
 	private boolean status;
 
 	@ManyToMany(mappedBy = "genre")
-	@JsonBackReference
+	@JsonIgnore
 	private List<Movie> movie;
 
 	@ManyToMany(mappedBy = "genre")
-	@JsonBackReference
+	@JsonIgnore
 	private List<Customer> customer;
 
 }

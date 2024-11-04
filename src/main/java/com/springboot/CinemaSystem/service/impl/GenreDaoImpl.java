@@ -2,14 +2,14 @@ package com.springboot.CinemaSystem.service.impl;
 
 import com.springboot.CinemaSystem.entity.Genre;
 import com.springboot.CinemaSystem.repository.GenreRepository;
-import com.springboot.CinemaSystem.service.GenreService;
+import com.springboot.CinemaSystem.service.GenreDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class GenreServiceImpl implements GenreService {
+public class GenreDaoImpl implements GenreDao {
     @Autowired
     private GenreRepository genreRepository;
 
