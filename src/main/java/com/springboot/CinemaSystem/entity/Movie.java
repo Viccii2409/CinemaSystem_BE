@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Data
@@ -17,8 +19,7 @@ public class Movie {
 	@Column(nullable = false)
 	private String title;
 	private int duration;
-	private Date releaseDate;
-
+	private LocalDate releaseDate;
 
 	@Lob
 	@Column(name = "description", columnDefinition = "TEXT")
@@ -71,4 +72,11 @@ public class Movie {
 	@JsonIgnoreProperties("movie")
 	private List<Feedback> feedback;
 
+	public long getId() {
+		return ID;
+	}
+
+	public void setId(long ID) {
+		this.ID = ID;
+	}
 }

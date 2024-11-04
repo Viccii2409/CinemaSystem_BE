@@ -11,9 +11,8 @@ import java.util.*;
 
 @Data
 @Embeddable
-@NoArgsConstructor
 @AllArgsConstructor
-
+@NoArgsConstructor
 public class City {
 	@Column(name = "city")
 	private String name;

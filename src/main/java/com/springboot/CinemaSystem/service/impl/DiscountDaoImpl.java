@@ -3,12 +3,16 @@ package com.springboot.CinemaSystem.service.impl;
 
 import com.springboot.CinemaSystem.entity.Discount;
 import com.springboot.CinemaSystem.entity.TypeDiscount;
+import com.springboot.CinemaSystem.repository.DiscountRepository;
 import com.springboot.CinemaSystem.service.DiscountDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+@Service
 public class DiscountDaoImpl implements DiscountDao {
-
+	@Autowired
+	private DiscountRepository discountRepository;
 	@Override
 	public boolean addDiscount(Discount discount) {
 		return false;
@@ -31,7 +35,7 @@ public class DiscountDaoImpl implements DiscountDao {
 
 	@Override
 	public List<Discount> getAllDiscounts() {
-		return List.of();
+		return discountRepository.findAll();
 	}
 
 	@Override

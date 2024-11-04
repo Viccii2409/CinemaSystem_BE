@@ -1,19 +1,13 @@
-	package com.springboot.CinemaSystem.service;
+package com.springboot.CinemaSystem.service;
 
-	import com.springboot.CinemaSystem.dto.TheaterDto;
-	import com.springboot.CinemaSystem.entity.*;
+import com.springboot.CinemaSystem.dto.TheaterDto;
+import com.springboot.CinemaSystem.entity.*;
 
-	import java.util.Date;
-	import java.util.List;
+import java.util.Date;
+import java.util.List;
 
-	public interface TheaterDao {
 
-		public Theater addTheater(Theater theater);
-		public Theater updateTheater(Theater theater);
-		public boolean updateStatusTheater(long theaterID);
-		public Theater getTheaterByID(long theaterID);
-		public long getCountTheater();
-
+public interface TheaterDao {
 		public List<Theater> getAllTheaters();
 		public List<TheaterDto> getAllTheaterDto();
 		public Room addRoom(Room room);
@@ -37,3 +31,4 @@
 
 		public boolean deleteTheater(long id);
 	}
+
