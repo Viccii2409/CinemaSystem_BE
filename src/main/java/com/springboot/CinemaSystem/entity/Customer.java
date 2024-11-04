@@ -1,6 +1,9 @@
 package com.springboot.CinemaSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,7 +18,6 @@ public class Customer extends User {
 
 	@ManyToOne
 	@JoinColumn(name = "levelID")
-	@JsonManagedReference
 	private Level level;
 
 	@ManyToMany
@@ -24,11 +26,10 @@ public class Customer extends User {
 			joinColumns = @JoinColumn(name = "userID"),
 			inverseJoinColumns = @JoinColumn(name = "genreID")
 	)
-	@JsonManagedReference
+	@JsonIgnoreProperties("customer")
 	private List<Genre> genre;
 
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonManagedReference
 	private List<TicketBought> ticketBought;
 
 	@ManyToMany
@@ -37,11 +38,9 @@ public class Customer extends User {
 			joinColumns = @JoinColumn(name = "userID"),
 			inverseJoinColumns = @JoinColumn(name = "discountID")
 	)
-	@JsonManagedReference
 	private List<Discount> discount;
 
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonManagedReference
 	private List<SeatReservation> seatReservation;
 
 }

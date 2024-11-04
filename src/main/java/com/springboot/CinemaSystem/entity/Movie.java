@@ -1,8 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,6 +16,7 @@ public class Movie {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "movieID")
 	private long ID;
+	@Column(nullable = false)
 	private String title;
 	private int duration;
 	private LocalDate releaseDate;
@@ -25,30 +24,30 @@ public class Movie {
 	@Lob
 	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
+	@Column(nullable = false)
 	private boolean status;
 	@Transient
 	private float rating;
 
 	@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonBackReference
+	@JsonIdentityReference(alwaysAsId = true)
 	private List<Showtime> showtime;
 
 	@ManyToOne
 	@JoinColumn(name = "directorID")
-	@JsonManagedReference
+	@JsonIgnoreProperties("movie")	// Bỏ qua thuộc tính "movies" của "director" để tránh vòng lặp
 	private Director director;
 
 	@ManyToOne
 	@JoinColumn(name = "languageID")
-	@JsonManagedReference
+	@JsonIgnoreProperties("movie")
 	private Language language;
 
 	@OneToOne(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonManagedReference
+	@JsonManagedReference("movie-trailer")
 	private Trailer trailer;
 
 	@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonManagedReference
 	private List<Image> image;
 
 	@ManyToMany
@@ -57,7 +56,7 @@ public class Movie {
 			joinColumns = @JoinColumn(name = "movieID"),
 			inverseJoinColumns = @JoinColumn(name = "castID")
 	)
-	@JsonManagedReference
+	@JsonIgnoreProperties("movie")
 	private List<Cast> cast;
 
 	@ManyToMany
@@ -66,11 +65,11 @@ public class Movie {
 			joinColumns = @JoinColumn(name = "movieID"),
 			inverseJoinColumns = @JoinColumn(name = "genreID")
 	)
-	@JsonManagedReference
+	@JsonIgnoreProperties("movie")
 	private List<Genre> genre;
 
 	@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonManagedReference
+	@JsonIgnoreProperties("movie")
 	private List<Feedback> feedback;
 
 	public long getId() {

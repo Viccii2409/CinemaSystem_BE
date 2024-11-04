@@ -1,7 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,23 +14,23 @@ public class Feedback {
 
 	@Lob
 	@Column(name = "text", columnDefinition = "TEXT")
-
 	private String text;
 	private String date;
 
 	@ManyToOne
+	@JoinColumn(name = "ratingID")
+	@JsonIdentityReference(alwaysAsId = true)
+	private Rating rating;
+
+	@ManyToOne
 	@JoinColumn(name = "movieID")
-	@JsonBackReference
+	@JsonIgnoreProperties("feedback")
 	private Movie movie;
 
 	@OneToOne
 	@JoinColumn(name = "ticketBoughtID")
-	@JsonManagedReference
+	@JsonIdentityReference(alwaysAsId = true)
 	private TicketBought ticketBought;
 
-	@ManyToOne
-	@JoinColumn(name = "ratingID")
-	@JsonManagedReference
-	private Rating rating;
 
 }

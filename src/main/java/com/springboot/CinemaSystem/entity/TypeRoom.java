@@ -1,6 +1,7 @@
 package com.springboot.CinemaSystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.*;
+import com.springboot.CinemaSystem.dto.TypeRoomDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -13,10 +14,18 @@ public class TypeRoom {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "typeRoomID")
 	private long ID;
+	@Column(nullable = false)
 	private String name;
 
-	@OneToMany(mappedBy = "typeRoom", cascade = CascadeType.ALL)
-	@JsonBackReference
+	@OneToMany(mappedBy = "typeRoom" )
+	@JsonIgnoreProperties("typeRoom")
 	List<Room> room;
+
+	public TypeRoomDto toTypeRoomDto() {
+		TypeRoomDto typeRoomDto = new TypeRoomDto();
+		typeRoomDto.setId(this.getID());
+		typeRoomDto.setName(this.getName());
+		return typeRoomDto;
+	}
 
 }
