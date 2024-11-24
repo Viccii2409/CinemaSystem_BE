@@ -11,7 +11,7 @@ public interface DiscountRepository extends JpaRepository<Discount, Long> {
     @Query("SELECT new com.springboot.CinemaSystem.dto.TheaterDto" +
             "(t.id, t.name, " +
             "CONCAT(t.address.addressDetail, ', ', t.address.ward.name, ', ', t.address.district.name, ', ', t.address.city.name), " +
-            "t.quantityRoom, t.status) " +
+            "t.quantityRoom, t.status,t.image) " +
             "FROM Theater t")
     List<TheaterDto> getListTheaterDto();
 }
