@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.service;
 
+import com.springboot.CinemaSystem.dto.BookingDto;
 import com.springboot.CinemaSystem.dto.TypeDiscountDto;
 import com.springboot.CinemaSystem.entity.*;
 
@@ -29,9 +30,6 @@ public interface TicketDao {
 	public PayCash addPayCash(PayCash payCash);
 	public void addPayTypeCustomer(List<PayTypeCustomer> payTypeCustomers);
 	public void addTicket(List<Ticket> tickets);
-
-	public Booking getTicketBoughtByID(int bookingID);
-	public boolean addTicketBought(Booking booking);
-	public List<Booking> getTicketBoughtByCustomer(int customerID);
+	public Booking getBookingById(long id);
 
 }

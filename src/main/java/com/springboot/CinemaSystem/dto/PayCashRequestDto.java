@@ -15,6 +15,8 @@ public class PayCashRequestDto {
     private long agentid;
     private long customerid;
     private long discountid;
+    private float totalPrice;
+    private float discountPrice;
     private float amount;
     private float received;
     private float moneyReturned;

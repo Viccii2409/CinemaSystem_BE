@@ -22,6 +22,8 @@ public class User {
 	private String phone;
 	private String image;
 	private Date startDate;
+	@Column(insertable = false, updatable = false)
+	private String user_type;
 
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference(value = "user-account")

@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.service.impl;
 
+import com.springboot.CinemaSystem.dto.BookingDto;
 import com.springboot.CinemaSystem.dto.SelectedSeatDto;
 import com.springboot.CinemaSystem.dto.TypeDiscountDto;
 import com.springboot.CinemaSystem.entity.*;
@@ -236,17 +237,8 @@ public class TicketDaoImpl implements TicketDao {
 	}
 
 	@Override
-	public Booking getTicketBoughtByID(int bookingID) {
-		return null;
-	}
-
-	@Override
-	public boolean addTicketBought(Booking booking) {
-		return false;
-	}
-
-	@Override
-	public List<Booking> getTicketBoughtByCustomer(int customerID) {
-		return List.of();
+	public Booking getBookingById(long id) {
+		return bookingRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Error getBookingById: " + id));
 	}
 }
