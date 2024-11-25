@@ -1,14 +1,18 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.sql.Time;
+import java.sql.Date;
 import java.util.*;
 
 @Data
 @Entity
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = TimeFrame.class)
 public class TimeFrame {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +24,6 @@ public class TimeFrame {
 	private float surcharge;
 
 	@OneToMany(mappedBy = "timeFrame", cascade = CascadeType.ALL)
-	@JsonBackReference
 	private List<SeatTicket> seatTicket;
 
 }

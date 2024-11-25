@@ -1,13 +1,21 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
+<<<<<<< HEAD
+=======
+import com.springboot.CinemaSystem.dto.GenreDto;
+>>>>>>> main
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.*;
 
 @Data
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Genre {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,5 +35,9 @@ public class Genre {
 	@ManyToMany(mappedBy = "genre")
 	@JsonIgnore
 	private List<Customer> customer;
+
+	public GenreDto toGenreDto(){
+		return new GenreDto(this.ID, this.name, this.description, this.status);
+	}
 
 }

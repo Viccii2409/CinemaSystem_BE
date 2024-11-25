@@ -1,6 +1,9 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,10 +17,13 @@ public class Rating {
 	@Column(name = "ratingID")
 	private long ID;
 	private int star;
+
+	@Lob
+	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
 
 	@OneToMany(mappedBy = "rating", cascade = CascadeType.ALL)
-	@JsonBackReference
+	@JsonIgnore
 	private List<Feedback> feedback;
 
 }

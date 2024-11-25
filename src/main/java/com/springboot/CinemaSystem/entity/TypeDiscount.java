@@ -1,6 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,8 +15,8 @@ public class TypeDiscount {
 	private long ID;
 	private String name;
 
-	@OneToMany(mappedBy = "typeDiscount", cascade = CascadeType.ALL)
-	@JsonBackReference
+	@OneToMany(mappedBy = "typeDiscount")
+	@JsonIgnoreProperties("typeDiscount")
 	private List<Discount> discount;
 
 

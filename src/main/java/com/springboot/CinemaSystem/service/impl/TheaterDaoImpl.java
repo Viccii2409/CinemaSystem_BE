@@ -4,7 +4,7 @@ import com.springboot.CinemaSystem.dto.TheaterDto;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.exception.NotFoundException;
-import com.springboot.CinemaSystem.repository.TheaterRepository;
+import com.springboot.CinemaSystem.repository.*;
 import com.springboot.CinemaSystem.service.TheaterDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,28 +14,42 @@ import java.util.List;
 
 @Service
 public class TheaterDaoImpl implements TheaterDao {
+	private TheaterRepository theaterRepository;
+	private RoomRepository roomRepository;
+	private TypeRoomRepository typeRoomRepository;
+	private TypeSeatRepository typeSeatRepository;
+	private SeatRepository seatRepository;
 
 	@Autowired
-	private TheaterRepository theaterRepository;
+	public TheaterDaoImpl(TheaterRepository theaterRepository, RoomRepository roomRepository, TypeRoomRepository typeRoomRepository, TypeSeatRepository typeSeatRepository, SeatRepository seatRepository) {
+		this.theaterRepository = theaterRepository;
+		this.roomRepository = roomRepository;
+		this.typeRoomRepository = typeRoomRepository;
+		this.typeSeatRepository = typeSeatRepository;
+		this.seatRepository = seatRepository;
+	}
 
 	@Override
-	public boolean addTheater(Theater theater) {
+
+	public Theater addTheater(Theater theater) {
 		try {
-			theaterRepository.save(theater);
-			return true;
+			return theaterRepository.save(theater);
+
 		} catch (Exception e) {
 			throw new DataProcessingException("Failed to add theater: " + e.getMessage());
 		}
 	}
 
 	@Override
-	public boolean updaeTheater(Theater theater) {
+
+	public Theater updateTheater(Theater theater) {
 		if (!theaterRepository.existsById(theater.getID())) {
 			throw new NotFoundException("Cannot update: Theater not found with ID: " + theater.getID());
 		}
 		try {
-			theaterRepository.save(theater);
-			return true;
+
+			return theaterRepository.save(theater);
+
 		} catch (Exception e) {
 			throw new DataProcessingException("Failed to update theater: " + e.getMessage());
 		}
@@ -43,7 +57,8 @@ public class TheaterDaoImpl implements TheaterDao {
 
 	@Override
 	public boolean updateStatusTheater(long theaterID) {
-		Theater theater = theaterRepository.findById((long) theaterID)
+
+		Theater theater = theaterRepository.findById(theaterID)
 				.orElseThrow(() -> new NotFoundException("Theater not found with ID: " + theaterID));
 		theater.setStatus(!theater.isStatus());
 		theaterRepository.save(theater);
@@ -52,11 +67,18 @@ public class TheaterDaoImpl implements TheaterDao {
 
 	@Override
 	public Theater getTheaterByID(long theaterID) {
-		return theaterRepository.findById((long) theaterID)
+		return theaterRepository.findById(theaterID)
 				.orElseThrow(() -> new NotFoundException("Theater not found with ID: " + theaterID));
 	}
 
 	@Override
+
+	public long getCountTheater() {
+		return theaterRepository.count();
+	}
+
+	@Override
+
 	public List<Theater> getAllTheaters() {
 		try {
 			return theaterRepository.findAll();
@@ -75,23 +97,36 @@ public class TheaterDaoImpl implements TheaterDao {
 	}
 
 	@Override
-	public boolean addRoom(Room room) {
-		return false;
+	public Room addRoom(Room room) {
+		try {
+			return roomRepository.save(room);
+		} catch (Exception e) {
+			throw new DataProcessingException("Lỗi thêm phòng: " + e.getMessage());
+		}
 	}
 
 	@Override
 	public boolean updateStatusRoom(long roomID) {
-		return false;
+		Room room = roomRepository.findById(roomID)
+				.orElseThrow(() -> new NotFoundException("Error get room with id: " + roomID));
+		room.setStatus(!room.isStatus());
+		roomRepository.save(room);
+		return true;
 	}
 
 	@Override
 	public List<Room> getRoomByTheater(long theaterID) {
-		return List.of();
+		try {
+			return roomRepository.findByTheaterID(theaterID);
+		} catch (Exception e) {
+			throw new DataProcessingException("Failed to retrieve rooms: " + e.getMessage());
+		}
 	}
 
 	@Override
 	public Room getRoomByID(long roomID) {
-		return null;
+		return roomRepository.findById(roomID)
+				.orElseThrow(() -> new NotFoundException("Not find room in database: " + roomID));
 	}
 
 	@Override
@@ -106,17 +141,33 @@ public class TheaterDaoImpl implements TheaterDao {
 
 	@Override
 	public TypeRoom getTypeRoomByID(long typeRoomID) {
-		return null;
+		return typeRoomRepository.findById(typeRoomID)
+				.orElseThrow(() -> new NotFoundException("Error get typeroom with id: " + typeRoomID));
 	}
 
 	@Override
 	public List<TypeRoom> getAllTypeRooms() {
-		return List.of();
+		try {
+			return typeRoomRepository.findAll();
+		} catch (Exception e) {
+			throw new DataProcessingException("Không lấy được danh sách loại phòng: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public boolean addListSeat(List<Seat> seats) {
+		try {
+			seatRepository.saveAll(seats); // Lưu danh sách Seat
+			return true;
+		} catch (Exception e) {
+			throw new DataProcessingException("Error add list room: " + e.getMessage());
+		}
+
 	}
 
 	@Override
 	public boolean addSeat(Seat seat) {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -146,12 +197,41 @@ public class TheaterDaoImpl implements TheaterDao {
 
 	@Override
 	public List<TypeSeat> getAllTypeSeats() {
-		return List.of();
+		try {
+			return typeSeatRepository.findAll();
+		} catch (Exception e) {
+			throw new DataProcessingException("Không lấy được danh sách loại ghế: " + e.getMessage());
+		}
 	}
 
 	@Override
 	public float getTheaterStat(Date startDate, Date endDate) {
 		return 0;
+	}
+
+	@Override
+	public boolean updateRoom(Room room) {
+		if (!roomRepository.existsById(room.getID())) {
+			throw new NotFoundException("Cannot update: Room not found with ID: " + room.getID());
+		}
+		try {
+			roomRepository.save(room);
+			return true;
+		} catch (Exception e) {
+			throw new DataProcessingException("Failed to update room: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public boolean deleteTheater(long id) {
+		Theater theater = theaterRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Theater not found with ID: " + id));
+		try {
+			theaterRepository.delete(theater);
+			return true;
+		} catch (Exception e) {
+			throw new DataProcessingException("Error delete theater with id: " + id + e.getMessage());
+		}
 	}
 
 }
