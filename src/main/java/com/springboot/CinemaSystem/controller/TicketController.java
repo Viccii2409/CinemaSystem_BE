@@ -175,7 +175,7 @@ public class TicketController {
 
     @PostMapping("/booking/paycash/add")
     @Transactional
-    public boolean addPayCash(@RequestBody PayCashRequestDto payCashRequestDto) {
+    public long addPayCash(@RequestBody PayCashRequestDto payCashRequestDto) {
         Booking booking = new Booking();
         LocalDateTime localDateTime = LocalDateTime.now();
         Showtime showtime = showtimeDao.getShowtimeByID(payCashRequestDto.getShowtimeid());
@@ -186,6 +186,8 @@ public class TicketController {
         PayCash payCash = new PayCash();
         payCash.setBooking(booking_new);
         payCash.setDate(localDateTime);
+        payCash.setTotalPrice(payCashRequestDto.getTotalPrice());
+        payCash.setDiscountPrice(payCashRequestDto.getDiscountPrice());
         payCash.setAmount(payCashRequestDto.getAmount());
         Agent agent = new Agent();
         agent.setID(payCashRequestDto.getAgentid());
@@ -226,7 +228,7 @@ public class TicketController {
             tickets.add(ticket);
         }
         ticketDao.addTicket(tickets);
-        return true;
+        return booking.getID();
     }
 
     @PostMapping("/customer/booking/paycash/add")
@@ -244,7 +246,10 @@ public class TicketController {
         PayCash payCash = new PayCash();
         payCash.setBooking(booking_new);
         payCash.setDate(localDateTime);
+        payCash.setTotalPrice(payCashRequestDto.getTotalPrice());
+        payCash.setDiscountPrice(payCashRequestDto.getDiscountPrice());
         payCash.setAmount(payCashRequestDto.getAmount());
+
         payCash.setReceived(payCashRequestDto.getReceived());
         payCash.setMoneyReturned(payCashRequestDto.getMoneyReturned());
         if(payCashRequestDto.getDiscountid() > 0) {
@@ -353,6 +358,11 @@ public class TicketController {
         Discount discount = discountDao.getDiscountByID(id);
         fileStorageService.deleteFileFromCloudinary(discount.getImage());
         return discountDao.deleteDiscount(id);
+    }
+
+    @GetMapping("/booking/{id}")
+    public BookingDto getBooking(@PathVariable("id") long id) {
+        return ticketDao.getBookingById(id).toBookingDto();
     }
 
 }

@@ -19,6 +19,8 @@ public class Payment {
 	@Column(name = "paymentID")
 	private long ID;
 	private LocalDateTime date;
+	private float totalPrice;
+	private float discountPrice;
 	private float amount;
 	private String barcode;
 

@@ -129,4 +129,8 @@ public class Movie {
 	public MovieShowtimeDto toMovieShowtimeDto() {
 		return new MovieShowtimeDto(this.ID, this.title, this.duration, this.description, this.image.get(0).getLink());
 	}
+
+	public String getFirstImage() {
+		return this.image.get(0).getLink();
+	}
 }
