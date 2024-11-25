@@ -19,11 +19,11 @@ public class MovieDetailDto {
     private String description;
     private boolean status;
     private float rating;
-    private Director director;
+    private String director;
     private Language language;
     private Trailer trailer;
     private List<Image> image;
-    private List<Cast> cast;
+    private String cast;
     private List<GenreDto> genre;
     private List<FeedbackDto> feedback;
 }

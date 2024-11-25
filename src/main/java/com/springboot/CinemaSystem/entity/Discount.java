@@ -28,10 +28,11 @@ public class Discount {
 	private List<Customer> customer;
 
 	@ManyToOne
+	@JsonIgnoreProperties("discount")
 	@JoinColumn(name = "typeDiscountID")
 	private TypeDiscount typeDiscount;
 
-	@OneToMany(mappedBy = "discount")
+	@OneToMany(mappedBy = "discount", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<Payment> payment;
 
