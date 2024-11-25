@@ -16,7 +16,9 @@ public class Name {
 	private String midName;
 	private String lastName;
 
-	@Transient
-	private String fullname;
+	public String getFullname () {
+		return this.firstName + " " + this.midName + " " + this.lastName;
+	}
+
 
 }

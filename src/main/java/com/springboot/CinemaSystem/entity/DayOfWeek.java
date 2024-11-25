@@ -1,8 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -10,7 +8,6 @@ import java.util.*;
 
 @Data
 @Entity
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = DayOfWeek.class)
 public class DayOfWeek {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +18,8 @@ public class DayOfWeek {
 	private int dayEnd;
 	private float surcharge;
 
-	@OneToMany(mappedBy = "dayOfWeek", cascade = CascadeType.ALL)
-	private List<SeatTicket> seatTicket;
+	@OneToMany(mappedBy = "dayOfWeek", fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<Showtime> showtimes;
 
 }

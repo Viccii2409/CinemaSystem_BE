@@ -12,8 +12,7 @@ import java.util.*;
 
 
 @Entity
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = {"showtime", "seat", "theater"})
@@ -73,4 +72,6 @@ public class Room {
 	public String toString() {
 		return "Room{id=" + ID + ", name='" + name + "', typeRoom=" + (typeRoom != null ? typeRoom.getName() : "N/A") + ", status=" + status + "}";
 	}
+
+
 }

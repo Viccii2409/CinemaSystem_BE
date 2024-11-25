@@ -2,7 +2,6 @@ package com.springboot.CinemaSystem.service;
 
 import com.springboot.CinemaSystem.dto.MovieDto;
 import com.springboot.CinemaSystem.entity.*;
-import com.springboot.CinemaSystem.exception.NotFoundException;
 
 import java.util.Date;
 import java.util.List;

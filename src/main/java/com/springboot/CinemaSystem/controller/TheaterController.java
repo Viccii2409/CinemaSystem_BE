@@ -24,12 +24,14 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/theater")
 public class TheaterController {
 
-    @Autowired
     private TheaterDao theaterDao;
-
+    private FileStorageService fileStorageService;
 
     @Autowired
-    private FileStorageService fileStorageService;
+    public TheaterController(TheaterDao theaterDao, FileStorageService fileStorageService) {
+        this.theaterDao = theaterDao;
+        this.fileStorageService = fileStorageService;
+    }
 
     @GetMapping("")
     public List<TheaterDto> getListTheater(){
@@ -87,15 +89,6 @@ public class TheaterController {
 
     }
 
-    @GetMapping("/{id}")
-    public TheaterDetailDto getTheaterById(@PathVariable("id") long id){
-        Theater theater = theaterDao.getTheaterByID(id);
-        if(theater != null ){
-            return theater.toTheaterDetailDto(theater);
-        }
-        throw new NotFoundException("Theater not found with ID: " + id);
-    }
-
 
     @DeleteMapping("/{id}/delete")
     public boolean deleteTheater(@PathVariable("id") long id) {
@@ -112,9 +105,14 @@ public class TheaterController {
         return theaterRoomDtos;
     }
 
-    @GetMapping("/{id}/room")
-    public List<Room> getRoomByTheater(@PathVariable("id") long id){
-        return theaterDao.getRoomByTheater(id);
+//    @GetMapping("/{id}/room")
+//    public List<Room> getRoomByTheater(@PathVariable("id") long id){
+//        return theaterDao.getRoomByTheater(id);
+//    }
+
+    @GetMapping("/typeseat")
+    public List<TypeSeat> getTypeSeat() {
+        return theaterDao.getAllTypeSeats();
     }
 
     @GetMapping("/typeroom")
@@ -127,10 +125,21 @@ public class TheaterController {
         return typeRoomDtos;
     }
 
-    @GetMapping("/typeseat")
-    public List<TypeSeat> getTypeSeat() {
-        return theaterDao.getAllTypeSeats();
+
+    @GetMapping("/{id}")
+    public TheaterViewDto getTheaterById(@PathVariable("id") long id){
+        Theater theater = theaterDao.getTheaterByID(id);
+        if(theater != null ){
+            return theater.toTheaterViewDto();
+        }
+        throw new NotFoundException("Theater not found with ID: " + id);
     }
+
+    @GetMapping("/room/{id}")
+    public RoomSeatDto getRoom(@PathVariable("id") long id) {
+        return theaterDao.getRoomByID(id).toRoomSeatDto();
+    }
+
 
     @PostMapping(value = "/{id}/room/add")
     public long addRoom(@PathVariable("id") long id ,@RequestBody Room room) {
@@ -153,10 +162,11 @@ public class TheaterController {
         room.getSeat().clear();
         for(Seat seat : seats){
             seat.setRoom(room);
+            room.getSeat().add(seat);
         }
-        room.setSeat(seats);
-        return theaterDao.addListSeat(seats);
+        return theaterDao.updateRoom(room);
     }
+
 
     @PutMapping(value = "/room/{id}/seat/update")
     public boolean updateSeat(@PathVariable("id") long id, @RequestBody List<Seat> seats) {
@@ -193,11 +203,6 @@ public class TheaterController {
         return theaterDao.updateStatusRoom(id);
     }
 
-    @GetMapping("/room/{id}")
-    public RoomSeatDto getRoom(@PathVariable("id") long id) {
-        return theaterDao.getRoomByID(id).toRoomSeatDto();
-    }
-
     @PutMapping("/room/update")
     public boolean updateRoom(@RequestBody Room room) {
         Room room1 = theaterDao.getRoomByID(room.getID());
@@ -222,8 +227,6 @@ public class TheaterController {
         if (theater == null) {
             throw new NotFoundException("Theater not found with id: " + id);
         }
-
-        // Tìm Room cần xóa trong danh sách rooms của Theater
         Room roomToRemove = theater.getRoom().stream()
                 .filter(room -> room.getID() == roomid)
                 .findFirst()
@@ -232,16 +235,8 @@ public class TheaterController {
         if (roomToRemove == null) {
             throw new NotFoundException("Room not found with id: " + roomid);
         }
-
-        // Xóa Room khỏi danh sách rooms của Theater
         theater.getRoom().remove(roomToRemove);
-
-        // Lưu Theater để cập nhật thay đổi nếu dùng orphanRemoval = true
         theaterDao.updateTheater(theater);
-
-        // Nếu không dùng orphanRemoval, cần xóa thủ công Room trong cơ sở dữ liệu
-        // theaterDao.delete(roomToRemove);
-
         return true;
     }
     @GetMapping("/except/{id}")

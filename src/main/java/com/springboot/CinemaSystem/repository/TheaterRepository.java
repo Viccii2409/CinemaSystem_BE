@@ -18,6 +18,8 @@ public interface TheaterRepository extends JpaRepository<Theater, Long> {
             "t.quantityRoom, t.status,t.image) " +
             "FROM Theater t")
     List<TheaterDto> getListTheaterDto();
+
+
     @Query("SELECT t.name FROM Theater t")
     List<String> findAllTheaterNames();
     @Query("SELECT new com.springboot.CinemaSystem.dto.TheaterExceptDto(t.id, t.name) FROM Theater t WHERE t.id <> :theaterID")

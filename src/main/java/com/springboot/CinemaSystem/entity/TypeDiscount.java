@@ -1,6 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
-import com.fasterxml.jackson.annotation.*;
+import com.springboot.CinemaSystem.dto.TypeDiscountDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,8 +16,10 @@ public class TypeDiscount {
 	private String name;
 
 	@OneToMany(mappedBy = "typeDiscount")
-	@JsonIgnoreProperties("typeDiscount")
 	private List<Discount> discount;
 
 
+	public TypeDiscountDto toTypeDiscountDto() {
+		return new TypeDiscountDto(this.ID, this.name);
+	}
 }

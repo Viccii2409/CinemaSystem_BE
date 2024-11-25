@@ -3,6 +3,7 @@ package com.springboot.CinemaSystem.service.impl;
 
 import com.springboot.CinemaSystem.dto.GenreDto;
 import com.springboot.CinemaSystem.dto.MovieDto;
+import com.springboot.CinemaSystem.dto.ShowtimeTheaterIDDto;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.repository.GenreRepository;
@@ -14,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -126,22 +126,34 @@ public class MovieDaoImpl implements MovieDao {
 
 
 	private MovieDto convertToDto(Movie movie) {
-		String link = movie.getImage().isEmpty() ? null : movie.getImage().get(0).getLink();
-
-		// Chuyển đổi Movie sang MovieDto
+		// Kiểm tra danh sách image
+		String link = (movie.getImage() == null || movie.getImage().isEmpty()) ? null : movie.getImage().get(0).getLink();
 		List<GenreDto> genreDtos = movie.getGenre().stream()
 				.map(Genre::toGenreDto)
 				.collect(Collectors.toList());
-
 		return new MovieDto(
 				movie.getId(),
 				movie.getTitle(),
 				link,
 				movie.getReleaseDate(),
 				movie.isStatus(),
-				genreDtos
+				genreDtos,
+				movie.getShowtime()
+						.stream()
+						.filter(showtime -> showtime.getRoom().isStatus() == true && ("upcoming".equals(showtime.getAction()) || "running".equals(showtime.getAction())))
+						.map(showtime -> new ShowtimeTheaterIDDto(
+								showtime.getID(),
+								showtime.getDate(),
+								showtime.getStartTime(),
+								showtime.getEndTime(),
+								showtime.getAction(),
+								showtime.getRoom().getTheater().getID(),
+								showtime.getRoom().getSeat().size() - showtime.getAvailableSeats(),
+								showtime.getRoom().getTypeRoom().getName()
+						))
+						.collect(Collectors.toList())
 		);
-	}
+	};
 
 	@Override
 	public boolean updateStatusMovie(int movieID) {
@@ -367,4 +379,5 @@ public class MovieDaoImpl implements MovieDao {
 	public float getMovieStat(Date startDate, Date endDate) {
 		return 0;
 	}
+
 }
