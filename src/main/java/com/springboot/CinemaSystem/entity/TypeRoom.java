@@ -27,5 +27,9 @@ public class TypeRoom {
 		typeRoomDto.setName(this.getName());
 		return typeRoomDto;
 	}
+	@Override
+	public String toString() {
+		return "TypeRoom{id=" + ID + ", name='" + name + "'}";
+	}
 
 }

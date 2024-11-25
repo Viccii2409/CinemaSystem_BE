@@ -3,12 +3,15 @@ package com.springboot.CinemaSystem.entity;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.sql.Time;
 import java.util.*;
+import java.sql.Date;
 
 @Data
 @Entity
+@ToString(exclude = {"room", "movie", "ticketBought", "seatAvailability"})
 public class Showtime {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,4 +43,8 @@ public class Showtime {
 	@OneToMany(mappedBy = "showtime", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SeatAvailability> seatAvailability;
 
+	@Override
+	public String toString() {
+		return "Showtime{id=" + ID + ", date=" + date + ", startTime=" + startTime + ", status=" + status + "}";
+	}
 }
