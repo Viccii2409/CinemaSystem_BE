@@ -103,10 +103,12 @@ public class TheaterDaoImpl implements TheaterDao {
 			throw new DataProcessingException("Failed to retrieve theaters: " + e.getMessage());
 		}
 	}
+
 	@Override
 	public List<TheaterExceptDto> getTheatersExcept(long theaterID) {
 		return theaterRepository.findAllExcept(theaterID);
 	}
+
 	@Override
 	public Room addRoom(Room room) {
 		try {

@@ -48,6 +48,16 @@ public class UserDaoImpl implements UserDao {
 	}
 
 	@Override
+	public List<UserDto> getAllCustomers() {
+		// Lấy tất cả người dùng có user_type là "user"
+		try{
+			return userRepository.findByUserType("user");
+		}catch(Exception e){
+			throw new DataProcessingException("Failed to retrieve customers: " + e.getMessage());
+		}
+	}
+
+	@Override
 	public User getUserByID(int userID) {
 		return null;
 	}
@@ -62,15 +72,6 @@ public class UserDaoImpl implements UserDao {
 		return false;
 	}
 
-	@Override
-	public List<UserDto> getAllCustomers() {
-		// Lấy tất cả người dùng có user_type là "user"
-		try{
-			return userRepository.findByUserType("user");
-		}catch(Exception e){
-			throw new DataProcessingException("Failed to retrieve customers: " + e.getMessage());
-		}
-	}
 	@Override
 	public User login(Account account) {
 		return null;

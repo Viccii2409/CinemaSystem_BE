@@ -89,6 +89,15 @@ public class TheaterController {
 
     }
 
+//    @GetMapping("/{id}")
+//    public Theater getTheaterById(@PathVariable("id") long id){
+//        Theater theater = theaterDao.getTheaterByID(id);
+//        if(theater != null ){
+//            return theater;
+//        }
+//        throw new NotFoundException("Theater not found with ID: " + id);
+//    }
+
 
     @DeleteMapping("/{id}/delete")
     public boolean deleteTheater(@PathVariable("id") long id) {
@@ -124,7 +133,6 @@ public class TheaterController {
         }
         return typeRoomDtos;
     }
-
 
     @GetMapping("/{id}")
     public TheaterViewDto getTheaterById(@PathVariable("id") long id){
@@ -239,6 +247,7 @@ public class TheaterController {
         theaterDao.updateTheater(theater);
         return true;
     }
+
     @GetMapping("/except/{id}")
     public ResponseEntity<List<TheaterExceptDto>> getTheatersExcept(@PathVariable Long id) {
         List<TheaterExceptDto> theaters = theaterDao.getTheatersExcept(id);

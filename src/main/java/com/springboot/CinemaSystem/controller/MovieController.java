@@ -8,8 +8,6 @@ import com.springboot.CinemaSystem.dto.GenreDto;
 import com.springboot.CinemaSystem.dto.MovieDetailDto;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.dto.MovieDto;
-import com.springboot.CinemaSystem.exception.NotFoundException;
-import com.springboot.CinemaSystem.repository.MovieRepository;
 import com.springboot.CinemaSystem.service.DiscountDao;
 import com.springboot.CinemaSystem.service.MovieDao;
 import com.springboot.CinemaSystem.service.SlideshowDao;
@@ -26,7 +24,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/movie")
 public class MovieController {
-
     @Autowired
     private MovieDao movieService;
     @Autowired
@@ -39,7 +36,6 @@ public class MovieController {
     public List<Movie> getAllMovies(){
         return movieService.getAllMovies();
     }
-
 
     @GetMapping("/{id}")
     public MovieDetailDto getMovieById(@PathVariable("id") long id){

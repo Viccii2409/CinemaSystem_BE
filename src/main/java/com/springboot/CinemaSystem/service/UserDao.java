@@ -11,6 +11,7 @@ import java.util.List;
 public interface UserDao {
 	public Customer getCustomerById(long id);
 	public void updateCustomer(Customer customer);
+	public List<UserDto> getAllCustomers();
 
 	public User login(Account account);
 	public void updateUser(User user);
@@ -18,5 +19,6 @@ public interface UserDao {
 	public User getUserByID(int userID);
 	public boolean changePassword(String password);
 	public boolean deleteAccount(int accountID);
-	public List<UserDto> getAllCustomers();
+
+
 }
