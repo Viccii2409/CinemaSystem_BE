@@ -1,13 +1,17 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
+import com.springboot.CinemaSystem.dto.SelectedSeatDto;
+import com.springboot.CinemaSystem.dto.ShowtimeRoomDto;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+import org.hibernate.annotations.Formula;
 import lombok.ToString;
 
-import java.sql.Time;
-import java.util.*;
 import java.sql.Date;
+import java.sql.Time;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Entity
@@ -24,9 +28,19 @@ public class Showtime {
 	private Time endTime;
 	@Column(nullable = false)
 	private boolean status;
+	private String action;
 
-	@Transient
+	@Formula("(SELECT COUNT(*) FROM selected_seat s " +
+			"WHERE s.status = 'confirmed' AND s.showtimeid = showtimeID)")
 	private int availableSeats;		// số ghế được đặt
+
+	@Formula(" (SELECT bp.default_price + dow.surcharge + tf.surcharge " +
+			" FROM base_price bp " +
+			" JOIN showtime s ON s.base_priceid = bp.id " +
+			" JOIN day_of_week dow ON s.day_of_weekid = dow.day_of_weekid " +
+			" JOIN time_frame tf ON s.time_frameid = tf.time_frameid " +
+			" WHERE s.showtimeid = showtimeID) ")
+	private float priceTicket;
 
 	@ManyToOne
 	@JoinColumn(name = "roomID", nullable = false)
@@ -37,11 +51,49 @@ public class Showtime {
 	@JoinColumn(name = "movieID")
 	private Movie movie;
 
-	@OneToMany(mappedBy = "showtime", cascade = CascadeType.ALL)
-	private List<TicketBought> ticketBought;
+	@OneToMany(mappedBy = "showtime")
+	private List<Booking> booking;
 
-	@OneToMany(mappedBy = "showtime", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<SeatAvailability> seatAvailability;
+	@OneToMany(mappedBy = "showtime", fetch = FetchType.LAZY)
+	private List<SelectedSeat> selectedSeats;
+
+	@ManyToOne
+	@JoinColumn(name = "basePriceID")
+	private BasePrice basePrice;
+
+	@ManyToOne
+	@JoinColumn(name = "dayOfWeekID")
+	private DayOfWeek dayOfWeek;
+
+	@ManyToOne
+	@JoinColumn(name = "timeFrameID")
+	private TimeFrame timeFrame;
+
+	public ShowtimeRoomDto toShowtimeRoomDto(){
+		ShowtimeRoomDto showtimeRoomDto = new ShowtimeRoomDto(
+				this.getID(),
+				this.getDate(),
+				this.getStartTime(),
+				this.getEndTime(),
+				this.isStatus(),
+				this.getAction(),
+				this.getPriceTicket(),
+				this.getMovie().toMovieShowtimeDto(),
+				this.getRoom().toRoomSeatDto(),
+				this.getSelectedSeats().stream()
+						.filter(entry -> entry.getStatus() != null && !"expired".equals(entry.getStatus()))
+						.map(entry -> new SelectedSeatDto(
+								entry.getID(),
+								entry.getUser().getID(),
+								entry.getSeat().getID(),
+								entry.getStart(),
+								entry.getEnd(),
+								entry.getStatus()
+						))
+						.collect(Collectors.toList())
+		);
+		return showtimeRoomDto;
+	}
 
 	@Override
 	public String toString() {

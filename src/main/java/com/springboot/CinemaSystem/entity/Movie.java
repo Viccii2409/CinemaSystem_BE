@@ -5,6 +5,7 @@ import com.springboot.CinemaSystem.dto.FeedbackDto;
 import com.springboot.CinemaSystem.dto.GenreDto;
 import com.springboot.CinemaSystem.dto.MovieDetailDto;
 import com.springboot.CinemaSystem.dto.MovieDto;
+import com.springboot.CinemaSystem.dto.MovieShowtimeDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -44,7 +45,7 @@ public class Movie {
 	private String cast;
 
 	@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonIgnore // Giúp tránh vòng lặp vô hạn bằng cách chỉ lưu ID
+	@JsonIgnore
 	private List<Showtime> showtime;
 
 	@ManyToOne
@@ -124,4 +125,8 @@ public class Movie {
 
 
 
+
+	public MovieShowtimeDto toMovieShowtimeDto() {
+		return new MovieShowtimeDto(this.ID, this.title, this.duration, this.description, this.image.get(0).getLink());
+	}
 }

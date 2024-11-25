@@ -8,10 +8,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
+@AllArgsConstructor
 public class MovieDto {
     private Long id;
     private String title;
@@ -19,20 +17,8 @@ public class MovieDto {
     private LocalDate releaseDate;
     private boolean status;
     private List<GenreDto> genres;
+    private List<ShowtimeTheaterIDDto> showtime;
 
-    public MovieDto(long id, String title, String link) {
-        this.id = id;
-        this.title = title;
-        this.link = link;
-    }
-
-    public MovieDto(Long id, String title, LocalDate releaseDate, boolean status, List<GenreDto> genres) {
-        this.id = id;
-        this.title = title;
-        this.releaseDate = releaseDate;
-        this.status = status;
-        this.genres = genres;
-    }
     public MovieDto toMovieDto(Movie movie) {
         MovieDto dto = new MovieDto();
         dto.setId(movie.getId());
@@ -48,3 +34,4 @@ public class MovieDto {
     }
 
 }
+

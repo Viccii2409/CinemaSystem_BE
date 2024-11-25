@@ -2,7 +2,9 @@ package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
 import com.springboot.CinemaSystem.dto.RoomDto;
+import com.springboot.CinemaSystem.dto.TheaterDetailDto;
 import com.springboot.CinemaSystem.dto.TheaterRoomDto;
+import com.springboot.CinemaSystem.dto.TheaterViewDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,11 +39,11 @@ public class Theater {
 	@Column(nullable = false)
 	private boolean status;
 
-	@OneToMany(mappedBy = "theater")
-	@JsonIdentityReference(alwaysAsId = true)
+	@OneToMany(mappedBy = "theater", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+	@JsonManagedReference(value = "theater-agent")
 	private List<Agent> agent;
 
-	@OneToMany(mappedBy = "theater", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToMany(mappedBy = "theater", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference(value = "theater-room")
 	private List<Room> room;
 
@@ -66,5 +68,15 @@ public class Theater {
 		return theaterRoomDto;
 	}
 
-
+	public TheaterViewDto toTheaterViewDto() {
+		return new TheaterViewDto(this.ID, this.name, this.description, this.phone,
+				this.email, this.image, this.quantityRoom, this.status, this.address);
+	}
+	public TheaterDetailDto toTheaterDetailDto(Theater theater) {
+		String address = theater.getAddress().getAddressDetail() + ", "
+				+ theater.getAddress().getWard().getName() + ", "
+				+ theater.getAddress().getDistrict().getName() + ", "
+				+ theater.getAddress().getCity().getName() ;
+		return new TheaterDetailDto(this.ID, this.name, this.description, this.phone, this.email, this.image,address);
+	}
 }
