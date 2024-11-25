@@ -10,7 +10,6 @@ public interface CustomerDao {
 	public boolean addCustomer(Customer customer);
 	public boolean updateCustomer(Customer customer);
 	public Customer getCustomerID(int customerID);
-	public List<Customer> getAllCustomers();
 	public boolean earnPoints(int customerID, int points);
 	public boolean redeemPoints(int customerID, int points);
 

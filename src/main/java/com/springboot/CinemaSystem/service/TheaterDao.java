@@ -1,6 +1,7 @@
 package com.springboot.CinemaSystem.service;
 
 import com.springboot.CinemaSystem.dto.TheaterDto;
+import com.springboot.CinemaSystem.dto.TheaterExceptDto;
 import com.springboot.CinemaSystem.entity.*;
 
 import java.util.Date;
@@ -36,4 +37,5 @@ public interface TheaterDao {
 	public boolean updateRoom(Room room);
 
 	public boolean deleteTheater(long id);
+	public List<TheaterExceptDto> getTheatersExcept(long theaterID);
 }
