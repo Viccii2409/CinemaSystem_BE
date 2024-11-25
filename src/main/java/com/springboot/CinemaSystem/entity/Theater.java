@@ -1,9 +1,7 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
-import com.springboot.CinemaSystem.dto.MovieDetailDto;
 import com.springboot.CinemaSystem.dto.RoomDto;
-import com.springboot.CinemaSystem.dto.TheaterDetailDto;
 import com.springboot.CinemaSystem.dto.TheaterRoomDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -67,19 +65,6 @@ public class Theater {
 
 		return theaterRoomDto;
 	}
-	public long getID() {
-		return ID;
-	}
 
-	public void setId(long ID) {
-		this.ID = ID;
-	}
 
-	public TheaterDetailDto toTheaterDetailDto(Theater theater) {
-		String address = theater.getAddress().getAddressDetail() + ", "
-				+ theater.getAddress().getWard().getName() + ", "
-				+ theater.getAddress().getDistrict().getName() + ", "
-				+ theater.getAddress().getCity().getName() ;
-		return new TheaterDetailDto(this.ID, this.name, this.description, this.phone, this.email, this.image,address);
-	}
 }

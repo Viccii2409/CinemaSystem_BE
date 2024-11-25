@@ -9,7 +9,6 @@ import com.springboot.CinemaSystem.mapper.TheaterMapper;
 import com.springboot.CinemaSystem.service.FileStorageService;
 import com.springboot.CinemaSystem.service.TheaterDao;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -88,10 +87,10 @@ public class TheaterController {
     }
 
     @GetMapping("/{id}")
-    public TheaterDetailDto getTheaterById(@PathVariable("id") long id){
+    public Theater getTheaterById(@PathVariable("id") long id){
         Theater theater = theaterDao.getTheaterByID(id);
         if(theater != null ){
-            return theater.toTheaterDetailDto(theater);
+            return theater;
         }
         throw new NotFoundException("Theater not found with ID: " + id);
     }
@@ -243,11 +242,6 @@ public class TheaterController {
         // theaterDao.delete(roomToRemove);
 
         return true;
-    }
-    @GetMapping("/except/{id}")
-    public ResponseEntity<List<TheaterExceptDto>> getTheatersExcept(@PathVariable Long id) {
-        List<TheaterExceptDto> theaters = theaterDao.getTheatersExcept(id);
-        return ResponseEntity.ok(theaters);
     }
 
 }

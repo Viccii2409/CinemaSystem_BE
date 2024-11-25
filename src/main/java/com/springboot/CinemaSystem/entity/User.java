@@ -26,14 +26,12 @@ public class User {
 	private String phone;
 	private String image;
 	private Date startDate;
+
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Account account;
 
 	@Embedded
 	private Name name;
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "levelID", referencedColumnName = "levelID")
-	private Level level;
 
 	@ManyToMany
 	@JoinTable(
@@ -42,6 +40,5 @@ public class User {
 			inverseJoinColumns = @JoinColumn(name = "notificationID") // Khóa ngoại từ bảng Notification
 	)
 	private List<Notification> notification;
-	@Column(insertable = false, updatable = false)
-	private String user_type;
+
 }

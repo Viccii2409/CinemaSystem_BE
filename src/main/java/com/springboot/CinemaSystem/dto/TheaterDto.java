@@ -13,5 +13,4 @@ public class TheaterDto {
     private String address;
     private int quantityRoom;
     private boolean status;
-    private String image;
 }

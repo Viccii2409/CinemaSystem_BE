@@ -1,10 +1,7 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
-<<<<<<< HEAD
-=======
 import com.springboot.CinemaSystem.dto.GenreDto;
->>>>>>> main
 import jakarta.persistence.*;
 import lombok.*;
 

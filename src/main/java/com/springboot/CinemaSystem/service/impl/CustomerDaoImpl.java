@@ -1,20 +1,15 @@
 package com.springboot.CinemaSystem.service.impl;
 
 
-import com.springboot.CinemaSystem.dto.UserDto;
 import com.springboot.CinemaSystem.entity.Customer;
 import com.springboot.CinemaSystem.entity.Level;
-import com.springboot.CinemaSystem.repository.UserRepository;
 import com.springboot.CinemaSystem.service.CustomerDao;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Service
 public class CustomerDaoImpl implements CustomerDao {
+
 	@Override
 	public boolean addCustomer(Customer customer) {
 		return false;
@@ -30,7 +25,10 @@ public class CustomerDaoImpl implements CustomerDao {
 		return null;
 	}
 
-
+	@Override
+	public List<Customer> getAllCustomers() {
+		return List.of();
+	}
 
 	@Override
 	public boolean earnPoints(int customerID, int points) {
