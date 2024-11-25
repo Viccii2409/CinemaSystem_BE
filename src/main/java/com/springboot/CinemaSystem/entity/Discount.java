@@ -1,12 +1,12 @@
 package com.springboot.CinemaSystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
+import com.springboot.CinemaSystem.dto.DiscountAddDto;
+import com.springboot.CinemaSystem.dto.DiscountDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.sql.Date;
 import java.util.*;
 
 @Data
@@ -20,21 +20,42 @@ public class Discount {
 	private float reducedValue;
 	private String discountCode;
 	private String image;
+	private Date start;
+	private Date end;
 
-  @Lob
+  	@Lob
 	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
 	private boolean status;
 
-	@ManyToMany(mappedBy = "discount")
-	@JsonBackReference("customer-discount")
-	private List<Customer> customer;
-
 	@ManyToOne
 	@JoinColumn(name = "typeDiscountID")
+	@JsonIgnoreProperties("discount")
 	private TypeDiscount typeDiscount;
 
-	@OneToMany(mappedBy = "discount", cascade = CascadeType.ALL)
+	@ManyToMany(mappedBy = "discount")
+	@JsonIgnore
+	private List<Customer> customer;
+
+	@OneToMany(mappedBy = "discount")
+	@JsonIgnore
 	private List<Payment> payment;
 
+	public static Discount toDiscount(DiscountAddDto discountAddDto) {
+		Discount discount = new Discount();
+		discount.setID(discountAddDto.getId());
+		discount.setName(discountAddDto.getName());
+		discount.setReducedValue(discountAddDto.getReducedValue());
+		discount.setDiscountCode(discountAddDto.getDiscountCode());
+		discount.setStart(Date.valueOf(discountAddDto.getStart()));
+		discount.setEnd(Date.valueOf(discountAddDto.getEnd()));
+		discount.setDescription(discountAddDto.getDescription());
+		discount.setStatus(discountAddDto.isStatus());
+		return discount;
+	}
+
+	public DiscountDto toDiscountDto() {
+		return new DiscountDto(this.ID, this.name, this.typeDiscount.toTypeDiscountDto(), this.reducedValue, this.discountCode,
+				this.start, this.end, this.description, this.image, this.status);
+	}
 }

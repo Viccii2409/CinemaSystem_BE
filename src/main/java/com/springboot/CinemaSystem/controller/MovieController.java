@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.controller;
 
+import com.springboot.CinemaSystem.dto.DiscountDto;
 import com.springboot.CinemaSystem.dto.GenreDto;
 import com.springboot.CinemaSystem.dto.MovieDetailDto;
 import com.springboot.CinemaSystem.entity.Genre;
@@ -53,8 +54,13 @@ public class MovieController {
         return movieService.getCommingSoonMovie();
     }
     @GetMapping("/discount")
-    public List<Discount> getAllDiscounts(){
-        return discountDao.getAllDiscounts();
+    public List<DiscountDto> getAllDiscounts(){
+        List<DiscountDto> discountDtos = new ArrayList<>();
+        List<Discount> discounts = discountDao.getAllDiscounts();
+        for(Discount discount : discounts) {
+            discountDtos.add(discount.toDiscountDto());
+        }
+        return discountDtos;
     }
     @GetMapping("/slideshow")
     public List<Slideshow> getAllSlideshow(){
@@ -100,4 +106,5 @@ public class MovieController {
         return ResponseEntity.ok("Chuyển trạng thái thành công");
 
     }
+
 }

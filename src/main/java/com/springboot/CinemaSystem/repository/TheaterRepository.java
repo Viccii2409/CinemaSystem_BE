@@ -16,6 +16,8 @@ public interface TheaterRepository extends JpaRepository<Theater, Long> {
             "t.quantityRoom, t.status) " +
             "FROM Theater t")
     List<TheaterDto> getListTheaterDto();
+
+
     @Query("SELECT t.name FROM Theater t")
     List<String> findAllTheaterNames();
 }

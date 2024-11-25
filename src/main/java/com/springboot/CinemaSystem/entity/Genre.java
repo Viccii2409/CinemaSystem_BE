@@ -26,7 +26,7 @@ public class Genre {
 	private List<Movie> movie;
 
 	@ManyToMany(mappedBy = "genre")
-	@JsonIgnoreProperties("genre")
+	@JsonIgnore
 	private List<Customer> customer;
 
 	public GenreDto toGenreDto(){

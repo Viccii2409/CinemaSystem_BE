@@ -23,12 +23,14 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/theater")
 public class TheaterController {
 
-    @Autowired
     private TheaterDao theaterDao;
-
+    private FileStorageService fileStorageService;
 
     @Autowired
-    private FileStorageService fileStorageService;
+    public TheaterController(TheaterDao theaterDao, FileStorageService fileStorageService) {
+        this.theaterDao = theaterDao;
+        this.fileStorageService = fileStorageService;
+    }
 
     @GetMapping("")
     public List<TheaterDto> getListTheater(){
@@ -39,12 +41,52 @@ public class TheaterController {
         return theaters;
     }
 
-
-
-    @PutMapping("/{id}/updatestatus")
-    public boolean updateStatusTheater(@PathVariable("id") long id){
-        return theaterDao.updateStatusTheater(id);
+    @GetMapping("/room")
+    public List<TheaterRoomDto> getTheaterRoomDtos() {
+        List<Theater> theaters = theaterDao.getAllTheaters();
+        List<TheaterRoomDto> theaterRoomDtos = new ArrayList<>();
+        for(Theater theater : theaters) {
+            theaterRoomDtos.add(theater.toTheaterRoomDto());
+        }
+        return theaterRoomDtos;
     }
+
+//    @GetMapping("/{id}/room")
+//    public List<Room> getRoomByTheater(@PathVariable("id") long id){
+//        return theaterDao.getRoomByTheater(id);
+//    }
+
+    @GetMapping("/typeseat")
+    public List<TypeSeat> getTypeSeat() {
+        return theaterDao.getAllTypeSeats();
+    }
+
+    @GetMapping("/typeroom")
+    public List<TypeRoomDto> getTypeRoom() {
+        List<TypeRoom> typeRooms = theaterDao.getAllTypeRooms();
+        List<TypeRoomDto> typeRoomDtos = new ArrayList<>();
+        for(TypeRoom t : typeRooms) {
+            typeRoomDtos.add(t.toTypeRoomDto());
+        }
+        return typeRoomDtos;
+    }
+
+
+    @GetMapping("/{id}")
+    public TheaterViewDto getTheaterById(@PathVariable("id") long id){
+        Theater theater = theaterDao.getTheaterByID(id);
+        if(theater != null ){
+            return theater.toTheaterViewDto();
+        }
+        throw new NotFoundException("Theater not found with ID: " + id);
+    }
+
+    @GetMapping("/room/{id}")
+    public RoomSeatDto getRoom(@PathVariable("id") long id) {
+        return theaterDao.getRoomByID(id).toRoomSeatDto();
+    }
+
+
 
     @PostMapping("/add")
     public TheaterDto addTheater(@ModelAttribute TheaterAddDto theaterAddDto,
@@ -63,6 +105,47 @@ public class TheaterController {
         }
 
     }
+
+
+    @PostMapping(value = "/{id}/room/add")
+    public long addRoom(@PathVariable("id") long id ,@RequestBody Room room) {
+        System.out.println(room);
+        Theater theater = theaterDao.getTheaterByID(id);
+        if(theater == null){
+            throw new NotFoundException("Not find theater: " + id);
+        }
+        room.setTheater(theater);
+        theater.getRoom().add(room);
+        return theaterDao.addRoom(room).getID();
+    }
+
+    @PostMapping(value = "/room/{id}/seat/add")
+    public boolean addSeat(@PathVariable("id") long id, @RequestBody List<Seat> seats) {
+        Room room = theaterDao.getRoomByID(id);
+        if(room == null){
+            throw new NotFoundException("Not find room: " + id);
+        }
+        room.getSeat().clear();
+        for(Seat seat : seats){
+            seat.setRoom(room);
+            room.getSeat().add(seat);
+        }
+        return theaterDao.updateRoom(room);
+    }
+
+
+
+    @PutMapping("/{id}/updatestatus")
+    public boolean updateStatusTheater(@PathVariable("id") long id){
+        return theaterDao.updateStatusTheater(id);
+    }
+
+    @PutMapping("/room/{id}/updatestatus")
+    public boolean updateStatusRoom(@PathVariable("id") long id) {
+//        System.out.println(id);
+        return theaterDao.updateStatusRoom(id);
+    }
+
 
     @PutMapping("/update")
     public TheaterDto editTheater(@ModelAttribute TheaterEditDto theaterEditDto,
@@ -86,76 +169,6 @@ public class TheaterController {
 
     }
 
-    @GetMapping("/{id}")
-    public Theater getTheaterById(@PathVariable("id") long id){
-        Theater theater = theaterDao.getTheaterByID(id);
-        if(theater != null ){
-            return theater;
-        }
-        throw new NotFoundException("Theater not found with ID: " + id);
-    }
-
-
-    @DeleteMapping("/{id}/delete")
-    public boolean deleteTheater(@PathVariable("id") long id) {
-        return theaterDao.deleteTheater(id);
-    }
-
-    @GetMapping("/room")
-    public List<TheaterRoomDto> getTheaterRoomDtos() {
-        List<Theater> theaters = theaterDao.getAllTheaters();
-        List<TheaterRoomDto> theaterRoomDtos = new ArrayList<>();
-        for(Theater theater : theaters) {
-            theaterRoomDtos.add(theater.toTheaterRoomDto());
-        }
-        return theaterRoomDtos;
-    }
-
-    @GetMapping("/{id}/room")
-    public List<Room> getRoomByTheater(@PathVariable("id") long id){
-        return theaterDao.getRoomByTheater(id);
-    }
-
-    @GetMapping("/typeroom")
-    public List<TypeRoomDto> getTypeRoom() {
-        List<TypeRoom> typeRooms = theaterDao.getAllTypeRooms();
-        List<TypeRoomDto> typeRoomDtos = new ArrayList<>();
-        for(TypeRoom t : typeRooms) {
-            typeRoomDtos.add(t.toTypeRoomDto());
-        }
-        return typeRoomDtos;
-    }
-
-    @GetMapping("/typeseat")
-    public List<TypeSeat> getTypeSeat() {
-        return theaterDao.getAllTypeSeats();
-    }
-
-    @PostMapping(value = "/{id}/room/add")
-    public long addRoom(@PathVariable("id") long id ,@RequestBody Room room) {
-        System.out.println(room);
-        Theater theater = theaterDao.getTheaterByID(id);
-        if(theater == null){
-            throw new NotFoundException("Not find theater: " + id);
-        }
-        room.setTheater(theater);
-        theater.getRoom().add(room);
-        return theaterDao.addRoom(room).getID();
-    }
-
-    @PostMapping(value = "/room/{id}/seat/add")
-    public boolean addSeat(@PathVariable("id") long id, @RequestBody List<Seat> seats) {
-        Room room = theaterDao.getRoomByID(id);
-        if(room == null){
-            throw new NotFoundException("Not find room: " + id);
-        }
-        room.getSeat().clear();
-        for(Seat seat : seats){
-            seat.setRoom(room);
-        }
-        room.setSeat(seats);
-        return theaterDao.addListSeat(seats);
-    }
 
     @PutMapping(value = "/room/{id}/seat/update")
     public boolean updateSeat(@PathVariable("id") long id, @RequestBody List<Seat> seats) {
@@ -186,17 +199,6 @@ public class TheaterController {
 
     }
 
-    @PutMapping("/room/{id}/updatestatus")
-    public boolean updateStatusRoom(@PathVariable("id") long id) {
-//        System.out.println(id);
-        return theaterDao.updateStatusRoom(id);
-    }
-
-    @GetMapping("/room/{id}")
-    public RoomSeatDto getRoom(@PathVariable("id") long id) {
-        return theaterDao.getRoomByID(id).toRoomSeatDto();
-    }
-
     @PutMapping("/room/update")
     public boolean updateRoom(@RequestBody Room room) {
         Room room1 = theaterDao.getRoomByID(room.getID());
@@ -212,6 +214,14 @@ public class TheaterController {
         room1.setNumRows(room.getNumRows());
         room1.setNumColumn(room.getNumColumn());
         return theaterDao.updateRoom(room1);
+    }
+
+
+    @DeleteMapping("/{id}/delete")
+    public boolean deleteTheater(@PathVariable("id") long id) {
+        Theater theater = theaterDao.getTheaterByID(id);
+        fileStorageService.deleteFileFromCloudinary(theater.getImage());
+        return theaterDao.deleteTheater(id);
     }
 
     @DeleteMapping("/{id}/room/{roomid}/delete")

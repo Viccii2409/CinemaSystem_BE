@@ -2,6 +2,9 @@ package com.springboot.CinemaSystem.service.impl;
 
 
 import com.springboot.CinemaSystem.dto.MovieDto;
+import com.springboot.CinemaSystem.dto.MovieShowtimeDto;
+import com.springboot.CinemaSystem.dto.ShowtimeMovieDto;
+import com.springboot.CinemaSystem.dto.ShowtimeTheaterIDDto;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.repository.GenreRepository;
@@ -10,6 +13,7 @@ import com.springboot.CinemaSystem.service.MovieDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Time;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
@@ -58,9 +62,30 @@ public class MovieDaoImpl implements MovieDao {
 
 
 	private MovieDto convertToDto(Movie movie) {
-		String  Link = movie.getImage().isEmpty() ? null : movie.getImage().get(0).getLink();
-		return new MovieDto(movie.getId(), movie.getTitle(), Link);
-	}
+		// Kiểm tra danh sách image
+		String link = (movie.getImage() == null || movie.getImage().isEmpty()) ? null : movie.getImage().get(0).getLink();
+
+		return new MovieDto(
+				movie.getId(),
+				movie.getTitle(),
+				link,
+				movie.getShowtime()
+						.stream()
+						.filter(showtime -> showtime.getRoom().isStatus() == true && ("upcoming".equals(showtime.getAction()) || "running".equals(showtime.getAction())))
+						.map(showtime -> new ShowtimeTheaterIDDto(
+								showtime.getID(),
+								showtime.getDate(),
+								showtime.getStartTime(),
+								showtime.getEndTime(),
+								showtime.getAction(),
+								showtime.getRoom().getTheater().getID(),
+								showtime.getRoom().getSeat().size() - showtime.getAvailableSeats(),
+								showtime.getRoom().getTypeRoom().getName()
+						))
+						.collect(Collectors.toList())
+		);
+	};
+
 
 	@Override
 	public boolean updateStatusMovie(int movieID) {
@@ -278,4 +303,5 @@ public class MovieDaoImpl implements MovieDao {
 	public float getMovieStat(Date startDate, Date endDate) {
 		return 0;
 	}
+
 }

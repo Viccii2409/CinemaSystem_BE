@@ -22,7 +22,7 @@ public class Trailer {
 
 	@OneToOne
 	@JoinColumn(name = "movieID")
-	@JsonBackReference("movie-trailer")
+	@JsonBackReference(value = "movie-trailer")
 	private Movie movie;
 
 }

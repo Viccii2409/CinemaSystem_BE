@@ -1,8 +1,10 @@
 package com.springboot.CinemaSystem.service;
 
 import com.springboot.CinemaSystem.dto.MovieDto;
+import com.springboot.CinemaSystem.dto.MovieShowtimeDto;
 import com.springboot.CinemaSystem.entity.*;
 
+import java.sql.Time;
 import java.util.Date;
 import java.util.List;
 
@@ -61,6 +63,5 @@ public interface MovieDao {
 	public boolean updateImage(Image image);
 
 	public float getMovieStat(Date startDate, Date endDate);
-
 
 }

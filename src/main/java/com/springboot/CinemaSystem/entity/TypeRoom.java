@@ -17,14 +17,17 @@ public class TypeRoom {
 	@Column(nullable = false)
 	private String name;
 
+	private float surcharge;
+
 	@OneToMany(mappedBy = "typeRoom" )
-	@JsonIgnoreProperties("typeRoom")
+	@JsonIgnore
 	List<Room> room;
 
 	public TypeRoomDto toTypeRoomDto() {
 		TypeRoomDto typeRoomDto = new TypeRoomDto();
 		typeRoomDto.setId(this.getID());
 		typeRoomDto.setName(this.getName());
+		typeRoomDto.setSurcharge(this.surcharge);
 		return typeRoomDto;
 	}
 

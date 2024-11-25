@@ -15,7 +15,7 @@ public class Language {
 	private long ID;
 	private String name;
 
-	@OneToMany(mappedBy = "language", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "language")
 	@JsonIgnore
 	private List<Movie> movie;
 

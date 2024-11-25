@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.*;
 import com.springboot.CinemaSystem.dto.FeedbackDto;
 import com.springboot.CinemaSystem.dto.GenreDto;
 import com.springboot.CinemaSystem.dto.MovieDetailDto;
+import com.springboot.CinemaSystem.dto.MovieShowtimeDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -32,7 +33,7 @@ public class Movie {
 	private float rating;
 
 	@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonIdentityReference(alwaysAsId = true)
+	@JsonIgnore
 	private List<Showtime> showtime;
 
 	@ManyToOne
@@ -95,5 +96,9 @@ public class Movie {
 		return new MovieDetailDto(this.ID, this.title, this.duration, this.releaseDate,
 				this.description, this.status, this.rating, this.director, this.language,
 				this.trailer, this.image, this.cast, genreDtos, feebackDtos);
+	}
+
+	public MovieShowtimeDto toMovieShowtimeDto() {
+		return new MovieShowtimeDto(this.ID, this.title, this.duration, this.description, this.image.get(0).getLink());
 	}
 }

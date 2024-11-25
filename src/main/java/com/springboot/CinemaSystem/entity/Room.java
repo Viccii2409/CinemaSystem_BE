@@ -7,6 +7,7 @@ import com.springboot.CinemaSystem.dto.SeatDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Formula;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.*;
 
@@ -69,5 +70,6 @@ public class Room {
 		}
 		return new RoomSeatDto(this.ID, this.name, this.getTypeRoom().toTypeRoomDto(), this.getQuantitySeat(), this.numRows, this.numColumn, this.status, seatDtos, this.getTheater().getName());
 	}
+
 
 }

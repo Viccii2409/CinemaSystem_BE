@@ -2,9 +2,12 @@ package com.springboot.CinemaSystem.service;
 
 
 import com.springboot.CinemaSystem.entity.Account;
+import com.springboot.CinemaSystem.entity.Customer;
 import com.springboot.CinemaSystem.entity.User;
 
 public interface UserDao {
+	public Customer getCustomerById(long id);
+	public void updateCustomer(Customer customer);
 
 	public User login(Account account);
 	public void updateUser(User user);
