@@ -213,16 +213,6 @@ public class TicketController {
             });
         }
         ticketDao.addPayTypeCustomer(payTypeCustomers);
-//		PayCashRequestDto(
-//		showtimeid=5, agentid=1, amount=515000, received=520000, moneyReturned=5000,
-//		paytypecustomer={1={1=1}, 2={2=1}, 3={1=1, 2=1, 3=2}},
-//		ticket=[
-//		TicketRequestDto(id=366, selectedSeatID=42),
-//		TicketRequestDto(id=367, selectedSeatID=43),
-//		TicketRequestDto(id=376, selectedSeatID=44),
-//		TicketRequestDto(id=377, selectedSeatID=45),
-//		TicketRequestDto(id=1261, selectedSeatID=46),
-//		TicketRequestDto(id=1262, selectedSeatID=47)])
 
         List<Ticket> tickets = new ArrayList<>();
         for(TicketRequestDto dto : payCashRequestDto.getTicket()) {
@@ -314,7 +304,7 @@ public class TicketController {
 
     @PostMapping("/discount/add")
     public DiscountDto addDiscount(@ModelAttribute DiscountAddDto discountAddDto,
-                               @RequestParam(value = "file", required = false) MultipartFile file) {
+                                   @RequestParam(value = "file", required = false) MultipartFile file) {
         try {
             Discount discount = Discount.toDiscount(discountAddDto);
             TypeDiscount typeDiscount = discountDao.getTypeDiscountByID(discountAddDto.getTypeDiscountid());
