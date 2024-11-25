@@ -1,14 +1,13 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Data
 @Entity
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Image.class)
+@AllArgsConstructor
+@NoArgsConstructor
 public class Image {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,6 +18,7 @@ public class Image {
 
 	@ManyToOne
 	@JoinColumn(name = "movieID")
+	@JsonBackReference
 	private Movie movie;
 
 }

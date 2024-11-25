@@ -30,5 +30,9 @@ public class TypeRoom {
 		typeRoomDto.setSurcharge(this.surcharge);
 		return typeRoomDto;
 	}
+	@Override
+	public String toString() {
+		return "TypeRoom{id=" + ID + ", name='" + name + "'}";
+	}
 
 }

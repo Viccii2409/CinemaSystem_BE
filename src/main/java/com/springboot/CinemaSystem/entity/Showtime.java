@@ -4,8 +4,9 @@ import com.fasterxml.jackson.annotation.*;
 import com.springboot.CinemaSystem.dto.SelectedSeatDto;
 import com.springboot.CinemaSystem.dto.ShowtimeRoomDto;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import org.hibernate.annotations.Formula;
+import lombok.ToString;
 
 import java.sql.Date;
 import java.sql.Time;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 
 @Data
 @Entity
+@ToString(exclude = {"room", "movie", "ticketBought", "seatAvailability"})
 public class Showtime {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -93,4 +95,8 @@ public class Showtime {
 		return showtimeRoomDto;
 	}
 
+	@Override
+	public String toString() {
+		return "Showtime{id=" + ID + ", date=" + date + ", startTime=" + startTime + ", status=" + status + "}";
+	}
 }

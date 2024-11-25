@@ -7,11 +7,12 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TheaterDto {
+public class TheaterDetailDto {
     private long ID;
     private String name;
-    private String address;
-    private int quantityRoom;
-    private boolean status;
+    private String description;
+    private String phone;
+    private String email;
     private String image;
+    private String address;
 }

@@ -30,7 +30,6 @@ public class Discount {
 
 	@ManyToOne
 	@JoinColumn(name = "typeDiscountID")
-	@JsonIgnoreProperties("discount")
 	private TypeDiscount typeDiscount;
 
 	@ManyToMany(mappedBy = "discount")
@@ -38,7 +37,6 @@ public class Discount {
 	private List<Customer> customer;
 
 	@OneToMany(mappedBy = "discount")
-	@JsonIgnore
 	private List<Payment> payment;
 
 	public static Discount toDiscount(DiscountAddDto discountAddDto) {

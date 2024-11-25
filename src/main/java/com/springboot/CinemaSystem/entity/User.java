@@ -3,7 +3,7 @@ package com.springboot.CinemaSystem.entity;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
-
+import java.sql.Date;
 import java.util.*;
 
 @Data
@@ -40,5 +40,4 @@ public class User {
 
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
 	private List<SelectedSeat> selectedSeats;
-
 }

@@ -4,6 +4,7 @@ import com.springboot.CinemaSystem.dto.MovieShowtimeDto;
 import com.springboot.CinemaSystem.dto.ShowtimeMovieDto;
 import com.springboot.CinemaSystem.dto.TheaterDto;
 import com.springboot.CinemaSystem.dto.TheaterMovieDto;
+import com.springboot.CinemaSystem.dto.TheaterExceptDto;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.exception.NotFoundException;
@@ -102,7 +103,10 @@ public class TheaterDaoImpl implements TheaterDao {
 			throw new DataProcessingException("Failed to retrieve theaters: " + e.getMessage());
 		}
 	}
-
+	@Override
+	public List<TheaterExceptDto> getTheatersExcept(long theaterID) {
+		return theaterRepository.findAllExcept(theaterID);
+	}
 	@Override
 	public Room addRoom(Room room) {
 		try {

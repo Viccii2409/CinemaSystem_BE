@@ -9,6 +9,7 @@ import com.springboot.CinemaSystem.mapper.TheaterMapper;
 import com.springboot.CinemaSystem.service.FileStorageService;
 import com.springboot.CinemaSystem.service.TheaterDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,6 +40,59 @@ public class TheaterController {
             throw new NotFoundException("No theaters found.");
         }
         return theaters;
+    }
+
+
+
+    @PutMapping("/{id}/updatestatus")
+    public boolean updateStatusTheater(@PathVariable("id") long id){
+        return theaterDao.updateStatusTheater(id);
+    }
+
+    @PostMapping("/add")
+    public TheaterDto addTheater(@ModelAttribute TheaterAddDto theaterAddDto,
+                                 @RequestParam(value = "file", required = false) MultipartFile file){
+        try {
+            Theater theater = TheaterMapper.toTheaterAdd(theaterAddDto);
+            theater.setStatus(false);
+            if(file != null && !file.isEmpty()){
+                String imageUrl = fileStorageService.saveFileFromCloudinary(file);
+                theater.setImage(imageUrl);
+            }
+            Theater saveTheater = theaterDao.addTheater(theater);
+            return TheaterMapper.toTheaterDto(theater);
+        } catch (Exception e) {
+            throw new DataProcessingException("Lỗi thêm rạp: " + e.getMessage());
+        }
+
+    }
+
+    @PutMapping("/update")
+    public TheaterDto editTheater(@ModelAttribute TheaterEditDto theaterEditDto,
+                                  @RequestParam(value = "file", required = false) MultipartFile file){
+        try {
+            Theater theater = TheaterMapper.toTheaterEdit(theaterEditDto);
+            Theater theater_old = theaterDao.getTheaterByID(theater.getID());
+            theater.setImage(theater_old.getImage());
+            theater.setQuantityRoom(theater_old.getQuantityRoom());
+            theater.setStatus(theater_old.isStatus());
+            theater.setRoom(theater_old.getRoom());
+            if(file != null && !file.isEmpty()){
+                String imageUrl = fileStorageService.updateFile(file, theater_old.getImage());
+                theater.setImage(imageUrl);
+            }
+            Theater updateTheater = theaterDao.updateTheater(theater);
+            return TheaterMapper.toTheaterDto(theater);
+        } catch (Exception e) {
+            throw new DataProcessingException("Lỗi thêm rạp: " + e.getMessage());
+        }
+
+    }
+
+
+    @DeleteMapping("/{id}/delete")
+    public boolean deleteTheater(@PathVariable("id") long id) {
+        return theaterDao.deleteTheater(id);
     }
 
     @GetMapping("/room")
@@ -87,26 +141,6 @@ public class TheaterController {
     }
 
 
-
-    @PostMapping("/add")
-    public TheaterDto addTheater(@ModelAttribute TheaterAddDto theaterAddDto,
-                                 @RequestParam(value = "file", required = false) MultipartFile file){
-        try {
-            Theater theater = TheaterMapper.toTheaterAdd(theaterAddDto);
-            theater.setStatus(false);
-            if(file != null && !file.isEmpty()){
-                String imageUrl = fileStorageService.saveFileFromCloudinary(file);
-                theater.setImage(imageUrl);
-            }
-            Theater saveTheater = theaterDao.addTheater(theater);
-            return TheaterMapper.toTheaterDto(theater);
-        } catch (Exception e) {
-            throw new DataProcessingException("Lỗi thêm rạp: " + e.getMessage());
-        }
-
-    }
-
-
     @PostMapping(value = "/{id}/room/add")
     public long addRoom(@PathVariable("id") long id ,@RequestBody Room room) {
         System.out.println(room);
@@ -131,42 +165,6 @@ public class TheaterController {
             room.getSeat().add(seat);
         }
         return theaterDao.updateRoom(room);
-    }
-
-
-
-    @PutMapping("/{id}/updatestatus")
-    public boolean updateStatusTheater(@PathVariable("id") long id){
-        return theaterDao.updateStatusTheater(id);
-    }
-
-    @PutMapping("/room/{id}/updatestatus")
-    public boolean updateStatusRoom(@PathVariable("id") long id) {
-//        System.out.println(id);
-        return theaterDao.updateStatusRoom(id);
-    }
-
-
-    @PutMapping("/update")
-    public TheaterDto editTheater(@ModelAttribute TheaterEditDto theaterEditDto,
-                                  @RequestParam(value = "file", required = false) MultipartFile file){
-        try {
-            Theater theater = TheaterMapper.toTheaterEdit(theaterEditDto);
-            Theater theater_old = theaterDao.getTheaterByID(theater.getID());
-            theater.setImage(theater_old.getImage());
-            theater.setQuantityRoom(theater_old.getQuantityRoom());
-            theater.setStatus(theater_old.isStatus());
-            theater.setRoom(theater_old.getRoom());
-            if(file != null && !file.isEmpty()){
-                String imageUrl = fileStorageService.updateFile(file, theater_old.getImage());
-                theater.setImage(imageUrl);
-            }
-            Theater updateTheater = theaterDao.updateTheater(theater);
-            return TheaterMapper.toTheaterDto(theater);
-        } catch (Exception e) {
-            throw new DataProcessingException("Lỗi thêm rạp: " + e.getMessage());
-        }
-
     }
 
 
@@ -199,6 +197,12 @@ public class TheaterController {
 
     }
 
+    @PutMapping("/room/{id}/updatestatus")
+    public boolean updateStatusRoom(@PathVariable("id") long id) {
+//        System.out.println(id);
+        return theaterDao.updateStatusRoom(id);
+    }
+
     @PutMapping("/room/update")
     public boolean updateRoom(@RequestBody Room room) {
         Room room1 = theaterDao.getRoomByID(room.getID());
@@ -216,14 +220,6 @@ public class TheaterController {
         return theaterDao.updateRoom(room1);
     }
 
-
-    @DeleteMapping("/{id}/delete")
-    public boolean deleteTheater(@PathVariable("id") long id) {
-        Theater theater = theaterDao.getTheaterByID(id);
-        fileStorageService.deleteFileFromCloudinary(theater.getImage());
-        return theaterDao.deleteTheater(id);
-    }
-
     @DeleteMapping("/{id}/room/{roomid}/delete")
     public boolean deleteRoom(@PathVariable("id") long id, @PathVariable("roomid") long roomid) {
         // Lấy Theater từ cơ sở dữ liệu
@@ -231,8 +227,6 @@ public class TheaterController {
         if (theater == null) {
             throw new NotFoundException("Theater not found with id: " + id);
         }
-
-        // Tìm Room cần xóa trong danh sách rooms của Theater
         Room roomToRemove = theater.getRoom().stream()
                 .filter(room -> room.getID() == roomid)
                 .findFirst()
@@ -241,17 +235,14 @@ public class TheaterController {
         if (roomToRemove == null) {
             throw new NotFoundException("Room not found with id: " + roomid);
         }
-
-        // Xóa Room khỏi danh sách rooms của Theater
         theater.getRoom().remove(roomToRemove);
-
-        // Lưu Theater để cập nhật thay đổi nếu dùng orphanRemoval = true
         theaterDao.updateTheater(theater);
-
-        // Nếu không dùng orphanRemoval, cần xóa thủ công Room trong cơ sở dữ liệu
-        // theaterDao.delete(roomToRemove);
-
         return true;
+    }
+    @GetMapping("/except/{id}")
+    public ResponseEntity<List<TheaterExceptDto>> getTheatersExcept(@PathVariable Long id) {
+        List<TheaterExceptDto> theaters = theaterDao.getTheatersExcept(id);
+        return ResponseEntity.ok(theaters);
     }
 
 }

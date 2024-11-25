@@ -1,6 +1,5 @@
 package com.springboot.CinemaSystem.repository;
 
-import com.springboot.CinemaSystem.dto.TheaterDto;
 import com.springboot.CinemaSystem.entity.Discount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

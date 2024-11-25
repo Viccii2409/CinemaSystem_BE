@@ -2,6 +2,7 @@ package com.springboot.CinemaSystem.service;
 
 import com.springboot.CinemaSystem.dto.TheaterDto;
 import com.springboot.CinemaSystem.dto.TheaterMovieDto;
+import com.springboot.CinemaSystem.dto.TheaterExceptDto;
 import com.springboot.CinemaSystem.entity.*;
 
 import java.sql.Time;
@@ -50,4 +51,5 @@ public interface TheaterDao {
 
 	public TheaterMovieDto getShowtimeByTheater(Theater theater);
 
+	public List<TheaterExceptDto> getTheatersExcept(long theaterID);
 }

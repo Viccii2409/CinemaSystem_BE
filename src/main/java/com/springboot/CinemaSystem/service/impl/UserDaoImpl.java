@@ -1,20 +1,24 @@
 package com.springboot.CinemaSystem.service.impl;
 
+import com.springboot.CinemaSystem.dto.UserDto;
 import com.springboot.CinemaSystem.entity.Account;
 import com.springboot.CinemaSystem.entity.Customer;
 import com.springboot.CinemaSystem.entity.User;
 import com.springboot.CinemaSystem.exception.DataProcessingException;
+import com.springboot.CinemaSystem.repository.UserRepository;
 import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.repository.AgentRepository;
 import com.springboot.CinemaSystem.repository.CustomerRepository;
-import com.springboot.CinemaSystem.repository.UserRepository;
 import com.springboot.CinemaSystem.service.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class UserDaoImpl implements UserDao {
-	private UserRepository userRepository;
+	private final UserRepository userRepository;
 	private AgentRepository agentRepository;
 	private CustomerRepository customerRepository;
 
@@ -58,7 +62,15 @@ public class UserDaoImpl implements UserDao {
 		return false;
 	}
 
-
+	@Override
+	public List<UserDto> getAllCustomers() {
+		// Lấy tất cả người dùng có user_type là "user"
+		try{
+			return userRepository.findByUserType("user");
+		}catch(Exception e){
+			throw new DataProcessingException("Failed to retrieve customers: " + e.getMessage());
+		}
+	}
 	@Override
 	public User login(Account account) {
 		return null;

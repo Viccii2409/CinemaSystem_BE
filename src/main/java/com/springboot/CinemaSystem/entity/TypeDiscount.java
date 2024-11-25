@@ -1,9 +1,5 @@
 package com.springboot.CinemaSystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.springboot.CinemaSystem.dto.TypeDiscountDto;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -20,7 +16,6 @@ public class TypeDiscount {
 	private String name;
 
 	@OneToMany(mappedBy = "typeDiscount")
-	@JsonIgnoreProperties("typeDiscount")
 	private List<Discount> discount;
 
 
