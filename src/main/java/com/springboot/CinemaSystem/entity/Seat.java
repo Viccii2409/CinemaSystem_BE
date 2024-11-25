@@ -18,7 +18,7 @@ public class Seat {
 	private String name;
 	@Column(nullable = false)
 	private int seatNum;
-	@Column(nullable = false)
+	@Column(name = "row_num", nullable = false)
 	private int rowNum;
 	@Column(nullable = false)
 	private boolean status;
