@@ -26,4 +26,5 @@ public class MovieDetailDto {
     private String cast;
     private List<GenreDto> genre;
     private List<FeedbackDto> feedback;
+    private List<ShowtimeTheaterIDDto> showtime;
 }
