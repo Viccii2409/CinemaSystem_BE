@@ -1,12 +1,15 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
+import com.springboot.CinemaSystem.dto.BookingDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Data
 @Entity
@@ -46,6 +49,36 @@ public class Booking {
 			numericBarcode.append(randomDigit);
 		}
 		this.barcode = numericBarcode.toString();
+	}
+
+	public BookingDto toBookingDto() {
+		List<String> nameSeats = new ArrayList<>();
+		for(Ticket t : this.getTicket()) {
+			nameSeats.add(t.getSeat().getName());
+		}
+		Customer customer = this.getCustomer();
+		Name name = (customer != null) ? customer.getName() : null;
+		return new BookingDto(
+				this.ID,
+				this.getDate(),
+				this.getBarcode(),
+				nameSeats,
+				this.getShowtime().getDate(),
+				this.getShowtime().getStartTime(),
+				this.getShowtime().getEndTime(),
+				this.getShowtime().getMovie().getTitle(),
+				this.getShowtime().getMovie().getFirstImage(),
+				this.getShowtime().getRoom().getTheater().getName(),
+				this.getShowtime().getRoom().getTheater().getFullAddress(),
+				this.getShowtime().getRoom().getName(),
+				this.getShowtime().getRoom().getTypeRoom().getName(),
+				this.getPayment().getTotalPrice(),
+				this.getPayment().getDiscountPrice(),
+				this.getPayment().getAmount(),
+				(name != null) ? name.getFullname() : "",
+				(customer != null) ? customer.getPhone() : "",
+				(customer != null) ? customer.getEmail() : ""
+		);
 	}
 
 }

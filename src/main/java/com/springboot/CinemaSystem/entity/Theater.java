@@ -50,6 +50,13 @@ public class Theater {
 	@Embedded
 	private Address address;
 
+	public String getFullAddress() {
+		return this.getAddress().getAddressDetail() + ", " +
+				this.getAddress().getWard().getName() + ", " +
+				this.getAddress().getDistrict().getName() + ", " +
+				this.getAddress().getCity().getName();
+	}
+
 	public TheaterRoomDto toTheaterRoomDto() {
 		TheaterRoomDto theaterRoomDto = new TheaterRoomDto();
 		theaterRoomDto.setId(this.getID());
