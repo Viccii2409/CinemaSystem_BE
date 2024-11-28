@@ -15,6 +15,5 @@ import java.time.LocalDateTime;
 @DiscriminatorValue("PAYONLINE")
 public class PayOnline extends Payment{
     private LocalDateTime dateExpire;
-    private String status;  // pending, confirmed, expired
 
 }

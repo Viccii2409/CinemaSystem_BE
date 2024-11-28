@@ -23,6 +23,7 @@ public class Payment {
 	private float discountPrice;
 	private float amount;
 	private String barcode;
+	private String status;  // pending, confirmed, expired
 
 	@Transient
 	private int quantityTicket;

@@ -196,6 +196,7 @@ public class TicketController {
         PayCash payCash = new PayCash();
         payCash.setBooking(booking_new);
 //        payCash.setDate(localDateTime);
+        payCash.setStatus("confirmed");
         payCash.setTotalPrice(payCashRequestDto.getTotalPrice());
         payCash.setDiscountPrice(payCashRequestDto.getDiscountPrice());
         payCash.setAmount(payCashRequestDto.getAmount());
@@ -252,6 +253,7 @@ public class TicketController {
         Booking booking_new = ticketDao.addBooking(booking);
 
         PayCash payCash = new PayCash();
+        payCash.setStatus("confirmed");
         payCash.setBooking(booking_new);
         payCash.setTotalPrice(payCashRequestDto.getTotalPrice());
         payCash.setDiscountPrice(payCashRequestDto.getDiscountPrice());
@@ -518,6 +520,14 @@ public class TicketController {
         return payUrl;
     }
 
+    @PostMapping("/booking/payonline/{barcode}")
+    public String createPayOnlineAfter(@PathVariable("barcode") String barcode) {
+        PayOnline payOnline = ticketDao.getPayOnlineByBarcode(barcode);
+        String redirectUrl = "http://localhost:3000/view-booking";
+        String payUrl = this.createPayOnline(barcode, (long) payOnline.getAmount(), redirectUrl);
+        return payUrl;
+    }
+
     private String createPayOnline(String orderId, long amount, String redirect_url) {
         try {// Tạo mã giao dịch duy nhất
             String requestId = orderId;
@@ -599,8 +609,10 @@ public class TicketController {
                                 @PathVariable("status") int status) {
         System.out.println(barcode + " " + status);
         if (status == 0) {
+            LocalDateTime localDateTime = LocalDateTime.now();
             PayOnline payOnline = ticketDao.getPayOnlineByBarcode(barcode);
             payOnline.setStatus("confirmed");
+            payOnline.setDate(localDateTime);
             PayOnline payOnline_new = ticketDao.updatePayOnline(payOnline);
         }
         else {
