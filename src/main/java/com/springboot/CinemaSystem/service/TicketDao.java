@@ -32,4 +32,11 @@ public interface TicketDao {
 	public void addTicket(List<Ticket> tickets);
 	public Booking getBookingById(long id);
 
+	public PayOnline addPayOnline(PayOnline payOnline);
+	public PayOnline getPayOnlineByBarcode(String orderId);
+	public PayOnline updatePayOnline(PayOnline payOnline);
+	public void updateSelectSeatStatusToExpired(long showtimeID, long userid, long seatid);
+	public Booking getBookingByBarcode(String barcode);
+	public void updateStatusPayOnlineToExpired();
+
 }

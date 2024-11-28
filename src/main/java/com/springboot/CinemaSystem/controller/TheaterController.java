@@ -69,7 +69,8 @@ public class TheaterController {
 
     @PutMapping("/update")
     public TheaterDto editTheater(@ModelAttribute TheaterEditDto theaterEditDto,
-                                  @RequestParam(value = "file", required = false) MultipartFile file){
+                                  @RequestParam(value = "file", required = false) MultipartFile file
+                                  ){
         try {
             Theater theater = TheaterMapper.toTheaterEdit(theaterEditDto);
             Theater theater_old = theaterDao.getTheaterByID(theater.getID());

@@ -46,9 +46,9 @@ public class Payment {
 	private List<PayTypeCustomer> payTypeCustomers;
 
 	@PrePersist
-	private void generateBarcode() {
-		if (barcode == null || barcode.isEmpty()) {
-			this.barcode = "PAY" + UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
+	private void initializeDate() {
+		if (this.date == null) {
+			this.date = LocalDateTime.now();
 		}
 	}
 

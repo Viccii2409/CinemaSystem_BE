@@ -25,36 +25,29 @@ public class TicketDaoImpl implements TicketDao {
 	private TypeCustomerRepository typeCustomerRepository;
 	private BasePriceRepository basePriceRepository;
 	private SelectedSeatRepository selectedSeatRepository;
-	private UserRepository userRepository;
-	private SeatRepository seatRepository;
-	private ShowtimeRepository showtimeRepository;
 	private BookingRepository bookingRepository;
 	private PayCashRepository payCashRepository;
 	private PayTypeCustomerRepository payTypeCustomerRepository;
 	private TicketRepository ticketRepository;
-	private DiscountRepository discountRepository;
-	private TypeDiscountRepository typeDiscountRepository;
+	private PayOnlineRepository payOnlineRepository;
 	private SimpMessagingTemplate simpMessagingTemplate;
 
 
 	@Autowired
-	public TicketDaoImpl(DayOfWeekRepository dayOfWeekRepository, TimeFrameRepository timeFrameRepository, TypeCustomerRepository typeCustomerRepository, BasePriceRepository basePriceRepository, SelectedSeatRepository selectedSeatRepository, UserRepository userRepository, SeatRepository seatRepository, ShowtimeRepository showtimeRepository, BookingRepository bookingRepository, PayCashRepository payCashRepository, PayTypeCustomerRepository payTypeCustomerRepository, TicketRepository ticketRepository, DiscountRepository discountRepository, TypeDiscountRepository typeDiscountRepository, SimpMessagingTemplate simpMessagingTemplate) {
+	public TicketDaoImpl(DayOfWeekRepository dayOfWeekRepository, TimeFrameRepository timeFrameRepository, TypeCustomerRepository typeCustomerRepository, BasePriceRepository basePriceRepository, SelectedSeatRepository selectedSeatRepository, BookingRepository bookingRepository, PayCashRepository payCashRepository, PayTypeCustomerRepository payTypeCustomerRepository, TicketRepository ticketRepository, PayOnlineRepository payOnlineRepository, SimpMessagingTemplate simpMessagingTemplate) {
 		this.dayOfWeekRepository = dayOfWeekRepository;
 		this.timeFrameRepository = timeFrameRepository;
 		this.typeCustomerRepository = typeCustomerRepository;
 		this.basePriceRepository = basePriceRepository;
 		this.selectedSeatRepository = selectedSeatRepository;
-		this.userRepository = userRepository;
-		this.seatRepository = seatRepository;
-		this.showtimeRepository = showtimeRepository;
 		this.bookingRepository = bookingRepository;
 		this.payCashRepository = payCashRepository;
 		this.payTypeCustomerRepository = payTypeCustomerRepository;
 		this.ticketRepository = ticketRepository;
-		this.discountRepository = discountRepository;
-		this.typeDiscountRepository = typeDiscountRepository;
+		this.payOnlineRepository = payOnlineRepository;
 		this.simpMessagingTemplate = simpMessagingTemplate;
 	}
+
 
 
 
@@ -240,5 +233,73 @@ public class TicketDaoImpl implements TicketDao {
 	public Booking getBookingById(long id) {
 		return bookingRepository.findById(id)
 				.orElseThrow(() -> new NotFoundException("Error getBookingById: " + id));
+	}
+
+	@Override
+	public PayOnline addPayOnline(PayOnline payOnline) {
+		try {
+			return payOnlineRepository.save(payOnline);
+		} catch (Exception e) {
+			throw new DataProcessingException("Error addPayOnline: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public PayOnline getPayOnlineByBarcode(String orderId) {
+		try {
+			return payOnlineRepository.findByBarcode(orderId);
+		} catch (Exception e) {
+			throw new NotFoundException("Error getPayOnlineByBarcode: " + orderId);
+		}
+	}
+
+	@Override
+	public PayOnline updatePayOnline(PayOnline payOnline) {
+		if(!payOnlineRepository.existsById(payOnline.getID())){
+			throw new NotFoundException("Error updatePayOnline by ID");
+		}
+		return payOnlineRepository.save(payOnline);
+	}
+
+	@Override
+	public void updateSelectSeatStatusToExpired(long showtimeID, long userid, long seatid) {
+		try {
+			selectedSeatRepository.updateSeatStatusToExpired(showtimeID, userid, seatid);
+		} catch (Exception e) {
+			throw new DataProcessingException(e.getMessage());
+		}
+	}
+
+	@Override
+	public Booking getBookingByBarcode(String barcode) {
+		PayOnline payOnline = this.getPayOnlineByBarcode(barcode);
+		return payOnline.getBooking();
+	}
+
+	@Override
+	@Scheduled(fixedRate = 60000)
+	@Transactional
+	public void updateStatusPayOnlineToExpired() {
+		try {
+			LocalDateTime localDateTime = LocalDateTime.now();
+			List<PayOnline> payOnlines = payOnlineRepository.getPayOnlineActive(localDateTime);
+			for(PayOnline payOnline : payOnlines) {
+				payOnline.setStatus("expired");
+				this.updatePayOnline(payOnline);
+				long showtimeID = payOnline.getBooking().getShowtime().getID();
+				long userid = 0;
+				if(payOnline.getAgent() != null) {
+					userid = payOnline.getAgent().getID();
+				}
+				else if(payOnline.getBooking().getCustomer() != null) {
+					userid = payOnline.getBooking().getCustomer().getID();
+				}
+				for(Ticket ticket : payOnline.getBooking().getTicket()) {
+					this.updateSelectSeatStatusToExpired(showtimeID, userid, ticket.getSeat().getID());
+				}
+			}
+		} catch (Exception e) {
+			throw new DataProcessingException("Error updateStatusPayOnlineToExpired: " + e.getMessage());
+		}
 	}
 }

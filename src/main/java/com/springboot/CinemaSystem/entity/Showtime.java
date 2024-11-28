@@ -28,7 +28,7 @@ public class Showtime {
 	private Time endTime;
 	@Column(nullable = false)
 	private boolean status;
-	private String action;
+	private String action;	//	upcoming, running, ended
 
 	@Formula("(SELECT COUNT(*) FROM selected_seat s " +
 			"WHERE s.status = 'confirmed' AND s.showtimeid = showtimeID)")
