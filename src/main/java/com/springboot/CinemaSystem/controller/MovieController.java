@@ -21,17 +21,24 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/movie")
 public class MovieController {
-    @Autowired
     private MovieDao movieService;
-    @Autowired
     private DiscountDao discountDao;
-    @Autowired
     private TheaterDao theaterDao;
-    @Autowired
     private SlideshowDao slideshowDao;
-    @Autowired
     private ShowtimeDao showtimeDao;
     private MovieRepository movieRepository;
+
+
+    @Autowired
+    public MovieController(MovieDao movieService, DiscountDao discountDao, TheaterDao theaterDao, SlideshowDao slideshowDao, ShowtimeDao showtimeDao, MovieRepository movieRepository, TrailerDaoImpl trailerDao) {
+        this.movieService = movieService;
+        this.discountDao = discountDao;
+        this.theaterDao = theaterDao;
+        this.slideshowDao = slideshowDao;
+        this.showtimeDao = showtimeDao;
+        this.movieRepository = movieRepository;
+        this.trailerDao = trailerDao;
+    }
 
     @GetMapping("/getAll")
     public List<Movie> getAllMovies(){
@@ -176,11 +183,11 @@ public class MovieController {
     }
 
 
-    
-    
-    
-    
-    ///  LÊN LỊCH CHIẾU 
+
+
+
+
+    ///  LÊN LỊCH CHIẾU
     @PostMapping("/schedule")
     public ResponseEntity<Showtime> scheduleShowtime(@RequestBody ShowtimeRequestDto dto) {
         Showtime showtime = showtimeDao.scheduleShowtime(dto);
