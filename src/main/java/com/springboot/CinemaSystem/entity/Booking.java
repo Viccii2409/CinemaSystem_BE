@@ -64,7 +64,6 @@ public class Booking {
 			nameSeats.add(t.getSeat().getName());
 		}
 		Customer customer = this.getCustomer();
-		Name name = (customer != null) ? customer.getName() : null;
 		return new BookingDto(
 				this.ID,
 				this.getDate(),
@@ -82,7 +81,7 @@ public class Booking {
 				this.getPayment().getTotalPrice(),
 				this.getPayment().getDiscountPrice(),
 				this.getPayment().getAmount(),
-				(name != null) ? name.getFullname() : "",
+				(customer != null) ? customer.getName() : "",
 				(customer != null) ? customer.getPhone() : "",
 				(customer != null) ? customer.getEmail() : ""
 		);
@@ -94,7 +93,6 @@ public class Booking {
 			nameSeats.add(t.getSeat().getName());
 		}
 		Customer customer = this.getCustomer();
-		Name name = (customer != null) ? customer.getName() : null;
 
 		return new BookingDto(
 				this.ID,
@@ -113,7 +111,7 @@ public class Booking {
 				this.getPayment().getTotalPrice(),
 				this.getPayment().getDiscountPrice(),
 				this.getPayment().getAmount(),
-				(name != null) ? name.getFullname() : "",
+				(customer != null) ? customer.getName() : "",
 				(customer != null) ? customer.getPhone() : "",
 				(customer != null) ? customer.getEmail() : "",
 				this.getPayment().getBarcode(),

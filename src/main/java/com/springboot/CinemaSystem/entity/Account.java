@@ -19,7 +19,7 @@ public class Account {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "userID")
 	private long ID;
-	private String username;
+	private String email;
 	private String password;
 
 	@OneToOne

@@ -45,14 +45,14 @@ public class Customer extends User {
 	public CustomerDto toCustomerDto() {
 		return new CustomerDto(
 				this.getID(),
-				this.isGender(),
+				this.getGender(),
 				this.getDob(),
 				this.getAddress(),
 				this.getEmail(),
 				this.getPhone(),
 				this.getImage(),
 				this.getStartDate(),
-				this.getName().getFullname(),
+				this.getName(),
 				this.getPoints(),
 				this.getLevel().toLevelDto(),
 				this.getDiscount().stream()
@@ -73,14 +73,14 @@ public class Customer extends User {
 		}
 		return new CustomerDto(
 				this.getID(),
-				this.isGender(),
+				this.getGender(),
 				this.getDob(),
 				this.getAddress(),
 				this.getEmail(),
 				this.getPhone(),
 				this.getImage(),
 				this.getStartDate(),
-				this.getName().getFullname(),
+				this.getName(),
 				this.getPoints(),
 				this.getLevel().toLevelDto(),
 				this.getDiscount().stream()

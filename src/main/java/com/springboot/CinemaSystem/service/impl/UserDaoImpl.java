@@ -5,6 +5,8 @@ import com.springboot.CinemaSystem.entity.Account;
 import com.springboot.CinemaSystem.entity.Customer;
 import com.springboot.CinemaSystem.entity.User;
 import com.springboot.CinemaSystem.exception.DataProcessingException;
+import com.springboot.CinemaSystem.exception.NotFoundException;
+import com.springboot.CinemaSystem.repository.AccountRepository;
 import com.springboot.CinemaSystem.repository.UserRepository;
 import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.repository.AgentRepository;
@@ -18,15 +20,24 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserDaoImpl implements UserDao {
-	private final UserRepository userRepository;
+	private UserRepository userRepository;
 	private AgentRepository agentRepository;
 	private CustomerRepository customerRepository;
+	private AccountRepository accountRepository;
 
 	@Autowired
-	public UserDaoImpl(UserRepository userRepository, AgentRepository agentRepository, CustomerRepository customerRepository) {
+	public UserDaoImpl(UserRepository userRepository, AgentRepository agentRepository, CustomerRepository customerRepository, AccountRepository accountRepository) {
 		this.userRepository = userRepository;
 		this.agentRepository = agentRepository;
 		this.customerRepository = customerRepository;
+		this.accountRepository = accountRepository;
+	}
+
+
+	@Override
+	public User getUserByID(long userID) {
+		return userRepository.findById(userID)
+				.orElseThrow(() -> new NotFoundException("Theater not found with ID: " + userID));
 	}
 
 	@Override
@@ -51,15 +62,10 @@ public class UserDaoImpl implements UserDao {
 	public List<UserDto> getAllCustomers() {
 		// Lấy tất cả người dùng có user_type là "user"
 		try{
-			return userRepository.findByUserType("user");
+			return userRepository.findByUserType("User");
 		}catch(Exception e){
 			throw new DataProcessingException("Failed to retrieve customers: " + e.getMessage());
 		}
-	}
-
-	@Override
-	public User getUserByID(int userID) {
-		return null;
 	}
 
 	@Override
@@ -78,9 +84,28 @@ public class UserDaoImpl implements UserDao {
 	}
 
 	@Override
-	public void updateUser(User user) {
+		public void updateUser(User request) throws Exception {
+			// Tìm User từ database
+			User user = userRepository.findById(request.getID())
+					.orElseThrow(() -> new Exception("User không tồn tại"));
 
-	}
+			// Cập nhật thông tin User
+			user.setName(request.getName());
+			user.setPhone(request.getPhone());
+			user.setGender(request.getGender());
+			user.setDob(request.getDob());
+			user.setAddress(request.getAddress());
+
+			// Nếu có password mới, cập nhật vào Account
+				Account account = user.getAccount();
+				if (account != null) {
+					account.setPassword(account.getPassword()); // Lưu trực tiếp mật khẩu
+					accountRepository.save(account); // Lưu account
+			}
+
+			// Lưu thông tin User
+			userRepository.save(user);
+		}
 
 	@Override
 	public boolean addUser(User user) {

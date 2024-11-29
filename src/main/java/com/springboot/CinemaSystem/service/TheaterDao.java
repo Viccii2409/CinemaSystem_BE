@@ -52,4 +52,7 @@ public interface TheaterDao {
 	public TheaterMovieDto getShowtimeByTheater(Theater theater);
 
 	public List<TheaterExceptDto> getTheatersExcept(long theaterID);
+
+//	// Phương thức tìm các rạp có status = true
+//	List<Theater> findByStatus(boolean status);
 }

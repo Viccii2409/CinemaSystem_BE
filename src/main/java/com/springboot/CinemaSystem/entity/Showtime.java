@@ -15,6 +15,10 @@ import java.util.stream.Collectors;
 
 @Data
 @Entity
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString(exclude = {"room", "movie", "ticketBought", "seatAvailability"})
 public class Showtime {
 	@Id
@@ -40,7 +44,8 @@ public class Showtime {
 			" JOIN day_of_week dow ON s.day_of_weekid = dow.day_of_weekid " +
 			" JOIN time_frame tf ON s.time_frameid = tf.time_frameid " +
 			" WHERE s.showtimeid = showtimeID) ")
-	private float priceTicket;
+
+	private Float priceTicket;
 
 	@ManyToOne
 	@JoinColumn(name = "roomID", nullable = false)
@@ -99,4 +104,14 @@ public class Showtime {
 	public String toString() {
 		return "Showtime{id=" + ID + ", date=" + date + ", startTime=" + startTime + ", status=" + status + "}";
 	}
+	public void setPriceTicket(Float priceTicket) {
+		if (priceTicket == null) {
+			this.priceTicket = 0.0f; // Giá trị mặc định nếu không có giá trị
+		} else {
+			this.priceTicket = priceTicket;
+		}
+	}
+
+
+
 }

@@ -1,7 +1,6 @@
 package com.springboot.CinemaSystem.dto;
 
 import com.springboot.CinemaSystem.entity.Level;
-import com.springboot.CinemaSystem.entity.Name;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 public class CustomerDto {
     private long ID;
-    private boolean gender;
+    private String gender;
     private Date dob;
     private String address;
     private String email;
@@ -25,10 +24,10 @@ public class CustomerDto {
     private LevelDto level;
     private List<DiscountDto> discounts;
 
-    private Name name;
+    private String name;
     private List<BookingDto> bookings;
 
-    public CustomerDto(long ID, boolean gender, Date dob, String address, String email, String phone, String image, Date startDate, String fullname, int points, LevelDto level, List<DiscountDto> discounts) {
+    public CustomerDto(long ID, String gender, Date dob, String address, String email, String phone, String image, Date startDate, String fullname, int points, LevelDto level, List<DiscountDto> discounts) {
         this.ID = ID;
         this.gender = gender;
         this.dob = dob;
@@ -43,7 +42,7 @@ public class CustomerDto {
         this.discounts = discounts;
     }
 
-    public CustomerDto(long ID, boolean gender, Date dob, String address, String email, String phone, String image, Date startDate, String fullname, int points, LevelDto level, List<DiscountDto> discounts, Name name, List<BookingDto> bookings) {
+    public CustomerDto(long ID, String gender, Date dob, String address, String email, String phone, String image, Date startDate, String fullname, int points, LevelDto level, List<DiscountDto> discounts, String name, List<BookingDto> bookings) {
         this.ID = ID;
         this.gender = gender;
         this.dob = dob;

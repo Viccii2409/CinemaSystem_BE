@@ -4,14 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TheaterDto {
-    private long ID;
+public class EditUserDto {
+    private Long id;
     private String name;
     private String address;
-    private int quantityRoom;
-    private boolean status;
+    private Date dob;
+    private String password;
+    private String gender;
+    private String phone;
 }
-
