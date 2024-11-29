@@ -24,14 +24,20 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/movie")
 public class MovieController {
-    @Autowired
     private MovieDao movieService;
-    @Autowired
     private DiscountDao discountDao;
-    @Autowired
     private TheaterDao theaterDao;
-    @Autowired
     private SlideshowDao slideshowDao;
+
+    @Autowired
+    public MovieController(MovieDao movieService, DiscountDao discountDao, TheaterDao theaterDao, SlideshowDao slideshowDao, TrailerDaoImpl trailerDao) {
+        this.movieService = movieService;
+        this.discountDao = discountDao;
+        this.theaterDao = theaterDao;
+        this.slideshowDao = slideshowDao;
+        this.trailerDao = trailerDao;
+    }
+
     @GetMapping("/getAll")
     public List<Movie> getAllMovies(){
         return movieService.getAllMovies();
