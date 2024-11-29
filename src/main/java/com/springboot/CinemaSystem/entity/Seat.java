@@ -2,7 +2,6 @@ package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
 import com.springboot.CinemaSystem.dto.SeatDto;
-import com.springboot.CinemaSystem.dto.TypeSeatDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -42,20 +41,15 @@ public class Seat {
 	@JsonBackReference(value = "room-seat")
 	private Room room;
 
-	@OneToMany(mappedBy = "seat")
+	@OneToMany(mappedBy = "seat", fetch = FetchType.LAZY)
 	@JsonIgnore
-	private List<SeatTicket> seatTicket;
-
-	@OneToMany(mappedBy = "seat", cascade = CascadeType.ALL)
-	@JsonIgnore
-	private List<SeatAvailability> seatAvailability;
-
-	@OneToMany(mappedBy = "seat", cascade = CascadeType.ALL)
-	@JsonIgnore
-	private List<SeatReservation> seatReservation;
+	private List<Ticket> ticket;
 
 	public SeatDto toSeatDto() {
 		return new SeatDto(this.getID(), this.getName(), this.seatNum, this.rowNum, this.status, this.typeSeat.toTypeSeatDto());
 	}
+
+	@OneToMany(mappedBy = "seat", fetch = FetchType.LAZY)
+	private List<SelectedSeat> selectedSeats;
 
 }

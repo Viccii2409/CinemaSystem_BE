@@ -6,24 +6,43 @@ import com.springboot.CinemaSystem.dto.UserDto;
 import com.springboot.CinemaSystem.entity.Account;
 import com.springboot.CinemaSystem.entity.User;
 import com.springboot.CinemaSystem.exception.DataProcessingException;
+import com.springboot.CinemaSystem.dto.UserDto;
 import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.service.AccountDao;
 import com.springboot.CinemaSystem.service.CustomerDao;
+import com.springboot.CinemaSystem.dto.CustomerDto;
+import com.springboot.CinemaSystem.entity.Customer;
 import com.springboot.CinemaSystem.service.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
-    @Autowired
     private UserDao userDao;
+    private AccountDao accountDao;
+
     @Autowired
-    private CustomerDao customerDao;
+    public UserController(UserDao userDao, AccountDao accountDao) {
+        this.userDao = userDao;
+        this.accountDao = accountDao;
+    }
+
+    @GetMapping("/{id}")
+    public CustomerDto getCustomerById(@PathVariable("id") long id) {
+        Customer customer = userDao.getCustomerById(id);
+        return customer.toCustomerDto();
+    }
+
     @GetMapping("/all-customers")
     public List<UserDto> getAllCustomers() {
         List<UserDto> customers = userDao.getAllCustomers();
@@ -32,8 +51,6 @@ public class UserController {
         }
         return customers;
     }
-    @Autowired
-    private AccountDao accountDao;
 
     @GetMapping("/login")
     public String showLoginForm() {

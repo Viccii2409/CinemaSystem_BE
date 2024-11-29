@@ -1,9 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -11,7 +8,6 @@ import java.util.*;
 
 @Entity
 @Data
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Position.class)
 public class Position {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +16,8 @@ public class Position {
 	private String name;
 	private boolean status;
 
-	@OneToMany(mappedBy = "position", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "position")
+	@JsonIgnoreProperties("position")
 	private List<Employee> employee;
 
 	@ManyToMany

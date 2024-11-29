@@ -15,13 +15,15 @@ public interface TheaterRepository extends JpaRepository<Theater, Long> {
     @Query("SELECT new com.springboot.CinemaSystem.dto.TheaterDto" +
             "(t.id, t.name, " +
             "CONCAT(t.address.addressDetail, ', ', t.address.ward.name, ', ', t.address.district.name, ', ', t.address.city.name), " +
-            "t.quantityRoom, t.status,t.image) " +
+            "t.quantityRoom, t.status) " +
             "FROM Theater t")
     List<TheaterDto> getListTheaterDto();
+
+
     @Query("SELECT t.name FROM Theater t")
     List<String> findAllTheaterNames();
+
+
     @Query("SELECT new com.springboot.CinemaSystem.dto.TheaterExceptDto(t.id, t.name) FROM Theater t WHERE t.id <> :theaterID")
     List<TheaterExceptDto> findAllExcept(@Param("theaterID") Long theaterID);
-
-
 }

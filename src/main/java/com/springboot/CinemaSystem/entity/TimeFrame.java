@@ -1,17 +1,15 @@
 package com.springboot.CinemaSystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.sql.Time;
+import java.sql.Date;
 import java.util.*;
 
 @Data
 @Entity
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = TimeFrame.class)
 public class TimeFrame {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +20,8 @@ public class TimeFrame {
 	private Time timeEnd;
 	private float surcharge;
 
-	@OneToMany(mappedBy = "timeFrame", cascade = CascadeType.ALL)
-	private List<SeatTicket> seatTicket;
+	@OneToMany(mappedBy = "timeFrame", fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<Showtime> showtimes;
 
 }

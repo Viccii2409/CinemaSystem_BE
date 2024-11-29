@@ -1,14 +1,13 @@
 package com.springboot.CinemaSystem.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -19,24 +18,38 @@ public class Payment {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "paymentID")
 	private long ID;
-	private String date;
-
-	@Transient
+	private LocalDateTime date;
+	private float totalPrice;
+	private float discountPrice;
 	private float amount;
 	private String barcode;
 
 	@Transient
-	private int agentID;
+	private int quantityTicket;
 
-	@OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<TicketBought> ticketBought;
+	@Transient
+	private String agentName;
+
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "bookingID")
+	private Booking booking;
 
 	@ManyToOne
 	@JoinColumn(name = "agentID")
 	private Agent agent;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "discountID")
 	private Discount discount;
+
+	@OneToMany(mappedBy = "payment", fetch = FetchType.LAZY)
+	private List<PayTypeCustomer> payTypeCustomers;
+
+	@PrePersist
+	private void generateBarcode() {
+		if (barcode == null || barcode.isEmpty()) {
+			this.barcode = "PAY" + UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
+		}
+	}
 
 }

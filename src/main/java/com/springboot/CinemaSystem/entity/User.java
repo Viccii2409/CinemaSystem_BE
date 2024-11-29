@@ -1,19 +1,15 @@
 package com.springboot.CinemaSystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.*;
 import java.sql.Date;
+import java.util.*;
+
 @Data
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = User.class)
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,8 +25,11 @@ public class User {
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Account account;
 	private String privileges;
+    @Column(insertable = false, updatable = false)
+    private String user_type;
 
 	private String name;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "levelID", referencedColumnName = "levelID")
 	private Level level;
@@ -39,9 +38,10 @@ public class User {
 	@JoinTable(
 			name = "user_notification", // Tên bảng trung gian
 			joinColumns = @JoinColumn(name = "userID"), // Khóa ngoại từ bảng User
-			inverseJoinColumns = @JoinColumn(name = "notificationID") // Khóa ngoại từ bảng Notification
+			inverseJoinColumns = @JoinColumn(name = "notificationID")
 	)
 	private List<Notification> notification;
-	@Column(insertable = false, updatable = false)
-	private String user_type;
+
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+	private List<SelectedSeat> selectedSeats;
 }

@@ -12,11 +12,10 @@ import java.util.*;
 
 
 @Entity
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@ToString(exclude = {"showtime", "seat", "theater"})
 public class Room {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -69,5 +68,10 @@ public class Room {
 		}
 		return new RoomSeatDto(this.ID, this.name, this.getTypeRoom().toTypeRoomDto(), this.getQuantitySeat(), this.numRows, this.numColumn, this.status, seatDtos, this.getTheater().getName());
 	}
+	@Override
+	public String toString() {
+		return "Room{id=" + ID + ", name='" + name + "', typeRoom=" + (typeRoom != null ? typeRoom.getName() : "N/A") + ", status=" + status + "}";
+	}
+
 
 }

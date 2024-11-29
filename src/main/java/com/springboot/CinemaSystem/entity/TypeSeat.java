@@ -19,12 +19,16 @@ public class TypeSeat {
 	@Column(nullable = false)
 	private float surcharge;
 
-	@OneToMany(mappedBy = "typeSeat", cascade = CascadeType.REFRESH)
+	@OneToMany(mappedBy = "typeSeat")
 	@JsonIgnore
 	private List<Seat> seats;
 
+	@OneToMany(mappedBy = "typeSeat")
+	@JsonIgnore
+	private List<PayTypeCustomer> payTypeCustomers;
+
 	public TypeSeatDto toTypeSeatDto() {
-		return new TypeSeatDto(this.getID(), this.getName());
+		return new TypeSeatDto(this.getID(), this.getName(), this.surcharge);
 	}
 
 }

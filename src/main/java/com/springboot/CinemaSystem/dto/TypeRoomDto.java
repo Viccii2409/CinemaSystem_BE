@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class TypeRoomDto {
     private long id;
     private String name;
+    private float surcharge;
 }

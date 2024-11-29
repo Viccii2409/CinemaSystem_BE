@@ -1,40 +1,37 @@
 package com.springboot.CinemaSystem.dto;
 
+import com.springboot.CinemaSystem.entity.Movie;
+import lombok.*;
+import com.springboot.CinemaSystem.entity.Genre;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class MovieDto {
-        private Long id;
-        private String title;
-        private String link;
+    private Long id;
+    private String title;
+    private String link;
+    private LocalDate releaseDate;
+    private boolean status;
+    private List<GenreDto> genres;
+    private List<ShowtimeTheaterIDDto> showtime;
 
-        public MovieDto(long id, String title, String link) {
-            this.id=id;
-            this.title = title;
-            this.link = link;
+    public MovieDto toMovieDto(Movie movie) {
+        MovieDto dto = new MovieDto();
+        dto.setId(movie.getId());
+        dto.setTitle(movie.getTitle());
 
-        }
-    public Long getId() {
-        return id;
+        // Chuyển đổi các thể loại của phim thành danh sách GenreDto
+        List<GenreDto> genreDtos = movie.getGenre().stream()
+                .map(Genre::toGenreDto)
+                .collect(Collectors.toList());
+        dto.setGenres(genreDtos);
+
+        return dto;
     }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getLink() {
-        return link;
-    }
-
-    public void setLink(String link) {
-        this.link = link;
-    }
-    // Getters and Setters
-
 
 }
 

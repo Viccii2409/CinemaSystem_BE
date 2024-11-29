@@ -28,9 +28,8 @@ public class Feedback {
 	private Movie movie;
 
 	@OneToOne
-	@JoinColumn(name = "ticketBoughtID")
-	@JsonIgnoreProperties("feedback")
-	private TicketBought ticketBought;
+	@JoinColumn(name = "bookingID")
+	private Booking booking;
 
 	public FeedbackDto toFeedbackDto() {
 		return new FeedbackDto(this.ID, this.text, this.date, this.rating);
