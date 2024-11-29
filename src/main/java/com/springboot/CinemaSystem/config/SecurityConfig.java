@@ -1,4 +1,4 @@
-package com.springboot.config;
+package com.springboot.CinemaSystem.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

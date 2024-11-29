@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/movie")
@@ -27,6 +26,7 @@ public class MovieController {
     private SlideshowDao slideshowDao;
     private ShowtimeDao showtimeDao;
     private MovieRepository movieRepository;
+    private TrailerDaoImpl trailerDao;
 
 
     @Autowired
@@ -53,14 +53,17 @@ public class MovieController {
         }
         throw new NotFoundException("Movie not found with ID: " + id);
     }
+
     @GetMapping("/showingNow")
     public List<MovieDto> getShowingNowMovie(){
         return movieService.getShowingNowMovie();
     }
+
     @GetMapping("/comingSoon")
     public List<MovieDto> getCommingSoonMovie(){
         return movieService.getCommingSoonMovie();
     }
+
     @GetMapping("/discount")
     public List<DiscountDto> getAllDiscounts(){
         List<DiscountDto> discountDtos = new ArrayList<>();
@@ -70,11 +73,11 @@ public class MovieController {
         }
         return discountDtos;
     }
+
     @GetMapping("/slideshow")
     public List<Slideshow> getAllSlideshow(){
         return slideshowDao.getAllSlideshow();
     }
-
 
     // Quản lý thể loại
     @PostMapping("/genre/add")
@@ -154,6 +157,7 @@ public class MovieController {
         // Call the service layer to get all movies
         return movieService.getAllMovie();
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteMovie(@PathVariable("id") long id) {
         Movie movie = movieService.getMovieByID(id);
@@ -164,15 +168,11 @@ public class MovieController {
             throw new NotFoundException("Movie not found with ID: " + id);
         }
     }
-    // tìm phim theo thể loại
+
     @GetMapping("/searchByGenre")
     public List<MovieDto> searchByGenre(@RequestParam("genreName") String genreName) {
         return movieService.searchMoviesByGenre(genreName);
     }
-
-// update trailer cho phim
-    @Autowired
-    private TrailerDaoImpl trailerDao;
 
     // Thêm trailer mới hoặc cập nhật trailer nếu movieId đã tồn tại
     @PostMapping("/addTrailer")

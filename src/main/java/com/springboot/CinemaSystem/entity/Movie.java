@@ -1,11 +1,7 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
-import com.springboot.CinemaSystem.dto.FeedbackDto;
-import com.springboot.CinemaSystem.dto.GenreDto;
-import com.springboot.CinemaSystem.dto.MovieDetailDto;
-import com.springboot.CinemaSystem.dto.MovieDto;
-import com.springboot.CinemaSystem.dto.MovieShowtimeDto;
+import com.springboot.CinemaSystem.dto.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -95,9 +91,35 @@ public class Movie {
 		for(Feedback f : this.feedback) {
 			feebackDtos.add(f.toFeedbackDto());
 		}
-		return new MovieDetailDto(this.ID, this.title, this.duration, this.releaseDate,
-				this.description, this.status, this.rating, this.director, this.language,
-				this.trailer, this.image, this.cast, genreDtos, feebackDtos);
+		return new MovieDetailDto(
+				this.ID,
+				this.title,
+				this.duration,
+				this.releaseDate,
+				this.description,
+				this.status,
+				this.rating,
+				this.director,
+				this.language,
+				this.trailer,
+				this.image,
+				this.cast,
+				genreDtos,
+				feebackDtos,
+				this.getShowtime()
+				.stream()
+				.filter(showtime -> showtime.getRoom().isStatus() == true && ("upcoming".equals(showtime.getAction()) || "running".equals(showtime.getAction())))
+				.map(showtime -> new ShowtimeTheaterIDDto(
+						showtime.getID(),
+						showtime.getDate(),
+						showtime.getStartTime(),
+						showtime.getEndTime(),
+						showtime.getAction(),
+						showtime.getRoom().getTheater().getID(),
+						showtime.getRoom().getSeat().size() - showtime.getAvailableSeats(),
+						showtime.getRoom().getTypeRoom().getName()
+				))
+				.collect(Collectors.toList()));
 	}
 
 	public MovieDto toMovieDto() {

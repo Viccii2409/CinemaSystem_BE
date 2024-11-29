@@ -2,6 +2,7 @@ package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.springboot.CinemaSystem.dto.BookingDto;
 import com.springboot.CinemaSystem.dto.CustomerDto;
 import com.springboot.CinemaSystem.dto.DiscountDto;
 import jakarta.persistence.*;
@@ -44,14 +45,14 @@ public class Customer extends User {
 	public CustomerDto toCustomerDto() {
 		return new CustomerDto(
 				this.getID(),
-				this.isGender(),
+				this.getGender(),
 				this.getDob(),
 				this.getAddress(),
 				this.getEmail(),
 				this.getPhone(),
 				this.getImage(),
 				this.getStartDate(),
-				this.getName().getFullname(),
+				this.getName(),
 				this.getPoints(),
 				this.getLevel().toLevelDto(),
 				this.getDiscount().stream()
@@ -59,6 +60,36 @@ public class Customer extends User {
 								entry.getID()
 						))
 						.collect(Collectors.toList())
+		);
+	}
+
+	public CustomerDto toCustomerDto2() {
+		List<Booking> bookings = this.getBooking();
+		List< BookingDto> bookingDtos = new ArrayList<>();
+		if(bookings.size() > 0) {
+			for(Booking b : bookings) {
+				bookingDtos.add(b.toBookingDto2());
+			}
+		}
+		return new CustomerDto(
+				this.getID(),
+				this.getGender(),
+				this.getDob(),
+				this.getAddress(),
+				this.getEmail(),
+				this.getPhone(),
+				this.getImage(),
+				this.getStartDate(),
+				this.getName(),
+				this.getPoints(),
+				this.getLevel().toLevelDto(),
+				this.getDiscount().stream()
+						.map(entry -> new DiscountDto(
+								entry.getID()
+						))
+						.collect(Collectors.toList()),
+				this.getName(),
+				bookingDtos
 		);
 	}
 }

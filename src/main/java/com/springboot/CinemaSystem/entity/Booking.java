@@ -8,8 +8,6 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Data
 @Entity
@@ -18,6 +16,7 @@ public class Booking {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "bookingID")
 	private long ID;
+
 	private LocalDateTime date;
 	private String barcode;
 
@@ -42,22 +41,29 @@ public class Booking {
 	private Feedback feedback;
 
 	@PrePersist
-	private void generateBarcode() {
-		StringBuilder numericBarcode = new StringBuilder();
-		for (int i = 0; i < 12; i++) {
-			int randomDigit = (int) (Math.random() * 10);
-			numericBarcode.append(randomDigit);
+	private void prePersistActions() {
+		// Gán giá trị mặc định cho `date` nếu chưa được thiết lập
+		if (this.date == null) {
+			this.date = LocalDateTime.now();
 		}
-		this.barcode = numericBarcode.toString();
+
+		// Tạo mã barcode duy nhất nếu chưa có
+		if (this.barcode == null || this.barcode.isEmpty()) {
+			StringBuilder numericBarcode = new StringBuilder();
+			for (int i = 0; i < 12; i++) {
+				int randomDigit = (int) (Math.random() * 10);
+				numericBarcode.append(randomDigit);
+			}
+			this.barcode = numericBarcode.toString();
+		}
 	}
 
 	public BookingDto toBookingDto() {
 		List<String> nameSeats = new ArrayList<>();
-		for(Ticket t : this.getTicket()) {
+		for (Ticket t : this.getTicket()) {
 			nameSeats.add(t.getSeat().getName());
 		}
 		Customer customer = this.getCustomer();
-		Name name = (customer != null) ? customer.getName() : null;
 		return new BookingDto(
 				this.ID,
 				this.getDate(),
@@ -75,10 +81,42 @@ public class Booking {
 				this.getPayment().getTotalPrice(),
 				this.getPayment().getDiscountPrice(),
 				this.getPayment().getAmount(),
-				(name != null) ? name.getFullname() : "",
+				(customer != null) ? customer.getName() : "",
 				(customer != null) ? customer.getPhone() : "",
 				(customer != null) ? customer.getEmail() : ""
 		);
 	}
 
+	public BookingDto toBookingDto2() {
+		List<String> nameSeats = new ArrayList<>();
+		for (Ticket t : this.getTicket()) {
+			nameSeats.add(t.getSeat().getName());
+		}
+		Customer customer = this.getCustomer();
+
+		return new BookingDto(
+				this.ID,
+				this.getDate(),
+				this.getBarcode(),
+				nameSeats,
+				this.getShowtime().getDate(),
+				this.getShowtime().getStartTime(),
+				this.getShowtime().getEndTime(),
+				this.getShowtime().getMovie().getTitle(),
+				this.getShowtime().getMovie().getFirstImage(),
+				this.getShowtime().getRoom().getTheater().getName(),
+				this.getShowtime().getRoom().getTheater().getFullAddress(),
+				this.getShowtime().getRoom().getName(),
+				this.getShowtime().getRoom().getTypeRoom().getName(),
+				this.getPayment().getTotalPrice(),
+				this.getPayment().getDiscountPrice(),
+				this.getPayment().getAmount(),
+				(customer != null) ? customer.getName() : "",
+				(customer != null) ? customer.getPhone() : "",
+				(customer != null) ? customer.getEmail() : "",
+				this.getPayment().getBarcode(),
+				this.getPayment().getStatus(),
+				(this.feedback != null) ? this.feedback.toFeedbackDto(): null
+		);
+	}
 }

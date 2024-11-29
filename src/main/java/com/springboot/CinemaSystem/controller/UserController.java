@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -46,6 +45,12 @@ public class UserController {
             throw new NotFoundException("No customers found.");
         }
         return customers;
+    }
+
+    @GetMapping("/inforaccount/{id}")
+    public CustomerDto getCustomerInfor(@PathVariable("id") long id) {
+        Customer customer = userDao.getCustomerById(id);
+        return customer.toCustomerDto2();
     }
 
     @GetMapping("/login")

@@ -5,6 +5,8 @@ import com.springboot.CinemaSystem.dto.FeedbackDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Entity
 public class Feedback {
@@ -16,7 +18,7 @@ public class Feedback {
 	@Lob
 	@Column(name = "text", columnDefinition = "TEXT")
 	private String text;
-	private String date;
+	private LocalDateTime date;
 
 	@ManyToOne
 	@JoinColumn(name = "ratingID")
