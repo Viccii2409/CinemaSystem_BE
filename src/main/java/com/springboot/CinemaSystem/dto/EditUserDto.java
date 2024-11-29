@@ -4,23 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
+import java.sql.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
+public class EditUserDto {
     private Long id;
     private String name;
-    private String email;
-    private String phone;
     private String address;
     private Date dob;
+    private String password;
     private String gender;
-    private int points;
-    private String levelName;
-    private boolean status;
-
-
-    // Getters and setters
+    private String phone;
 }

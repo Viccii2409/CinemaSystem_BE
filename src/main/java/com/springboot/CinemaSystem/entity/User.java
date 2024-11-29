@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.*;
-
+import java.sql.Date;
 @Data
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -19,7 +19,7 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "UserID")
 	private long ID;
-	private boolean gender;
+	private String gender;
 	private Date dob;
 	private String address;
 	private String email;
@@ -28,9 +28,9 @@ public class User {
 	private Date startDate;
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Account account;
+	private String privileges;
 
-	@Embedded
-	private Name name;
+	private String name;
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "levelID", referencedColumnName = "levelID")
 	private Level level;

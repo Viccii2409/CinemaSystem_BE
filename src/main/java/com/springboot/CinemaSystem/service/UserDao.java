@@ -10,9 +10,9 @@ import java.util.List;
 public interface UserDao {
 
 	public User login(Account account);
-	public void updateUser(User user);
+	public void updateUser(User user) throws Exception;
 	public boolean addUser(User user);
-	public User getUserByID(int userID);
+	public User getUserByID(long userID);
 	public boolean changePassword(String password);
 	public boolean deleteAccount(int accountID);
 	public List<UserDto> getAllCustomers();
