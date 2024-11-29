@@ -352,4 +352,17 @@ public class TheaterDaoImpl implements TheaterDao {
 		return new TheaterMovieDto(theater.getID(), theater.getName(), movieShowtimeDtos);
 	}
 
+//	// LÊN LỊCH CHIẾU
+//	// Lấy danh sách các rạp có status = 1 (hoạt động)
+//
+//	public List<TheaterDto> getActiveTheaters() {
+//		// Lấy danh sách các rạp có status = 1 (hoạt động)
+//		List<Theater> activeTheaters = theaterRepository.findByStatus(true);
+//
+//		// Chuyển đổi từ Theater sang TheaterDto
+//		return activeTheaters.stream()
+//				.map(theater -> theater.toTheaterDto())
+//				.collect(Collectors.toList());
+//	}
+
 }

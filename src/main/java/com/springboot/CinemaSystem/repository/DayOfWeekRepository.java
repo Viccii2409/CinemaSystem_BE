@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface DayOfWeekRepository extends JpaRepository<DayOfWeek, Long> {
     @Query("SELECT d FROM DayOfWeek d WHERE :day BETWEEN d.dayStart AND d.dayEnd")
     DayOfWeek findByDayInRange(@Param("day") int day);
+    DayOfWeek findByName(String name);
 }

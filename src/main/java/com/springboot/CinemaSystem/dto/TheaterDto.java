@@ -14,3 +14,4 @@ public class TheaterDto {
     private int quantityRoom;
     private boolean status;
 }
+

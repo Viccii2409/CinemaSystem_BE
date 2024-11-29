@@ -1,22 +1,19 @@
 package com.springboot.CinemaSystem.controller;
 
 
+import com.springboot.CinemaSystem.dto.*;
 import com.springboot.CinemaSystem.entity.Movie;
 import com.springboot.CinemaSystem.exception.NotFoundException;
-import com.springboot.CinemaSystem.dto.DiscountDto;
-import com.springboot.CinemaSystem.dto.GenreDto;
-import com.springboot.CinemaSystem.dto.MovieDetailDto;
 import com.springboot.CinemaSystem.entity.*;
-import com.springboot.CinemaSystem.dto.MovieDto;
-import com.springboot.CinemaSystem.service.DiscountDao;
-import com.springboot.CinemaSystem.service.MovieDao;
-import com.springboot.CinemaSystem.service.SlideshowDao;
-import com.springboot.CinemaSystem.service.TheaterDao;
+import com.springboot.CinemaSystem.repository.MovieRepository;
+import com.springboot.CinemaSystem.service.*;
 import com.springboot.CinemaSystem.service.impl.TrailerDaoImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,6 +29,10 @@ public class MovieController {
     private TheaterDao theaterDao;
     @Autowired
     private SlideshowDao slideshowDao;
+    @Autowired
+    private ShowtimeDao showtimeDao;
+    private MovieRepository movieRepository;
+
     @GetMapping("/getAll")
     public List<Movie> getAllMovies(){
         return movieService.getAllMovies();
@@ -175,7 +176,55 @@ public class MovieController {
     }
 
 
+    
+    
+    
+    
+    ///  LÊN LỊCH CHIẾU 
+    @PostMapping("/schedule")
+    public ResponseEntity<Showtime> scheduleShowtime(@RequestBody ShowtimeRequestDto dto) {
+        Showtime showtime = showtimeDao.scheduleShowtime(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(showtime);
+    }
+    // Cập nhật trạng thái tự động
+    @PutMapping("/status/update")
+    public ResponseEntity<Void> updateShowtimeStatus() {
+        showtimeDao.updateShowtimeStatus();
+        return ResponseEntity.ok().build();
+    }
+
+    // Ẩn hoặc mở lịch chiếu
+    @PutMapping("/{id}/toggle-status")
+    public ResponseEntity<Void> toggleShowtimeStatus(@PathVariable long id) {
+        showtimeDao.toggleShowtimeStatus(id);
+        return ResponseEntity.ok().build();
+    }
+
+    // Sửa lịch chiếu
+    @PutMapping("/showtime/update/{showtimeId}")
+    public ResponseEntity<Void> updateShowtime(@PathVariable long showtimeId, @RequestBody ShowtimeRequestDto showtimeRequestDto) {
+        showtimeDao.updateShowtime(showtimeId, showtimeRequestDto);
+        return ResponseEntity.ok().build();
+    }
 
 
+    // Xóa lịch chiếu
+    @DeleteMapping("/showtime/{id}")
+    public ResponseEntity<Void> deleteShowtime(@PathVariable long id) {
+        showtimeDao.deleteShowtime(id);
+        return ResponseEntity.noContent().build();
+    }
+    // Ẩn lịch chiếu khi phim ngừng chiếu
+    @PutMapping("/movie/{movieId}/hide-showtimes")
+    public ResponseEntity<Void> hideShowtimesByMovie(@PathVariable long movieId) {
+        showtimeDao.hideShowtimesByMovie(movieId);
+        return ResponseEntity.ok().build();
+    }
+
+//    // API trả về danh sách các rạp có status = 1 (hoạt động)
+//    @GetMapping("/theaters")
+//    public List<TheaterDto> getActiveTheaters() {
+//        return theaterDao.getActiveTheaters();  // Lấy danh sách các rạp có status = 1 từ service
+//    }
 
 }
