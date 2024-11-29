@@ -1,10 +1,7 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
-import com.springboot.CinemaSystem.dto.RoomDto;
-import com.springboot.CinemaSystem.dto.TheaterDetailDto;
-import com.springboot.CinemaSystem.dto.TheaterRoomDto;
-import com.springboot.CinemaSystem.dto.TheaterViewDto;
+import com.springboot.CinemaSystem.dto.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -86,4 +83,17 @@ public class Theater {
 				+ theater.getAddress().getCity().getName() ;
 		return new TheaterDetailDto(this.ID, this.name, this.description, this.phone, this.email, this.image,address);
 	}
+
+//	//LÊN LỊCH CHIẾU
+//	public TheaterDto toTheaterDto() {
+//		TheaterDto theaterDto = new TheaterDto();
+//		theaterDto.setID(this.getID());
+//		theaterDto.setName(this.getName());
+//		theaterDto.setAddress(this.getFullAddress());  // Dùng phương thức getFullAddress() để lấy địa chỉ
+//		theaterDto.setQuantityRoom(this.getQuantityRoom());  // Lấy số lượng phòng
+//		theaterDto.setStatus(this.isStatus());
+//
+//		return theaterDto;
+//	}
+
 }

@@ -26,4 +26,9 @@ public interface TheaterRepository extends JpaRepository<Theater, Long> {
 
     @Query("SELECT new com.springboot.CinemaSystem.dto.TheaterExceptDto(t.id, t.name) FROM Theater t WHERE t.id <> :theaterID")
     List<TheaterExceptDto> findAllExcept(@Param("theaterID") Long theaterID);
+
+//    // Lấy danh sách rạp cho lên lịch chiếu
+//    List<Theater> findByStatus(boolean status);
+
+
 }

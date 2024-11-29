@@ -1,15 +1,11 @@
 package com.springboot.CinemaSystem.controller;
 
-import com.springboot.CinemaSystem.dto.EditUserDto;
 import com.springboot.CinemaSystem.dto.LoginResponse;
 import com.springboot.CinemaSystem.dto.UserDto;
 import com.springboot.CinemaSystem.entity.Account;
 import com.springboot.CinemaSystem.entity.User;
-import com.springboot.CinemaSystem.exception.DataProcessingException;
-import com.springboot.CinemaSystem.dto.UserDto;
 import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.service.AccountDao;
-import com.springboot.CinemaSystem.service.CustomerDao;
 import com.springboot.CinemaSystem.dto.CustomerDto;
 import com.springboot.CinemaSystem.entity.Customer;
 import com.springboot.CinemaSystem.service.UserDao;

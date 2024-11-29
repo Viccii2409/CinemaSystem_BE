@@ -7,9 +7,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Time;
+import java.time.LocalTime;
+import java.util.Optional;
 
 @Repository
 public interface TimeFrameRepository extends JpaRepository<TimeFrame, Long> {
     @Query("SELECT t FROM TimeFrame t WHERE :time >= t.timeStart AND :time < t.timeEnd")
     TimeFrame findByTimeInRange(@Param("time") Time time);
+
+    Optional<TimeFrame> findByTimeStartBeforeAndTimeEndAfter(LocalTime startTime, LocalTime endTime);
+
+
 }
