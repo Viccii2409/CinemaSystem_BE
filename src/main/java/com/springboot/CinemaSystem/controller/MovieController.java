@@ -126,12 +126,10 @@ public class MovieController {
     }
 
 
-
     @PutMapping("/{ID}")
     public boolean editMovie(@PathVariable Long ID, @RequestBody Movie movie) {
         return movieService.editMovie(ID, movie);
     }
-
 
     @PutMapping("/update-status/{id}")
     public boolean updateStatusMovie(@PathVariable int id) {
@@ -177,10 +175,7 @@ public class MovieController {
 
 
     
-    
-    
-    
-    ///  LÊN LỊCH CHIẾU 
+    ///  LÊN LỊCH CHIẾU     < chưa có hiển thị danh sách lịch chiếu khi chọn ngày + rạp>
     @PostMapping("/schedule")
     public ResponseEntity<Showtime> scheduleShowtime(@RequestBody ShowtimeRequestDto dto) {
         Showtime showtime = showtimeDao.scheduleShowtime(dto);

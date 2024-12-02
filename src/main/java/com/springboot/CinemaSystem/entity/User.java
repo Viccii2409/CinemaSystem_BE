@@ -15,22 +15,24 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "UserID")
 	private long ID;
-	private boolean gender;
+	private String gender;
 	private Date dob;
 	private String address;
 	private String email;
 	private String phone;
 	private String image;
 	private Date startDate;
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Account account;
+	private String privileges;
 	@Column(insertable = false, updatable = false)
 	private String user_type;
 
-	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonManagedReference(value = "user-account")
-	private Account account;
+	private String name;
 
-	@Embedded
-	private Name name;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "levelID", referencedColumnName = "levelID")
+	private Level level;
 
 	@ManyToMany
 	@JoinTable(
