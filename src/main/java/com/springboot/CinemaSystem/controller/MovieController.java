@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/movie")
@@ -142,7 +143,6 @@ public class MovieController {
         return movieService.editMovie(ID, movie);
     }
 
-
     @PutMapping("/update-status/{id}")
     public boolean updateStatusMovie(@PathVariable int id) {
         return movieService.updateStatusMovie(id);
@@ -168,11 +168,12 @@ public class MovieController {
             throw new NotFoundException("Movie not found with ID: " + id);
         }
     }
-
+    // tìm phim theo thể loại
     @GetMapping("/searchByGenre")
     public List<MovieDto> searchByGenre(@RequestParam("genreName") String genreName) {
         return movieService.searchMoviesByGenre(genreName);
     }
+
 
     // Thêm trailer mới hoặc cập nhật trailer nếu movieId đã tồn tại
     @PostMapping("/addTrailer")
@@ -183,11 +184,8 @@ public class MovieController {
     }
 
 
-
-
-
-
-    ///  LÊN LỊCH CHIẾU
+    
+    ///  LÊN LỊCH CHIẾU     < chưa có hiển thị danh sách lịch chiếu khi chọn ngày + rạp>
     @PostMapping("/schedule")
     public ResponseEntity<Showtime> scheduleShowtime(@RequestBody ShowtimeRequestDto dto) {
         Showtime showtime = showtimeDao.scheduleShowtime(dto);

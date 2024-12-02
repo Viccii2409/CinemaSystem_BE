@@ -2,6 +2,7 @@ package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
 import com.springboot.CinemaSystem.dto.FeedbackDto;
+import com.springboot.CinemaSystem.dto.UserDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -34,8 +35,20 @@ public class Feedback {
 	private Booking booking;
 
 	public FeedbackDto toFeedbackDto() {
-		return new FeedbackDto(this.ID, this.text, this.date, this.rating);
+		FeedbackDto feedbackDto = new FeedbackDto();
+		feedbackDto.setID(this.ID);
+		feedbackDto.setText(this.text);
+		feedbackDto.setDate(this.date);
+		feedbackDto.setRating(this.rating);
+		// Lấy thông tin User thông qua Booking
+		if (this.booking != null && this.booking.getCustomer() != null) {
+			UserDto userDto = new UserDto();
+			userDto.setId(this.booking.getCustomer().getID());
+			userDto.setName(this.booking.getCustomer().getName()); // Đảm bảo UserDto có phương thức setUsername
+			feedbackDto.setUser(userDto);
+		}
+		return feedbackDto;
 	}
-
-
 }
+
+

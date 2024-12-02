@@ -1,9 +1,7 @@
 package com.springboot.CinemaSystem.dto;
 
 import com.springboot.CinemaSystem.entity.Rating;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -15,4 +13,7 @@ public class FeedbackDto {
     private String text;
     private LocalDateTime date;
     private Rating rating;
+    private UserDto user;  // Thay vì chỉ trả về username, bạn trả về đối tượng UserDto
+
+
 }

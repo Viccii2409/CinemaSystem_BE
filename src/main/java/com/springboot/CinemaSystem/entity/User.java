@@ -11,37 +11,37 @@ import java.util.*;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
 public class User {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "UserID")
-	private long ID;
-	private String gender;
-	private Date dob;
-	private String address;
-	private String email;
-	private String phone;
-	private String image;
-	private Date startDate;
-	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-	private Account account;
-	private String privileges;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "UserID")
+    private long ID;
+    private String gender;
+    private Date dob;
+    private String address;
+    private String email;
+    private String phone;
+    private String image;
+    private Date startDate;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Account account;
+    private String privileges;
     @Column(insertable = false, updatable = false)
     private String user_type;
 
-	private String name;
+    private String name;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "levelID", referencedColumnName = "levelID")
-	private Level level;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "levelID", referencedColumnName = "levelID")
+    private Level level;
 
-	@ManyToMany
-	@JoinTable(
-			name = "user_notification", // Tên bảng trung gian
-			joinColumns = @JoinColumn(name = "userID"), // Khóa ngoại từ bảng User
-			inverseJoinColumns = @JoinColumn(name = "notificationID")
-	)
-	private List<Notification> notification;
+    @ManyToMany
+    @JoinTable(
+            name = "user_notification", // Tên bảng trung gian
+            joinColumns = @JoinColumn(name = "userID"), // Khóa ngoại từ bảng User
+            inverseJoinColumns = @JoinColumn(name = "notificationID")
+    )
+    private List<Notification> notification;
 
-	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-	private List<SelectedSeat> selectedSeats;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<SelectedSeat> selectedSeats;
 }
