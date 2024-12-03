@@ -35,10 +35,17 @@ public class Movie {
 	private boolean status;
 	@Transient
 	private float rating;
+
 	private String director;
 
 	@Column(name ="cast", columnDefinition = "TEXT")
 	private String cast;
+
+	@Column(name = "image", nullable = false)
+	private String image;
+
+	@Column(name = "trailer", nullable = false)
+	private String trailer;
 
 	@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnore
@@ -47,14 +54,6 @@ public class Movie {
 	@ManyToOne
 	@JoinColumn(name = "languageID")
 	private Language language;
-
-	@OneToOne(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonManagedReference("movie-trailer")
-	private Trailer trailer;
-
-	@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonManagedReference
-	private List<Image> image;
 
 
 	@ManyToMany
@@ -98,7 +97,7 @@ public class Movie {
 				this.releaseDate,
 				this.description,
 				this.status,
-				this.rating,
+				this.calculateAverageRating(), // Gọi phương thức tính rating
 				this.director,
 				this.language,
 				this.trailer,
@@ -143,16 +142,30 @@ public class Movie {
 		return "Movie{id=" + ID + ", title='" + title + "', releaseDate=" + releaseDate + ", status=" + status + "}";
 	}
 
-	// Tính rating phim
-
-
-
 
 	public MovieShowtimeDto toMovieShowtimeDto() {
-		return new MovieShowtimeDto(this.ID, this.title, this.duration, this.description, this.image.get(0).getLink());
+		return new MovieShowtimeDto(this.ID, this.title, this.duration, this.description, this.image);
 	}
 
 	public String getFirstImage() {
-		return this.image.get(0).getLink();
+		return this.image;
 	}
+
+// tính rating phim
+	public float calculateAverageRating() {
+		if (this.feedback == null || this.feedback.isEmpty()) {
+			return 0; // Nếu không có feedback nào, trả về 0.
+		}
+
+		double averageRating = this.feedback.stream()
+				.map(Feedback::getRating) // Lấy Rating từ Feedback
+				.filter(Objects::nonNull) // Bỏ qua Rating null
+				.mapToInt(Rating::getStar) // Lấy điểm số (star) từ Rating
+				.average() // Tính trung bình
+				.orElse(0); // Nếu không có giá trị nào thì trả về 0.
+
+		return (float) averageRating; // Chuyển thành float nếu cần.
+	}
+
 }
+

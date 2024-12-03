@@ -25,3 +25,4 @@ public class ShowtimeDto {
         this.action = action;
     }
 }
+// trả về thông tin suất chiếu trong admin

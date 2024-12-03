@@ -30,10 +30,6 @@ public class User {
 
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "levelID", referencedColumnName = "levelID")
-    private Level level;
-
     @ManyToMany
     @JoinTable(
             name = "user_notification", // Tên bảng trung gian

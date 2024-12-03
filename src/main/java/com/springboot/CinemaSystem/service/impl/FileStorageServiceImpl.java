@@ -99,4 +99,22 @@ public class FileStorageServiceImpl implements FileStorageService {
             throw new DataProcessingException("Không thể xóa tệp trên Cloudinary: " + e.getMessage());
         }
     }
+
+    // lưu ảnh và trailer
+    public String saveFileMovieAndTrailer(MultipartFile file, String folder) {
+        try {
+            String publicId = folder + "/" + System.currentTimeMillis();
+
+            Map map = this.cloudinary.uploader().upload(file.getBytes(),
+                    ObjectUtils.asMap(
+                            "folder", folder,
+                            "public_id", publicId,
+                            "resource_type", "auto"));
+            return (String) map.get("secure_url");
+
+        } catch (Exception e) {
+            throw new DataProcessingException("Không lưu được tệp: " + e.getMessage());
+        }
+    }
+
 }

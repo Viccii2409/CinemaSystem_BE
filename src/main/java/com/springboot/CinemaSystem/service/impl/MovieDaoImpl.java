@@ -3,17 +3,19 @@ package com.springboot.CinemaSystem.service.impl;
 
 import com.springboot.CinemaSystem.dto.GenreDto;
 import com.springboot.CinemaSystem.dto.MovieDto;
+import com.springboot.CinemaSystem.dto.MovieRequestDto;
 import com.springboot.CinemaSystem.dto.ShowtimeTheaterIDDto;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.repository.GenreRepository;
-import com.springboot.CinemaSystem.repository.ImageRepository;
 import com.springboot.CinemaSystem.repository.MovieRepository;
-import com.springboot.CinemaSystem.repository.TrailerRepository;
+import com.springboot.CinemaSystem.service.FileStorageService;
 import com.springboot.CinemaSystem.service.MovieDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
@@ -25,84 +27,85 @@ public class MovieDaoImpl implements MovieDao {
 
 	private GenreRepository genreRepository;
 	private MovieRepository movieRepository;
-	private TrailerRepository trailerRepository;
-	private ImageRepository imageRepository;
+	private FileStorageService fileStorageService;
+
 
 	@Autowired
-	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository, TrailerRepository trailerRepository, ImageRepository imageRepository) {
+	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository) {
 		this.genreRepository = genreRepository;
 		this.movieRepository = movieRepository;
-		this.trailerRepository = trailerRepository;
-		this.imageRepository = imageRepository;
+		this.fileStorageService = fileStorageService;
 	}
 
+// thêm và sửa phim
+@Override
+public Movie addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile) {
+	Movie movie = new Movie();
+	movie.setTitle(movieRequestDto.getTitle());
+	movie.setDuration(movieRequestDto.getDuration());
+	movie.setReleaseDate(movieRequestDto.getReleaseDate());
+	movie.setDescription(movieRequestDto.getDescription());
+	movie.setDirector(movieRequestDto.getDirector());
+	movie.setCast(movieRequestDto.getCast());
+	movie.setLanguage(movieRequestDto.getLanguage());
+	movie.setTrailer(movieRequestDto.getTrailer());
 
-	@Override
-	public boolean addMovie(Movie movie) {
-		movieRepository.save(movie);
-		return true;
-	}
-
-
-	@Override
-	public boolean editMovie(Long ID, Movie movie) {
-		if (movieRepository.existsById(ID)) {
-			// Lấy movie hiện tại từ database
-			Movie existingMovie = movieRepository.findById(ID).orElseThrow(() -> new RuntimeException("Movie not found"));
-
-			// Cập nhật các trường của movie nếu cần
-			existingMovie.setTitle(movie.getTitle());
-			existingMovie.setDuration(movie.getDuration());
-			existingMovie.setReleaseDate(movie.getReleaseDate());
-			existingMovie.setDescription(movie.getDescription());
-			existingMovie.setStatus(movie.isStatus());
-			existingMovie.setLanguage(movie.getLanguage());
-			existingMovie.setRating(movie.getRating());
-			existingMovie.setDirector(movie.getDirector());
-
-			// Cập nhật danh sách cast (nếu có sự thay đổi)
-			if (movie.getCast() != null) {
-				existingMovie.setCast(movie.getCast());
-			}
-
-			// Cập nhật danh sách genre (nếu có sự thay đổi)
-			if (movie.getGenre() != null) {
-				existingMovie.setGenre(movie.getGenre());
-			}
-
-
-			// Cập nhật trailer (nếu có sự thay đổi)
-			Trailer trailer = movie.getTrailer();
-			if (trailer != null) {
-				// Kiểm tra trailer đã tồn tại chưa, nếu có thì cập nhật
-				Optional<Trailer> existingTrailer = trailerRepository.findByMovieId(existingMovie.getId());
-				if (existingTrailer.isPresent()) {
-					// Cập nhật trailer nếu đã tồn tại
-					Trailer currentTrailer = existingTrailer.get();
-					currentTrailer.setDescription(trailer.getDescription());
-					currentTrailer.setLink(trailer.getLink());
-					trailerRepository.save(currentTrailer);  // Cập nhật trailer
-				} else {
-					// Nếu trailer chưa có, lưu mới
-					trailer.setMovie(existingMovie);  // Đảm bảo liên kết 2 chiều
-					trailerRepository.save(trailer);  // Lưu trailer mới
-				}
-			}
-
-			if (movie.getImage() != null) {
-				existingMovie.getImage().clear();
-				movie.getImage().forEach(image -> image.setMovie(existingMovie));  // Gán movie cho ảnh
-				imageRepository.saveAll(movie.getImage());
-			}
-
-			// Lưu movie đã cập nhật
-			movieRepository.save(existingMovie);
-			return true;
+	try {
+		// Upload ảnh lên Cloudinary vào thư mục 'Movie'
+		if (imageFile != null && !imageFile.isEmpty()) {
+			String imageUrl = fileStorageService.saveFileMovieAndTrailer(imageFile, "Movie");
+			movie.setImage(imageUrl);
 		}
-		return false;  // Trường hợp không tìm thấy movie với ID
+
+		// Upload trailer lên Cloudinary vào thư mục 'Trailer'
+		if (trailerFile != null && !trailerFile.isEmpty()) {
+			String trailerUrl = fileStorageService.saveFileMovieAndTrailer(trailerFile, "Trailer");
+			movie.setTrailer(trailerUrl);
+		}
+
+	} catch (Exception e) {
+		throw new RuntimeException("Failed to upload files to Cloudinary", e);
 	}
 
+	return movieRepository.save(movie);
+}
 
+	@Override
+	public Movie editMovie(long id, MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile) {
+		Optional<Movie> movieOpt = movieRepository.findById(id);
+		if (movieOpt.isPresent()) {
+			Movie movie = movieOpt.get();
+			movie.setTitle(movieRequestDto.getTitle());
+			movie.setDuration(movieRequestDto.getDuration());
+			movie.setReleaseDate(movieRequestDto.getReleaseDate());
+			movie.setDescription(movieRequestDto.getDescription());
+			movie.setDirector(movieRequestDto.getDirector());
+			movie.setCast(movieRequestDto.getCast());
+			movie.setLanguage(movieRequestDto.getLanguage());
+			movie.setTrailer(movieRequestDto.getTrailer());
+
+			try {
+				// Upload ảnh lên Cloudinary vào thư mục 'Image' nếu có thay đổi
+				if (imageFile != null && !imageFile.isEmpty()) {
+					String imageUrl = fileStorageService.saveFileMovieAndTrailer(imageFile, "Image");
+					movie.setImage(imageUrl);
+				}
+
+				// Upload trailer lên Cloudinary vào thư mục 'Trailer' nếu có thay đổi
+				if (trailerFile != null && !trailerFile.isEmpty()) {
+					String trailerUrl = fileStorageService.saveFileMovieAndTrailer(trailerFile, "Trailer");
+					movie.setTrailer(trailerUrl);
+				}
+
+			} catch (Exception e) {
+				throw new RuntimeException("Failed to upload files to Cloudinary", e);
+			}
+
+			return movieRepository.save(movie);
+		} else {
+			throw new RuntimeException("Movie not found with id " + id);
+		}
+	}
 
 
 
@@ -127,7 +130,7 @@ public class MovieDaoImpl implements MovieDao {
 
 	private MovieDto convertToDto(Movie movie) {
 		// Kiểm tra danh sách image
-		String link = (movie.getImage() == null || movie.getImage().isEmpty()) ? null : movie.getImage().get(0).getLink();
+		String link = (movie.getImage() == null || movie.getImage().isEmpty()) ? null : movie.getImage();
 		List<GenreDto> genreDtos = movie.getGenre().stream()
 				.map(Genre::toGenreDto)
 				.collect(Collectors.toList());
@@ -186,14 +189,6 @@ public class MovieDaoImpl implements MovieDao {
 				.collect(Collectors.toList());
 	}
 
-//	private MovieDto convertToMovieDto(Movie movie) {
-//		List<GenreDto> genreDtos = movie.getGenre().stream()
-//				.map(genre -> new GenreDto(genre.getID(), genre.getName()))
-//				.collect(Collectors.toList());
-//
-//		return new MovieDto(movie.getId(), movie.getTitle(), movie.getReleaseDate(),
-//				movie.isStatus(), movie.getImage().toString(), genreDtos);
-//	}
 
 	@Override
 	public List<Movie> searchMovies(String title) {
@@ -343,36 +338,6 @@ public class MovieDaoImpl implements MovieDao {
 	@Override
 	public List<Language> getAllLanguages() {
 		return List.of();
-	}
-
-	@Override
-	public boolean addTrailer(Trailer trailer) {
-		return false;
-	}
-
-	@Override
-	public boolean updateTrailer(Trailer trailer) {
-		return false;
-	}
-
-	@Override
-	public Trailer getTrailerByID(int trailerID) {
-		return null;
-	}
-
-	@Override
-	public Image getImage(int imageID) {
-		return null;
-	}
-
-	@Override
-	public boolean addImage(Image image) {
-		return false;
-	}
-
-	@Override
-	public boolean updateImage(Image image) {
-		return false;
 	}
 
 	@Override
