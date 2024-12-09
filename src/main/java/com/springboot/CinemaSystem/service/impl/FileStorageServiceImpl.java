@@ -72,7 +72,9 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public String updateFile(MultipartFile file, String image) {
         try{
-            deleteFileFromCloudinary(image);
+            if(image != null) {
+                deleteFileFromCloudinary(image);
+            }
             return saveFileFromCloudinary(file);
         }catch (Exception e){
             throw new DataProcessingException("Không cập nhật được tệp: " + e.getMessage());
@@ -89,12 +91,17 @@ public class FileStorageServiceImpl implements FileStorageService {
             String imageName = filename.substring(0, filename.lastIndexOf('.'));
             String publicId = "Image/" + imageName;
 
-            Map result = cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("invalidate", true));
-            if ("ok".equals(result.get("result"))) {
-                System.out.println("Đã xóa tệp trên Cloudinary: " + publicId);
-            } else {
-                System.out.println("Không thể xóa tệp trên Cloudinary: " + publicId);
+            Map checkResult = cloudinary.api().resource(publicId, ObjectUtils.emptyMap());
+            if (checkResult.containsKey("public_id")) {
+                Map result = cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("invalidate", true));
             }
+
+//            Map result = cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("invalidate", true));
+//            if ("ok".equals(result.get("result"))) {
+//                System.out.println("Đã xóa tệp trên Cloudinary: " + publicId);
+//            } else {
+//                System.out.println("Không thể xóa tệp trên Cloudinary: " + publicId);
+//            }
         } catch (Exception e) {
             throw new DataProcessingException("Không thể xóa tệp trên Cloudinary: " + e.getMessage());
         }

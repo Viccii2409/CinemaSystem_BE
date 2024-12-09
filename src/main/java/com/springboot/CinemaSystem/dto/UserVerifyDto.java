@@ -5,20 +5,20 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
-
+import java.util.List;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
-    private Long id;
+@AllArgsConstructor
+public class UserVerifyDto {
+    private long ID;
     private String name;
+    private Date dob;
+    private String address;
     private String email;
     private String phone;
-    private String address;
-    private Date dob;
-    private String gender;
-    private int points;
-    private String levelName;
+    private String image;
     private boolean status;
+    private RoleDto role;
+    private List<DiscountDto> discounts;
 }

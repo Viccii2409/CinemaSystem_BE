@@ -8,8 +8,5 @@ import lombok.Data;
 @Entity
 @DiscriminatorValue("ADMIN")
 public class Admin extends Employee {
-
-	private String privileges;
-	private String lastLogin;
-
+	private String accessLevel;
 }
