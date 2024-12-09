@@ -3,7 +3,9 @@ package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,6 +15,8 @@ import java.util.UUID;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "typePay", discriminatorType = DiscriminatorType.STRING)
+@NoArgsConstructor
+@AllArgsConstructor
 public class Payment {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,32 +26,30 @@ public class Payment {
 	private float totalPrice;
 	private float discountPrice;
 	private float amount;
+
 	private String barcode;
 	private String status;  // pending, confirmed, expired
-
-	@Transient
-	private int quantityTicket;
-
-	@Transient
-	private String agentName;
+//
+//	@Transient
+//	private int quantityTicket;
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "bookingID")
 	private Booking booking;
 
-	@ManyToOne
-	@JoinColumn(name = "agentID")
-	private Agent agent;
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "discountID")
 	private Discount discount;
 
-	@OneToMany(mappedBy = "payment", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<PayTypeCustomer> payTypeCustomers;
 
+	public Payment(long ID) {
+		this.ID = ID;
+	}
+
 	@PrePersist
-	private void initializeDate() {
+	private void prePersistDate() {
 		if (this.date == null) {
 			this.date = LocalDateTime.now();
 		}

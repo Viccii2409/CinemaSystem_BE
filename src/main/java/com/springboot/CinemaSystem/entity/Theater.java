@@ -36,9 +36,8 @@ public class Theater {
 	@Column(nullable = false)
 	private boolean status;
 
-	@OneToMany(mappedBy = "theater", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-	@JsonManagedReference(value = "theater-agent")
-	private List<Agent> agent;
+	@OneToOne(mappedBy = "theater", fetch = FetchType.LAZY)
+	private Manager manager;
 
 	@OneToMany(mappedBy = "theater", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference(value = "theater-room")

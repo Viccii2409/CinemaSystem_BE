@@ -1,8 +1,6 @@
 package com.springboot.CinemaSystem.service.impl;
 
-import com.springboot.CinemaSystem.dto.BookingDto;
 import com.springboot.CinemaSystem.dto.SelectedSeatDto;
-import com.springboot.CinemaSystem.dto.TypeDiscountDto;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.exception.NotFoundException;
@@ -15,7 +13,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,6 +28,9 @@ public class TicketDaoImpl implements TicketDao {
 	private TicketRepository ticketRepository;
 	private PayOnlineRepository payOnlineRepository;
 	private SimpMessagingTemplate simpMessagingTemplate;
+
+	@Autowired
+	private PaymentRepository paymentRepository;
 
 
 	@Autowired
@@ -48,28 +48,43 @@ public class TicketDaoImpl implements TicketDao {
 		this.simpMessagingTemplate = simpMessagingTemplate;
 	}
 
-
-
-
-
-
 	@Override
-	public List<TimeFrame> getAllTimeFrames() {
-		try {
-			return timeFrameRepository.findAll();
-		} catch (Exception e) {
-			throw new NotFoundException("Error get all timeframe" + e.getMessage());
+	@Scheduled(fixedRate = 60000)
+	@Transactional
+	public void updateAllSelectedSeat() {
+		LocalDateTime localDateTime = LocalDateTime.now();
+		List<SelectedSeat> selectedSeats = selectedSeatRepository.getSelectedSeatByPending(localDateTime);
+		for(SelectedSeat s : selectedSeats){
+			this.updateStatusToExpired(s.getID());
 		}
 	}
 
 	@Override
-	public List<DayOfWeek> getAllDayOfWeeks() {
+	@Scheduled(fixedRate = 60000)
+	@Transactional
+	public void updateStatusPayOnlineToExpired() {
 		try {
-			return dayOfWeekRepository.findAll();
+			LocalDateTime localDateTime = LocalDateTime.now();
+			List<PayOnline> payOnlines = payOnlineRepository.getPayOnlineActive(localDateTime);
+			for(PayOnline payOnline : payOnlines) {
+				Payment payment = payOnline;
+				payment.setStatus("expired");
+				this.updatePayment(payment);
+				long showtimeID = payOnline.getBooking().getShowtime().getID();
+				long userid = payment.getBooking().getUser().getID();
+				for(Ticket ticket : payOnline.getBooking().getTicket()) {
+					this.updateSelectSeatStatusToExpired(showtimeID, userid, ticket.getSeat().getID());
+				}
+			}
 		} catch (Exception e) {
-			throw new NotFoundException("Error get all day of week" + e.getMessage());
+			throw new DataProcessingException("Error updateStatusPayOnlineToExpired: " + e.getMessage());
 		}
 	}
+
+
+
+
+
 
 	@Override
 	public List<TypeCustomer> getAllTypeCustomer() {
@@ -77,15 +92,6 @@ public class TicketDaoImpl implements TicketDao {
 			return typeCustomerRepository.findAll();
 		} catch (Exception e) {
 			throw new NotFoundException("Error get all typecustomer" + e.getMessage());
-		}
-	}
-
-	@Override
-	public BasePrice getBasePrice() {
-		try {
-			return basePriceRepository.findTopByOrderByIDDesc();
-		} catch (Exception e) {
-			throw new NotFoundException("Error get baseprice" + e.getMessage());
 		}
 	}
 
@@ -101,45 +107,6 @@ public class TicketDaoImpl implements TicketDao {
 			throw new NotFoundException("Error get typecustomer by id" + typeCustomer.getID());
 		}
 		typeCustomerRepository.save(typeCustomer);
-	}
-
-	@Override
-	public DayOfWeek getDayOfWeekById(Long key) {
-		return dayOfWeekRepository.findById(key)
-				.orElseThrow(() -> new NotFoundException("Error get dayofweek by ID"));
-	}
-
-	@Override
-	public void updateDayOfWeek(DayOfWeek dayOfWeek) {
-		if(!dayOfWeekRepository.existsById(dayOfWeek.getID())){
-			throw new NotFoundException("Error get dayofweek by ID");
-		}
-		dayOfWeekRepository.save(dayOfWeek);
-	}
-
-	@Override
-	public TimeFrame getTimeFrameById(Long key) {
-		return timeFrameRepository.findById(key)
-				.orElseThrow(() -> new NotFoundException("Error timeframe by ID"));
-	}
-
-	@Override
-	public void updateTimeFrame(TimeFrame timeFrame) {
-		if(!timeFrameRepository.existsById(timeFrame.getID())){
-			throw new NotFoundException("Error timeframe by ID");
-		}
-		timeFrameRepository.save(timeFrame);
-	}
-
-	@Override
-	@Scheduled(fixedRate = 60000)
-	@Transactional
-	public void updateAllSelectedSeat() {
-		LocalDateTime localDateTime = LocalDateTime.now();
-		List<SelectedSeat> selectedSeats = selectedSeatRepository.getSelectedSeatByPending(localDateTime);
-		for(SelectedSeat s : selectedSeats){
-			this.updateStatusToExpired(s.getID());
-		}
 	}
 
 	@Override
@@ -203,6 +170,18 @@ public class TicketDaoImpl implements TicketDao {
 	}
 
 	@Override
+	public Booking updateBooking(Booking booking) {
+		if(!bookingRepository.existsById(booking.getID())){
+			throw new NotFoundException("Not found booking: " + booking.getID());
+		}
+		try {
+			return bookingRepository.save(booking);
+		} catch (Exception e) {
+			throw new DataProcessingException("Error updateBooking" + e.getMessage());
+		}
+	}
+
+	@Override
 	public PayCash addPayCash(PayCash payCash) {
 		try {
 			return payCashRepository.save(payCash);
@@ -236,6 +215,36 @@ public class TicketDaoImpl implements TicketDao {
 	}
 
 	@Override
+	public Payment addPayment(Payment payment) {
+		try {
+			return paymentRepository.save(payment);
+		} catch (Exception e) {
+			throw new DataProcessingException("Error addPayment: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public Payment updatePayment(Payment paymentNew) {
+		if(!paymentRepository.existsById(paymentNew.getID())) {
+			throw new NotFoundException("Not found payment: " + paymentNew.getID());
+		}
+		try {
+			return paymentRepository.save(paymentNew);
+		} catch (Exception e) {
+			throw new DataProcessingException("Error addPayment: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public Payment getPaymentByBarcode(String barcode) {
+		try {
+			return paymentRepository.findByBarcode(barcode);
+		} catch (Exception e) {
+			throw new NotFoundException("Error getPaymentByBarcode: " + barcode);
+		}
+	}
+
+	@Override
 	public PayOnline addPayOnline(PayOnline payOnline) {
 		try {
 			return payOnlineRepository.save(payOnline);
@@ -246,11 +255,7 @@ public class TicketDaoImpl implements TicketDao {
 
 	@Override
 	public PayOnline getPayOnlineByBarcode(String orderId) {
-		try {
-			return payOnlineRepository.findByBarcode(orderId);
-		} catch (Exception e) {
-			throw new NotFoundException("Error getPayOnlineByBarcode: " + orderId);
-		}
+		return null;
 	}
 
 	@Override
@@ -272,34 +277,7 @@ public class TicketDaoImpl implements TicketDao {
 
 	@Override
 	public Booking getBookingByBarcode(String barcode) {
-		PayOnline payOnline = this.getPayOnlineByBarcode(barcode);
-		return payOnline.getBooking();
-	}
-
-	@Override
-	@Scheduled(fixedRate = 60000)
-	@Transactional
-	public void updateStatusPayOnlineToExpired() {
-		try {
-			LocalDateTime localDateTime = LocalDateTime.now();
-			List<PayOnline> payOnlines = payOnlineRepository.getPayOnlineActive(localDateTime);
-			for(PayOnline payOnline : payOnlines) {
-				payOnline.setStatus("expired");
-				this.updatePayOnline(payOnline);
-				long showtimeID = payOnline.getBooking().getShowtime().getID();
-				long userid = 0;
-				if(payOnline.getAgent() != null) {
-					userid = payOnline.getAgent().getID();
-				}
-				else if(payOnline.getBooking().getCustomer() != null) {
-					userid = payOnline.getBooking().getCustomer().getID();
-				}
-				for(Ticket ticket : payOnline.getBooking().getTicket()) {
-					this.updateSelectSeatStatusToExpired(showtimeID, userid, ticket.getSeat().getID());
-				}
-			}
-		} catch (Exception e) {
-			throw new DataProcessingException("Error updateStatusPayOnlineToExpired: " + e.getMessage());
-		}
+		Payment payment = paymentRepository.findByBarcode(barcode);
+		return payment.getBooking();
 	}
 }

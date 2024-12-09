@@ -1,6 +1,5 @@
 package com.springboot.CinemaSystem.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.springboot.CinemaSystem.dto.*;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.exception.DataProcessingException;
@@ -14,8 +13,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,8 +37,6 @@ public class TicketController {
     private UserDao userDao;
     private FileStorageService fileStorageService;
 
-
-
     @Autowired
     public TicketController(TicketDao ticketDao, TheaterDao theaterDao, ShowtimeDao showtimeDao, DiscountDao discountDao, UserDao userDao, FileStorageService fileStorageService) {
         this.ticketDao = ticketDao;
@@ -51,33 +47,131 @@ public class TicketController {
         this.fileStorageService = fileStorageService;
     }
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @GetMapping("/timeframe")
-    public List<TimeFrame> getTimeFrame() {
-        return ticketDao.getAllTimeFrames();
+    @GetMapping("/public/discount")
+    public List<DiscountDto> getAllDiscount() {
+        List<DiscountDto> discountDtos = new ArrayList<>();
+        List<Discount> discounts = discountDao.getAllDiscounts();
+        for(Discount discount : discounts) {
+            discountDtos.add(discount.toDiscountDto());
+        }
+        return discountDtos;
     }
 
-    @GetMapping("/dayofweek")
-    public List<DayOfWeek> getDayOfWeek() {
-        return ticketDao.getAllDayOfWeeks();
-    }
-
+    @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_PRICETICKET', 'MANAGER_SELLING')")
     @GetMapping("/typecustomer")
     public List<TypeCustomer> getTypeCustomer() {
         return ticketDao.getAllTypeCustomer();
     }
 
-    @GetMapping("/typediscount")
-    public List<TypeDiscountDto> getTypeDiscountDtos() {
-        return discountDao.getAllTypeDiscount();
+    @PreAuthorize("hasAuthority('MANAGER_SELLING')")
+    @GetMapping("/showtime")
+    public List<TheaterMovieDto> getShowtime() {
+        LocalDate localDate = LocalDate.now();
+        Date currentDate = Date.valueOf(localDate);
+        LocalTime localTime = LocalTime.now();
+        Time currentTime = Time.valueOf(localTime);
+        System.out.println(currentDate);
+        System.out.println(currentTime);
+        List<Theater> theaters = theaterDao.getAllTheaters();
+        List<TheaterMovieDto> theaterMovieDtos = new ArrayList<>();
+        for(Theater theater : theaters) {
+//            theaterMovieDtos.add(theaterDao.getShowtimeByTheaterAndDateTime(theater, currentDate, currentTime));
+            theaterMovieDtos.add(theaterDao.getShowtimeByTheater(theater));
+        }
+        return theaterMovieDtos;
     }
 
-    @GetMapping("/baseprice")
-    public BasePrice getBasePrice() {
-        return ticketDao.getBasePrice();
+    @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_SELLING')")
+    @GetMapping("/showtime/{id}")
+    public ShowtimeRoomDto getShowtimeRoomDto(@PathVariable("id") long id) {
+        return showtimeDao.getRoomByShowtime(id);
     }
 
+    @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_SELLING')")
+    @PostMapping("/showtime/selectedseat/reserve")
+    public long addSelectedSeat(@RequestBody SelectedSeat selectedSeat) {
+        System.out.println(selectedSeat);
+        return ticketDao.addSelectedSeat(selectedSeat);
+    }
+
+    @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_SELLING')")
+    @PutMapping("/showtime/selectedseat/{id}/expired")
+    public boolean updateSelectedSeat(@PathVariable("id") long id) {
+        return ticketDao.updateStatusToExpired(id);
+    }
+
+    @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_SELLING')")
+    @GetMapping("/booking/{id}")
+    public BookingDto getBooking(@PathVariable("id") long id) {
+        return ticketDao.getBookingById(id).toBookingDto2();
+    }
+
+    @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_SELLING')")
+    @GetMapping("/booking/payonline/{barcode}")
+    public BookingDto getBookingByBarcode(@PathVariable("barcode") String barcode) {
+        return ticketDao.getBookingByBarcode(barcode).toBookingDto();
+    }
+
+    @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_SELLING')")
+    @PostMapping("/booking/payonline/add")
+    @Transactional
+    public String addPayOnline(@RequestBody PaymentRequestDto paymentRequestDto) {
+        String orderId = "MOMO" + System.currentTimeMillis();
+        createPayment(paymentRequestDto, orderId);
+        String redirectUrl = "http://localhost:3000/view-booking";
+        String payUrl = this.createPayOnline(orderId, paymentRequestDto.getAmount(), redirectUrl);
+        return payUrl;
+    }
+
+    @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_SELLING')")
+    @PostMapping("/admin/booking/payonline/add")
+    @Transactional
+    public String addPayOnlineAdmin(@RequestBody PaymentRequestDto paymentRequestDto) {
+        String orderId = "MOMO" + System.currentTimeMillis();
+        createPayment(paymentRequestDto, orderId);
+        String redirectUrl = "http://localhost:3000/admin/view-ticket-admin";
+        String payUrl = this.createPayOnline(orderId, paymentRequestDto.getAmount(), redirectUrl);
+        return payUrl;
+    }
+
+    @PreAuthorize("hasAuthority('MANAGER_SELLING')")
+    @PostMapping("/booking/paycash/add")
+    @Transactional
+    public long addPayCash(@RequestBody PaymentRequestDto paymentRequestDto) {
+        return this.createPayment(paymentRequestDto, null);
+    }
+
+    @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_SELLING', 'VIEW_CUSTOMER_INFOR')")
+    @PutMapping("/booking/payonline/update/{barcode}/{status}")
+    public void updatePayOnline(@PathVariable("barcode") String barcode,
+                                @PathVariable("status") int status) {
+        Payment payment = ticketDao.getPaymentByBarcode(barcode);
+        if (status == 0) {
+            LocalDateTime localDateTime = LocalDateTime.now();
+            payment.setStatus("confirmed");
+            payment.setDate(localDateTime);
+            ticketDao.updatePayment(payment);
+        }
+        else {
+            payment.setStatus("expired");
+            Payment payment_new = ticketDao.updatePayment(payment);
+            long showtimeID = payment_new.getBooking().getShowtime().getID();
+            long userID = payment_new.getBooking().getUser().getID();
+            for(Ticket ticket : payment_new.getBooking().getTicket()) {
+                ticketDao.updateSelectSeatStatusToExpired(showtimeID, userID, ticket.getSeat().getID());
+            }
+        }
+    }
+
+    @PreAuthorize("hasAuthority('VIEW_CUSTOMER_INFOR')")
+    @PostMapping("/booking/payonline/add/{barcode}")
+    public String createPayOnlineAfter(@PathVariable("barcode") String barcode) {
+        Payment payment = ticketDao.getPaymentByBarcode(barcode);
+        String redirectUrl = "http://localhost:3000/view-booking";
+        return this.createPayOnline(barcode, (long) payment.getAmount(), redirectUrl);
+    }
+
+    @PreAuthorize("hasAuthority('MANAGER_PRICETICKET')")
     @PutMapping("/baseprice/update")
     public boolean updatePrice(@RequestBody Map<String, Object> data) {
         System.out.println(data);
@@ -103,9 +197,9 @@ public class TicketController {
             try {
                 Long key = Long.parseLong(entry.getKey());
                 Float value = Float.parseFloat((String) entry.getValue());
-                DayOfWeek dayOfWeek = ticketDao.getDayOfWeekById(key);
+                DayOfWeek dayOfWeek = showtimeDao.getDayOfWeekById(key);
                 dayOfWeek.setSurcharge(value);
-                ticketDao.updateDayOfWeek(dayOfWeek);
+                showtimeDao.updateDayOfWeek(dayOfWeek);
             } catch (Exception e) {
                 throw new DataProcessingException("Error update price " + e.getMessage());
             }
@@ -115,9 +209,9 @@ public class TicketController {
             try {
                 Long key = Long.parseLong(entry.getKey());
                 Float value = Float.parseFloat((String) entry.getValue());
-                TimeFrame timeFrame = ticketDao.getTimeFrameById(key);
+                TimeFrame timeFrame = showtimeDao.getTimeFrameById(key);
                 timeFrame.setSurcharge(value);
-                ticketDao.updateTimeFrame(timeFrame);
+                showtimeDao.updateTimeFrame(timeFrame);
             } catch (Exception e) {
                 throw new DataProcessingException("Error update price " + e.getMessage());
             }
@@ -150,172 +244,7 @@ public class TicketController {
         return true;
     }
 
-    @GetMapping("/showtime")
-    public List<TheaterMovieDto> getShowtime() {
-        LocalDate localDate = LocalDate.now();
-        Date currentDate = Date.valueOf(localDate);
-        LocalTime localTime = LocalTime.now();
-        Time currentTime = Time.valueOf(localTime);
-        System.out.println(currentDate);
-        System.out.println(currentTime);
-        List<Theater> theaters = theaterDao.getAllTheaters();
-        List<TheaterMovieDto> theaterMovieDtos = new ArrayList<>();
-        for(Theater theater : theaters) {
-//            theaterMovieDtos.add(theaterDao.getShowtimeByTheaterAndDateTime(theater, currentDate, currentTime));
-            theaterMovieDtos.add(theaterDao.getShowtimeByTheater(theater));
-        }
-        return theaterMovieDtos;
-    }
-
-    @GetMapping("/showtime/{id}")
-    public ShowtimeRoomDto getShowtimeRoomDto(@PathVariable("id") long id) {
-        return showtimeDao.getRoomByShowtime(id);
-    }
-
-    @PostMapping("/showtime/selectedseat/reserve")
-    public long addSelectedSeat(@RequestBody SelectedSeat selectedSeat) {
-        System.out.println(selectedSeat);
-        return ticketDao.addSelectedSeat(selectedSeat);
-    }
-
-    @PutMapping("/showtime/selectedseat/{id}/expired")
-    public boolean updateSelectedSeat(@PathVariable("id") long id) {
-        return ticketDao.updateStatusToExpired(id);
-    }
-
-    @PostMapping("/booking/paycash/add")
-    @Transactional
-    public long addPayCash(@RequestBody PayCashRequestDto payCashRequestDto) {
-        Booking booking = new Booking();
-//        LocalDateTime localDateTime = LocalDateTime.now();
-        Showtime showtime = showtimeDao.getShowtimeByID(payCashRequestDto.getShowtimeid());
-//        booking.setDate(localDateTime);
-        booking.setShowtime(showtime);
-        Booking booking_new = ticketDao.addBooking(booking);
-
-        PayCash payCash = new PayCash();
-        payCash.setBooking(booking_new);
-//        payCash.setDate(localDateTime);
-        payCash.setStatus("confirmed");
-        payCash.setTotalPrice(payCashRequestDto.getTotalPrice());
-        payCash.setDiscountPrice(payCashRequestDto.getDiscountPrice());
-        payCash.setAmount(payCashRequestDto.getAmount());
-        Agent agent = new Agent();
-        agent.setID(payCashRequestDto.getAgentid());
-        payCash.setAgent(agent);
-        payCash.setReceived(payCashRequestDto.getReceived());
-        payCash.setMoneyReturned(payCashRequestDto.getMoneyReturned());
-        PayCash payCash_new = ticketDao.addPayCash(payCash);
-
-        List<PayTypeCustomer> payTypeCustomers = new ArrayList<>();
-        Map<Long, Map<Long, Integer>> paytypecustomermap = payCashRequestDto.getPaytypecustomer();
-        if (paytypecustomermap != null) {
-            paytypecustomermap.forEach((key, valueMap) -> {
-                TypeCustomer typeCustomer = new TypeCustomer();
-                typeCustomer.setID(key);
-                valueMap.forEach((subKey, subValue) -> {
-                    PayTypeCustomer payTypeCustomer = new PayTypeCustomer();
-                    payTypeCustomer.setCount(subValue);
-                    TypeSeat typeSeat = new TypeSeat();
-                    typeSeat.setID(subKey);
-                    payTypeCustomer.setTypeSeat(typeSeat);
-                    payTypeCustomer.setTypeCustomer(typeCustomer);
-                    payTypeCustomer.setPayment(payCash_new);
-                    payTypeCustomers.add(payTypeCustomer);
-                });
-            });
-        }
-        ticketDao.addPayTypeCustomer(payTypeCustomers);
-
-        List<Ticket> tickets = new ArrayList<>();
-        for(TicketRequestDto dto : payCashRequestDto.getTicket()) {
-            SelectedSeat selectedSeat = ticketDao.getSelectedSeatByID(dto.getSelectedSeatID());
-            selectedSeat.setStatus("confirmed");
-            Ticket ticket = new Ticket();
-            Seat seat = new Seat();
-            seat.setID(dto.getId());
-            ticket.setSeat(seat);
-            ticket.setBooking(booking_new);
-            tickets.add(ticket);
-        }
-        ticketDao.addTicket(tickets);
-        return booking.getID();
-    }
-
-    @PostMapping("/customer/booking/paycash/add")
-    @Transactional
-    public long addPayCashCustomer(@RequestBody PayCashRequestDto payCashRequestDto) {
-        Booking booking = new Booking();
-        Showtime showtime = showtimeDao.getShowtimeByID(payCashRequestDto.getShowtimeid());
-        booking.setShowtime(showtime);
-        Customer customer = userDao.getCustomerById(payCashRequestDto.getCustomerid());
-        booking.setCustomer(customer);
-        Booking booking_new = ticketDao.addBooking(booking);
-
-        PayCash payCash = new PayCash();
-        payCash.setStatus("confirmed");
-        payCash.setBooking(booking_new);
-        payCash.setTotalPrice(payCashRequestDto.getTotalPrice());
-        payCash.setDiscountPrice(payCashRequestDto.getDiscountPrice());
-        payCash.setAmount(payCashRequestDto.getAmount());
-
-        payCash.setReceived(payCashRequestDto.getReceived());
-        payCash.setMoneyReturned(payCashRequestDto.getMoneyReturned());
-        if(payCashRequestDto.getDiscountid() > 0) {
-            Discount discount = discountDao.getDiscountByID(payCashRequestDto.getDiscountid());
-            payCash.setDiscount(discount);
-            customer.getDiscount().add(discount);
-            userDao.updateCustomer(customer);
-        }
-        PayCash payCash_new = ticketDao.addPayCash(payCash);
-
-        List<PayTypeCustomer> payTypeCustomers = new ArrayList<>();
-        Map<Long, Map<Long, Integer>> paytypecustomermap = payCashRequestDto.getPaytypecustomer();
-        if (paytypecustomermap != null) {
-            paytypecustomermap.forEach((key, valueMap) -> {
-                TypeCustomer typeCustomer = new TypeCustomer();
-                typeCustomer.setID(key);
-                valueMap.forEach((subKey, subValue) -> {
-                    PayTypeCustomer payTypeCustomer = new PayTypeCustomer();
-                    payTypeCustomer.setCount(subValue);
-                    TypeSeat typeSeat = new TypeSeat();
-                    typeSeat.setID(subKey);
-                    payTypeCustomer.setTypeSeat(typeSeat);
-                    payTypeCustomer.setTypeCustomer(typeCustomer);
-                    payTypeCustomer.setPayment(payCash_new);
-                    payTypeCustomers.add(payTypeCustomer);
-                });
-            });
-        }
-        ticketDao.addPayTypeCustomer(payTypeCustomers);
-
-        List<Ticket> tickets = new ArrayList<>();
-        for(TicketRequestDto dto : payCashRequestDto.getTicket()) {
-            SelectedSeat selectedSeat = ticketDao.getSelectedSeatByID(dto.getSelectedSeatID());
-            selectedSeat.setStatus("confirmed");
-            Ticket ticket = new Ticket();
-            Seat seat = new Seat();
-            seat.setID(dto.getId());
-            ticket.setSeat(seat);
-            ticket.setBooking(booking_new);
-            tickets.add(ticket);
-        }
-        ticketDao.addTicket(tickets);
-
-
-        return booking.getID();
-    }
-
-    @GetMapping("/discount")
-    public List<DiscountDto> getAllDiscount() {
-        List<DiscountDto> discountDtos = new ArrayList<>();
-        List<Discount> discounts = discountDao.getAllDiscounts();
-        for(Discount discount : discounts) {
-            discountDtos.add(discount.toDiscountDto());
-        }
-        return discountDtos;
-    }
-
+    @PreAuthorize("hasAuthority('MANAGER_DISCOUNT')")
     @PostMapping("/discount/add")
     public DiscountDto addDiscount(@ModelAttribute DiscountAddDto discountAddDto,
                                    @RequestParam(value = "file", required = false) MultipartFile file) {
@@ -336,6 +265,7 @@ public class TicketController {
         }
     }
 
+    @PreAuthorize("hasAuthority('MANAGER_DISCOUNT')")
     @PutMapping("/discount/{id}/updatestatus")
     public boolean updateStatusDiscount(@PathVariable("id") long id) {
         Discount discount = discountDao.getDiscountByID(id);
@@ -344,6 +274,7 @@ public class TicketController {
         return true;
     }
 
+    @PreAuthorize("hasAuthority('MANAGER_DISCOUNT')")
     @PutMapping("/discount/update")
     public DiscountDto updateDiscount(@ModelAttribute DiscountAddDto discountAddDto,
                                       @RequestParam(value = "file", required = false) MultipartFile file) {
@@ -352,7 +283,7 @@ public class TicketController {
         TypeDiscount typeDiscount = discountDao.getTypeDiscountByID(discountAddDto.getTypeDiscountid());
         discount.setTypeDiscount(typeDiscount);
         discount.setImage(discount_old.getImage());
-        discount.setCustomer(discount_old.getCustomer());
+        discount.setUser(discount_old.getUser());
         discount.setPayment(discount_old.getPayment());
         if(file != null && !file.isEmpty()){
             String imageUrl = fileStorageService.updateFile(file, discount_old.getImage());
@@ -362,6 +293,7 @@ public class TicketController {
         return discount_new.toDiscountDto();
     }
 
+    @PreAuthorize("hasAuthority('MANAGER_DISCOUNT')")
     @DeleteMapping("/discount/{id}/delete")
     public boolean deleteDiscount(@PathVariable("id") long id) {
         Discount discount = discountDao.getDiscountByID(id);
@@ -369,73 +301,28 @@ public class TicketController {
         return discountDao.deleteDiscount(id);
     }
 
-    @GetMapping("/booking/{id}")
-    public BookingDto getBooking(@PathVariable("id") long id) {
-        return ticketDao.getBookingById(id).toBookingDto();
+    @PreAuthorize("hasAuthority('MANAGER_DISCOUNT')")
+    @GetMapping("/typediscount")
+    public List<TypeDiscountDto> getTypeDiscountDtos() {
+        return discountDao.getAllTypeDiscount();
     }
 
-    @GetMapping("/booking/payonline/{barcode}")
-    public BookingDto getBookingByBarcode(@PathVariable("barcode") String barcode) {
-        return ticketDao.getBookingByBarcode(barcode).toBookingDto();
-    }
+//    @PostMapping("/public/momo/ipn")
+//    public void payOnlineIpn() {
+//        System.out.println("12345678");
+//    }
 
-    @PostMapping("/customer/booking/payonline")
-    @Transactional
-    public String addPayOnlineCustomer(@RequestBody PayOnlineRequestDto payOnlineRequestDto, HttpServletResponse response) {
+    private long createPayment(PaymentRequestDto paymentRequestDto, String orderId) {
         Booking booking = new Booking();
-        Showtime showtime = showtimeDao.getShowtimeByID(payOnlineRequestDto.getShowtimeid());
+        Showtime showtime = showtimeDao.getShowtimeByID(paymentRequestDto.getShowtimeid());
         booking.setShowtime(showtime);
-        Customer customer = userDao.getCustomerById(payOnlineRequestDto.getCustomerid());
-        booking.setCustomer(customer);
+        User user = userDao.getUserByID(paymentRequestDto.getUserid());
+        booking.setUser(user);
+        booking.setTypeBooking(paymentRequestDto.getTypeBooking());
         Booking booking_new = ticketDao.addBooking(booking);
 
-        long amount = payOnlineRequestDto.getAmount();
-
-        if (amount < 1000 || amount > 50000000) {
-            throw new DataProcessingException("Số tiền không hợp lệ. Vui lòng nhập số tiền từ 1,000 VND đến 50,000,000 VND.");
-        }
-        String orderId = "MOMO" + System.currentTimeMillis();
-        PayOnline payOnline = new PayOnline();
-        payOnline.setBarcode(orderId);
-        LocalDateTime localDateTime = LocalDateTime.now();
-        LocalDateTime updatedDateTime = localDateTime.plusHours(1).plusMinutes(40);
-        payOnline.setDateExpire(updatedDateTime);
-        payOnline.setStatus("pending");
-        payOnline.setBooking(booking_new);
-        payOnline.setTotalPrice(payOnlineRequestDto.getTotalPrice());
-        payOnline.setDiscountPrice(payOnlineRequestDto.getDiscountPrice());
-        payOnline.setAmount(payOnlineRequestDto.getAmount());
-
-        if(payOnlineRequestDto.getDiscountid() > 0) {
-            Discount discount = discountDao.getDiscountByID(payOnlineRequestDto.getDiscountid());
-            payOnline.setDiscount(discount);
-            customer.getDiscount().add(discount);
-            userDao.updateCustomer(customer);
-        }
-        PayOnline payOnline_new = ticketDao.addPayOnline(payOnline);
-
-        List<PayTypeCustomer> payTypeCustomers = new ArrayList<>();
-        Map<Long, Map<Long, Integer>> paytypecustomermap = payOnlineRequestDto.getPaytypecustomer();
-        if (paytypecustomermap != null) {
-            paytypecustomermap.forEach((key, valueMap) -> {
-                TypeCustomer typeCustomer = new TypeCustomer();
-                typeCustomer.setID(key);
-                valueMap.forEach((subKey, subValue) -> {
-                    PayTypeCustomer payTypeCustomer = new PayTypeCustomer();
-                    payTypeCustomer.setCount(subValue);
-                    TypeSeat typeSeat = new TypeSeat();
-                    typeSeat.setID(subKey);
-                    payTypeCustomer.setTypeSeat(typeSeat);
-                    payTypeCustomer.setTypeCustomer(typeCustomer);
-                    payTypeCustomer.setPayment(payOnline_new);
-                    payTypeCustomers.add(payTypeCustomer);
-                });
-            });
-        }
-        ticketDao.addPayTypeCustomer(payTypeCustomers);
-
         List<Ticket> tickets = new ArrayList<>();
-        for(TicketRequestDto dto : payOnlineRequestDto.getTicket()) {
+        for(TicketRequestDto dto : paymentRequestDto.getTicket()) {
             SelectedSeat selectedSeat = ticketDao.getSelectedSeatByID(dto.getSelectedSeatID());
             selectedSeat.setStatus("confirmed");
             Ticket ticket = new Ticket();
@@ -445,87 +332,64 @@ public class TicketController {
             ticket.setBooking(booking_new);
             tickets.add(ticket);
         }
-        ticketDao.addTicket(tickets);
-
-        String redirectUrl = "http://localhost:3000/view-booking";
-        String payUrl = this.createPayOnline(orderId, amount, redirectUrl);
-        return payUrl;
-    }
-
-    @PostMapping("/booking/payonline")
-    @Transactional
-    public String addPayOnline(@RequestBody PayOnlineRequestDto payOnlineRequestDto, HttpServletResponse response) {
-        Booking booking = new Booking();
-        Showtime showtime = showtimeDao.getShowtimeByID(payOnlineRequestDto.getShowtimeid());
-        booking.setShowtime(showtime);
-        Booking booking_new = ticketDao.addBooking(booking);
-
-        long amount = payOnlineRequestDto.getAmount();
-
-        if (amount < 1000 || amount > 50000000) {
-            throw new DataProcessingException("Số tiền không hợp lệ. Vui lòng nhập số tiền từ 1,000 VND đến 50,000,000 VND.");
+        booking_new.getTicket().clear();
+        booking_new.getTicket().addAll(tickets);
+        Booking booking_new_2 = ticketDao.updateBooking(booking_new);
+//        ticketDao.addTicket(tickets);
+        long paymentID;
+        if(paymentRequestDto.getTypePay().equals("PAYCASH")) {
+            PayCash payCash = new PayCash();
+            payCash.setTotalPrice(paymentRequestDto.getTotalPrice());
+            payCash.setDiscountPrice(paymentRequestDto.getDiscountPrice());
+            payCash.setAmount(paymentRequestDto.getAmount());
+            payCash.setStatus("confirmed");
+            payCash.setBooking(booking_new_2);
+            payCash.setReceived(paymentRequestDto.getReceived());
+            payCash.setMoneyReturned(paymentRequestDto.getMoneyReturned());
+            PayCash payCash_new = ticketDao.addPayCash(payCash);
+            paymentID = payCash_new.getID();
         }
-        String orderId = "MOMO" + System.currentTimeMillis();
-        PayOnline payOnline = new PayOnline();
-        payOnline.setBarcode(orderId);
-        LocalDateTime localDateTime = LocalDateTime.now();
-        LocalDateTime updatedDateTime = localDateTime.plusHours(1).plusMinutes(40);
-//        LocalDateTime updatedDateTime = localDateTime.plusMinutes(2);
-        payOnline.setDateExpire(updatedDateTime);
-        payOnline.setStatus("pending");
-        payOnline.setBooking(booking_new);
-        payOnline.setTotalPrice(payOnlineRequestDto.getTotalPrice());
-        payOnline.setDiscountPrice(payOnlineRequestDto.getDiscountPrice());
-        payOnline.setAmount(payOnlineRequestDto.getAmount());
-        Agent agent = new Agent();
-        agent.setID(payOnlineRequestDto.getAgentid());
-        payOnline.setAgent(agent);
-        PayOnline payOnline_new = ticketDao.addPayOnline(payOnline);
-
+        else if (paymentRequestDto.getTypePay().equals("PAYONLINE")) {
+            PayOnline payOnline = new PayOnline();
+            payOnline.setTotalPrice(paymentRequestDto.getTotalPrice());
+            payOnline.setDiscountPrice(paymentRequestDto.getDiscountPrice());
+            payOnline.setAmount(paymentRequestDto.getAmount());
+            payOnline.setBarcode(orderId);
+            payOnline.setStatus("pending");
+            payOnline.setBooking(booking_new_2);
+            if(paymentRequestDto.getDiscountid() > 0){
+                Discount discount = discountDao.getDiscountByID(paymentRequestDto.getDiscountid());
+                user.getDiscount().add(discount);
+                userDao.updateUser(user);
+                payOnline.setDiscount(discount);
+            }
+            LocalDateTime dateExpire = LocalDateTime.now().plusHours(1).plusMinutes(40);
+            payOnline.setDateExpire(dateExpire);
+            System.out.println(payOnline);
+            PayOnline payOnline_new = ticketDao.addPayOnline(payOnline);
+            paymentID = payOnline_new.getID();
+        } else {
+            paymentID = -1;
+        }
+        System.out.println(paymentID);
         List<PayTypeCustomer> payTypeCustomers = new ArrayList<>();
-        Map<Long, Map<Long, Integer>> paytypecustomermap = payOnlineRequestDto.getPaytypecustomer();
+        Map<Long, Map<Long, Integer>> paytypecustomermap = paymentRequestDto.getPaytypecustomer();
         if (paytypecustomermap != null) {
             paytypecustomermap.forEach((key, valueMap) -> {
-                TypeCustomer typeCustomer = new TypeCustomer();
-                typeCustomer.setID(key);
+                TypeCustomer typeCustomer = new TypeCustomer(key);
                 valueMap.forEach((subKey, subValue) -> {
                     PayTypeCustomer payTypeCustomer = new PayTypeCustomer();
                     payTypeCustomer.setCount(subValue);
-                    TypeSeat typeSeat = new TypeSeat();
-                    typeSeat.setID(subKey);
-                    payTypeCustomer.setTypeSeat(typeSeat);
+                    payTypeCustomer.setTypeSeat(new TypeSeat(subKey));
                     payTypeCustomer.setTypeCustomer(typeCustomer);
-                    payTypeCustomer.setPayment(payOnline_new);
+                    payTypeCustomer.setPayment(new Payment(paymentID));
                     payTypeCustomers.add(payTypeCustomer);
                 });
             });
         }
+        System.out.println(payTypeCustomers);
         ticketDao.addPayTypeCustomer(payTypeCustomers);
-
-        List<Ticket> tickets = new ArrayList<>();
-        for(TicketRequestDto dto : payOnlineRequestDto.getTicket()) {
-            SelectedSeat selectedSeat = ticketDao.getSelectedSeatByID(dto.getSelectedSeatID());
-            selectedSeat.setStatus("confirmed");
-            Ticket ticket = new Ticket();
-            Seat seat = new Seat();
-            seat.setID(dto.getId());
-            ticket.setSeat(seat);
-            ticket.setBooking(booking_new);
-            tickets.add(ticket);
-        }
-        ticketDao.addTicket(tickets);
-
-        String redirectUrl = "http://localhost:3000/admin/view-ticket-admin";
-        String payUrl = this.createPayOnline(orderId, amount, redirectUrl);
-        return payUrl;
-    }
-
-    @PostMapping("/booking/payonline/{barcode}")
-    public String createPayOnlineAfter(@PathVariable("barcode") String barcode) {
-        PayOnline payOnline = ticketDao.getPayOnlineByBarcode(barcode);
-        String redirectUrl = "http://localhost:3000/view-booking";
-        String payUrl = this.createPayOnline(barcode, (long) payOnline.getAmount(), redirectUrl);
-        return payUrl;
+        return booking_new.getID();
     }
 
     private String createPayOnline(String orderId, long amount, String redirect_url) {
@@ -536,7 +400,7 @@ public class TicketController {
             String accessKey = "F8BBA842ECF85";
             String secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
             String redirectUrl = redirect_url;
-            String ipnUrl = "http://localhost:8080/api/ticket/booking/payonline/ipn";
+            String ipnUrl = "http://localhost:8080/api/ticket/public/momo/ipn";
             String requestType = "payWithMethod";   // captureWallet: payQR
             String extraData = "";
 
@@ -602,39 +466,5 @@ public class TicketController {
         }
         return null;
     }
-
-
-    @PutMapping("/booking/payonline/update/{barcode}/{status}")
-    public void updatePayOnline(@PathVariable("barcode") String barcode,
-                                @PathVariable("status") int status) {
-        System.out.println(barcode + " " + status);
-        if (status == 0) {
-            LocalDateTime localDateTime = LocalDateTime.now();
-            PayOnline payOnline = ticketDao.getPayOnlineByBarcode(barcode);
-            payOnline.setStatus("confirmed");
-            payOnline.setDate(localDateTime);
-            PayOnline payOnline_new = ticketDao.updatePayOnline(payOnline);
-        }
-        else {
-            PayOnline payOnline = ticketDao.getPayOnlineByBarcode(barcode);
-            payOnline.setStatus("expired");
-            PayOnline payOnline_new = ticketDao.updatePayOnline(payOnline);
-            long showtimeID = payOnline_new.getBooking().getShowtime().getID();
-            long userid = 0;
-            if(payOnline_new.getAgent() != null) {
-                userid = payOnline_new.getAgent().getID();
-            }
-            else if(payOnline_new.getBooking().getCustomer() != null) {
-                userid = payOnline_new.getBooking().getCustomer().getID();
-            }
-            for(Ticket ticket : payOnline_new.getBooking().getTicket()) {
-                ticketDao.updateSelectSeatStatusToExpired(showtimeID, userid, ticket.getSeat().getID());
-            }
-        }
-    }
-
-
-
-
 
 }

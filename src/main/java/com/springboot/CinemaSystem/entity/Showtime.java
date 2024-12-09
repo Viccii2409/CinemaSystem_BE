@@ -74,6 +74,10 @@ public class Showtime {
 	@JoinColumn(name = "timeFrameID")
 	private TimeFrame timeFrame;
 
+	public Showtime(long ID) {
+		this.ID = ID;
+	}
+
 	public ShowtimeRoomDto toShowtimeRoomDto(){
 		ShowtimeRoomDto showtimeRoomDto = new ShowtimeRoomDto(
 				this.getID(),

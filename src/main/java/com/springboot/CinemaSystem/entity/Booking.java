@@ -4,7 +4,9 @@ import aj.org.objectweb.asm.commons.Remapper;
 import com.fasterxml.jackson.annotation.*;
 import com.springboot.CinemaSystem.dto.BookingDto;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,6 +14,8 @@ import java.util.List;
 
 @Data
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class Booking {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,12 +24,10 @@ public class Booking {
 
 	private LocalDateTime date;
 	private String barcode;
+	private String typeBooking;	//	ONLINE, OFFLINE
 
 	@Transient
 	private float amount;
-
-	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<Ticket> ticket;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "showtimeID")
@@ -33,7 +35,10 @@ public class Booking {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "userID")
-	private Customer customer;
+	private User user;
+
+	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<Ticket> ticket = new ArrayList<>();
 
 	@OneToOne(mappedBy = "booking", fetch = FetchType.LAZY)
 	private Payment payment;
@@ -43,8 +48,7 @@ public class Booking {
 	private Feedback feedback;
 
 	@PrePersist
-	private void prePersistActions() {
-		// Gán giá trị mặc định cho `date` nếu chưa được thiết lập
+	private void prePersistDateAndBarcode() {
 		if (this.date == null) {
 			this.date = LocalDateTime.now();
 		}
@@ -60,12 +64,15 @@ public class Booking {
 		}
 	}
 
+	public Booking(long ID) {
+		this.ID = ID;
+	}
+
 	public BookingDto toBookingDto() {
 		List<String> nameSeats = new ArrayList<>();
 		for (Ticket t : this.getTicket()) {
 			nameSeats.add(t.getSeat().getName());
 		}
-		Customer customer = this.getCustomer();
 		return new BookingDto(
 				this.ID,
 				this.getDate(),
@@ -84,9 +91,9 @@ public class Booking {
 				this.getPayment().getTotalPrice(),
 				this.getPayment().getDiscountPrice(),
 				this.getPayment().getAmount(),
-				(customer != null) ? customer.getName() : "",
-				(customer != null) ? customer.getPhone() : "",
-				(customer != null) ? customer.getEmail() : ""
+				(this.user != null) ? this.user.getName() : "",
+				(this.user != null) ? this.user.getPhone() : "",
+				(this.user != null) ? this.user.getEmail() : ""
 		);
 	}
 
@@ -95,8 +102,6 @@ public class Booking {
 		for (Ticket t : this.getTicket()) {
 			nameSeats.add(t.getSeat().getName());
 		}
-		Customer customer = this.getCustomer();
-
 		return new BookingDto(
 				this.ID,
 				this.getDate(),
@@ -115,9 +120,9 @@ public class Booking {
 				this.getPayment().getTotalPrice(),
 				this.getPayment().getDiscountPrice(),
 				this.getPayment().getAmount(),
-				(customer != null) ? customer.getName() : "",
-				(customer != null) ? customer.getPhone() : "",
-				(customer != null) ? customer.getEmail() : "",
+				(this.user != null) ? this.user.getName() : "",
+				(this.user != null) ? this.user.getPhone() : "",
+				(this.user != null) ? this.user.getEmail() : "",
 				this.getPayment().getBarcode(),
 				this.getPayment().getStatus(),
 				(this.feedback != null) ? this.feedback.toFeedbackDto(): null

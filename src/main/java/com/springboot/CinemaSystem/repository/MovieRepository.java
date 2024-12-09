@@ -22,6 +22,6 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     List<Movie> findByStatusAndReleaseDateGreaterThanEqual(boolean status, LocalDate releaseDate); // Lọc phim theo trạng thái và ngày khởi chiếu
     @Query("SELECT DISTINCT m FROM Movie m JOIN m.genre g WHERE g.id IN :genreId")
-    List<MovieDto> findMoviesByGenres(List<Long> genreId);
+    List<Movie> findMoviesByGenres(List<Long> genreId);
 
 }

@@ -4,13 +4,17 @@ import com.fasterxml.jackson.annotation.*;
 import com.springboot.CinemaSystem.dto.DiscountAddDto;
 import com.springboot.CinemaSystem.dto.DiscountDto;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 import java.util.*;
 
 @Data
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 public class Discount {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,10 +38,14 @@ public class Discount {
 
 	@ManyToMany(mappedBy = "discount")
 	@JsonIgnore
-	private List<Customer> customer;
+	private List<User> user;
 
 	@OneToMany(mappedBy = "discount")
 	private List<Payment> payment;
+
+	public Discount(long ID) {
+		this.ID = ID;
+	}
 
 	public static Discount toDiscount(DiscountAddDto discountAddDto) {
 		Discount discount = new Discount();

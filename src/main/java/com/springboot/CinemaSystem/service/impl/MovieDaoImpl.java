@@ -101,12 +101,11 @@ private CustomerRepository customerRepository;
 		return customerRepository.findGenresByCustomerId(customerID);
 	}
 	public List<MovieDto> recommendMovies(List<Long> genreIds) {
-		return movieRepository.findMoviesByGenres(genreIds).stream()
+		List<Movie> movies=movieRepository.findMoviesByGenres(genreIds);
+		return movies.stream()
 				.map(this::convertToDto)
 				.collect(Collectors.toList());
 	}
-
-
 
 	@Override
 	public List<MovieDto> getCommingSoonMovie() {
@@ -380,15 +379,4 @@ private CustomerRepository customerRepository;
 	public float getMovieStat(Date startDate, Date endDate) {
 		return 0;
 	}
-
-	@Override
-	public List<Genre> customerGenre(Long customerID) {
-		return genreRepository.findByCustomer_ID(customerID);
-	}
-
-	@Override
-	public List<MovieDto> recommendMovies(List<Long> genreIds) {
-		return movieRepository.findMoviesByGenres(genreIds);
-	}
-
 }
