@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
+import aj.org.objectweb.asm.commons.Remapper;
 import com.fasterxml.jackson.annotation.*;
 import com.springboot.CinemaSystem.dto.BookingDto;
 import jakarta.persistence.*;
@@ -38,6 +39,7 @@ public class Booking {
 	private Payment payment;
 
 	@OneToOne(mappedBy = "booking", fetch = FetchType.LAZY)
+	@JsonIgnoreProperties("booking")
 	private Feedback feedback;
 
 	@PrePersist

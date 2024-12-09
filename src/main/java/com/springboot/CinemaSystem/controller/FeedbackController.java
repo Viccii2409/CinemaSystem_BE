@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
 public class FeedbackController {
     @Autowired
     private FeedbackDao feedbackDao;
-    @Autowired
-    private BookingRepository bookingRepository;
-    @Autowired
-    private MovieRepository movieRepository;
+@Autowired
+private BookingRepository bookingRepository;
+@Autowired
+private MovieRepository movieRepository;
 
     @PostMapping("add")
     public FeedbackDto addFeedback(@ModelAttribute FeedbackAddDto feedbackAddDto,  @RequestParam long movieId, @RequestParam long bookingId){

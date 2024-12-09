@@ -33,6 +33,12 @@ public class Genre {
 	@JsonIgnore
 	private List<Customer> customer;
 
+	public Genre(long ID, String name, String description) {
+		this.ID=ID;
+		this.name=name;
+		this.description=description;
+	}
+
 	public GenreDto toGenreDto(){
 		return new GenreDto(this.ID, this.name, this.description, this.status);
 	}

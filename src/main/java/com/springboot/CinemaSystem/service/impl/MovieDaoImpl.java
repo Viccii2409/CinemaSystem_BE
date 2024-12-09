@@ -6,18 +6,13 @@ import com.springboot.CinemaSystem.dto.MovieDto;
 import com.springboot.CinemaSystem.dto.ShowtimeTheaterIDDto;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.exception.NotFoundException;
-import com.springboot.CinemaSystem.repository.GenreRepository;
-import com.springboot.CinemaSystem.repository.ImageRepository;
-import com.springboot.CinemaSystem.repository.MovieRepository;
-import com.springboot.CinemaSystem.repository.TrailerRepository;
+import com.springboot.CinemaSystem.repository.*;
 import com.springboot.CinemaSystem.service.MovieDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,13 +22,14 @@ public class MovieDaoImpl implements MovieDao {
 	private MovieRepository movieRepository;
 	private TrailerRepository trailerRepository;
 	private ImageRepository imageRepository;
-
+private CustomerRepository customerRepository;
 	@Autowired
-	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository, TrailerRepository trailerRepository, ImageRepository imageRepository) {
+	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository, TrailerRepository trailerRepository, ImageRepository imageRepository,CustomerRepository customerRepository) {
 		this.genreRepository = genreRepository;
 		this.movieRepository = movieRepository;
 		this.trailerRepository = trailerRepository;
 		this.imageRepository = imageRepository;
+		this.customerRepository=customerRepository;
 	}
 
 
@@ -101,8 +97,14 @@ public class MovieDaoImpl implements MovieDao {
 		}
 		return false;  // Trường hợp không tìm thấy movie với ID
 	}
-
-
+	public List<Genre> customerGenre(Long customerID){
+		return customerRepository.findGenresByCustomerId(customerID);
+	}
+	public List<MovieDto> recommendMovies(List<Long> genreIds) {
+		return movieRepository.findMoviesByGenres(genreIds).stream()
+				.map(this::convertToDto)
+				.collect(Collectors.toList());
+	}
 
 
 
@@ -240,7 +242,6 @@ public class MovieDaoImpl implements MovieDao {
 				})
 				.collect(Collectors.toList());
 	}
-
 
 	@Override
 	public List<Movie> getMoviesByGenre(int genreID) {

@@ -23,7 +23,6 @@ public class CustomerDto {
     private int points;
     private LevelDto level;
     private List<DiscountDto> discounts;
-
     private String name;
     private List<BookingDto> bookings;
 
