@@ -55,5 +55,7 @@ public interface MovieDao {
 	public float getMovieStat(Date startDate, Date endDate);
 
 
+	List<Genre> customerGenre(Long customerID);
 
+	List<MovieDto> recommendMovies(List<Long> genreIds);
 }

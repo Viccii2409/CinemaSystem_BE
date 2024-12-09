@@ -1,13 +1,16 @@
 package com.springboot.CinemaSystem.controller;
 
 import com.springboot.CinemaSystem.dto.LoginResponse;
+import com.springboot.CinemaSystem.dto.MovieDto;
 import com.springboot.CinemaSystem.dto.UserDto;
 import com.springboot.CinemaSystem.entity.Account;
+import com.springboot.CinemaSystem.entity.Genre;
 import com.springboot.CinemaSystem.entity.User;
 import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.service.AccountDao;
 import com.springboot.CinemaSystem.dto.CustomerDto;
 import com.springboot.CinemaSystem.entity.Customer;
+import com.springboot.CinemaSystem.service.MovieDao;
 import com.springboot.CinemaSystem.service.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,17 +22,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
     private UserDao userDao;
     private AccountDao accountDao;
+    private MovieDao movieDao;
 
     @Autowired
-    public UserController(UserDao userDao, AccountDao accountDao) {
+    public UserController(UserDao userDao, AccountDao accountDao, MovieDao movieDao) {
         this.userDao = userDao;
         this.accountDao = accountDao;
+        this.movieDao = movieDao;
     }
 
     @GetMapping("/{id}")
@@ -83,5 +89,13 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cập nhật thất bại: " + e.getMessage());
         }
+    }
+    @GetMapping("/recommend/{customerID}")
+    public List<MovieDto> recommendMovies(@PathVariable("customerID") Long customerID) {
+        List<Genre> genres = movieDao.customerGenre(customerID);
+        List<Long> genreIds = genres.stream()
+                .map(Genre::getID)
+                .collect(Collectors.toList());
+        return  movieDao.recommendMovies(genreIds);
     }
 }

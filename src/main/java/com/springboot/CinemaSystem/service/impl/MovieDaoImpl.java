@@ -380,4 +380,14 @@ public class MovieDaoImpl implements MovieDao {
 		return 0;
 	}
 
+	@Override
+	public List<Genre> customerGenre(Long customerID) {
+		return genreRepository.findByCustomer_ID(customerID);
+	}
+
+	@Override
+	public List<MovieDto> recommendMovies(List<Long> genreIds) {
+		return movieRepository.findMoviesByGenres(genreIds);
+	}
+
 }
