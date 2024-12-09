@@ -11,9 +11,9 @@ public class LoginResponse {
     private String password;
     private String gender;
     private String phone;
-    private String privileges;
+    private String user_type;
 
-    public LoginResponse(Long id,String name, String address, Date dob, String email, String password,String gender, String phone, String privileges) {
+    public LoginResponse(Long id,String name, String address, Date dob, String email, String password,String gender, String phone, String user_type) {
         this.id=id;
         this.name = name;
         this.address = address;
@@ -22,7 +22,7 @@ public class LoginResponse {
         this.password=password;
         this.gender = gender;
         this.phone = phone;
-        this.privileges = privileges;
+        this.user_type = user_type;
     }
 
     public Long getId() {
@@ -33,12 +33,12 @@ public class LoginResponse {
         this.id = id;
     }
 
-    public String getPrivileges() {
-        return privileges;
+    public String getUser_type() {
+        return user_type;
     }
 
-    public void setPrivileges(String privileges) {
-        this.privileges = privileges;
+    public void setUser_type(String privileges) {
+        this.user_type = user_type;
     }
 
     public String getPhone() {

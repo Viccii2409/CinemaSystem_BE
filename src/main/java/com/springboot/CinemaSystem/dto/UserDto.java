@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.dto;
 
+import com.springboot.CinemaSystem.entity.Genre;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

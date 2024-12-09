@@ -1,6 +1,7 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
+import com.springboot.CinemaSystem.dto.BookingDto;
 import com.springboot.CinemaSystem.dto.FeedbackDto;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -20,9 +21,7 @@ public class Feedback {
 	private String text;
 	private LocalDateTime date;
 
-	@ManyToOne
-	@JoinColumn(name = "ratingID")
-	private Rating rating;
+	private int star;
 
 	@ManyToOne
 	@JoinColumn(name = "movieID")
@@ -34,7 +33,8 @@ public class Feedback {
 	private Booking booking;
 
 	public FeedbackDto toFeedbackDto() {
-		return new FeedbackDto(this.ID, this.text, this.date, this.rating);
+		BookingDto bookingDto = new BookingDto();
+		return new FeedbackDto(this.ID, this.text, this.date, this.star,bookingDto);
 	}
 
 
