@@ -2,6 +2,8 @@ package com.springboot.CinemaSystem.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.springboot.CinemaSystem.dto.*;
 import com.springboot.CinemaSystem.entity.Movie;
 import com.springboot.CinemaSystem.exception.DataProcessingException;
@@ -9,6 +11,7 @@ import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.repository.MovieRepository;
 import com.springboot.CinemaSystem.service.*;
+import com.springboot.CinemaSystem.service.impl.LanguageDaoImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,16 +30,18 @@ public class MovieController {
     private SlideshowDao slideshowDao;
     private ShowtimeDao showtimeDao;
     private MovieRepository movieRepository;
+    private LanguageDao languageDao;
 
 
     @Autowired
-    public MovieController(MovieDao movieService, DiscountDao discountDao, TheaterDao theaterDao, SlideshowDao slideshowDao, ShowtimeDao showtimeDao, MovieRepository movieRepository) {
+    public MovieController(MovieDao movieService, DiscountDao discountDao, TheaterDao theaterDao, SlideshowDao slideshowDao, ShowtimeDao showtimeDao, MovieRepository movieRepository, LanguageDaoImpl languageDao) {
         this.movieService = movieService;
         this.discountDao = discountDao;
         this.theaterDao = theaterDao;
         this.slideshowDao = slideshowDao;
         this.showtimeDao = showtimeDao;
         this.movieRepository = movieRepository;
+        this.languageDao = languageDao;
     }
 
     @GetMapping("/getAll")
@@ -129,21 +134,17 @@ public class MovieController {
         }
     }
     // Quản lý phim
-//    @PostMapping("/add")
-//    public boolean addMovie(@RequestBody MovieRequestDto movieRequestDto) {
-//        return movieService.addMovie(movieRequestDto) != null;
-//    }
-//
-//    @PutMapping("/{ID}")
-//    public boolean editMovie(@PathVariable long ID, @RequestBody MovieRequestDto movieRequestDto) {
-//        return movieService.editMovie(ID, movieRequestDto) != null;
-//    }
 
     @PostMapping("/add")
     public boolean addMovie(@RequestParam("movie") String movieRequestDtoJson,
                             @RequestParam("image") MultipartFile imageFile,
                             @RequestParam("trailer") MultipartFile trailerFile) {
         try {
+            // Tạo ObjectMapper và đăng ký JavaTimeModule
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
             // Chuyển đổi JSON movieRequestDto thành đối tượng MovieRequestDto
             MovieRequestDto movieRequestDto = new ObjectMapper().readValue(movieRequestDtoJson, MovieRequestDto.class);
 
@@ -206,10 +207,13 @@ public class MovieController {
         return movieService.searchMoviesByGenre(genreName);
     }
 
+    // API lấy danh sách ngôn ngữ
+    @GetMapping("/getAllLanguage")
+    public List<Language> getAllLanguages() {
+        return languageDao.getAllLanguages();
+    }
 
 
-
-    
     ///  LÊN LỊCH CHIẾU     < chưa có hiển thị danh sách lịch chiếu khi chọn ngày + rạp>
     @PostMapping("/schedule")
     public ResponseEntity<Showtime> scheduleShowtime(@RequestBody ShowtimeRequestDto dto) {

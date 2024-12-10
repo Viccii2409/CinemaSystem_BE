@@ -101,20 +101,68 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     // lưu ảnh và trailer
-    public String saveFileMovieAndTrailer(MultipartFile file, String folder) {
-        try {
-            String publicId = folder + "/" + System.currentTimeMillis();
+//    public String saveFileMovieAndTrailer(MultipartFile file, String folder) {
+//        try {
+//            String publicId = folder + "/" + System.currentTimeMillis();
+//
+//            Map map = this.cloudinary.uploader().upload(file.getBytes(),
+//                    ObjectUtils.asMap(
+//                            "folder", folder,
+//                            "public_id", publicId,
+//                            "resource_type", "auto"));
+//            return (String) map.get("secure_url");
+//
+//        } catch (Exception e) {
+//            throw new DataProcessingException("Không lưu được tệp: " + e.getMessage());
+//        }
+//    }
+//    public String saveFileMovieAndTrailer(MultipartFile file, String folder) throws IOException {
+//        Map<String, String> uploadResult = cloudinary.uploader().upload(file.getBytes(),
+//                ObjectUtils.asMap("folder", folder));
+//        return uploadResult.get("url"); // Trả về URL của file đã upload
+//    }
+//    public String saveFileMovieAndTrailer(MultipartFile file, String folder) throws IOException {
+//        if (file == null || file.isEmpty()) {
+//            throw new RuntimeException("File is empty");
+//        }
+//
+//        // Kiểm tra Content-Type là image/jpeg hoặc image/png
+//        String contentType = file.getContentType();
+//        if (!contentType.startsWith("image/")) {
+//            throw new RuntimeException("Invalid image file type. Expected JPG or PNG.");
+//        }
+//
+//        // Kiểm tra định dạng file (JPG, PNG)
+//        String fileName = file.getOriginalFilename();
+//        String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+//
+//        if (!fileExtension.equals("jpg") && !fileExtension.equals("png")) {
+//            throw new RuntimeException("Invalid image file type. Expected JPG or PNG.");
+//        }
+//
+//        try {
+//            Map<String, String> uploadResult = cloudinary.uploader().upload(file.getBytes(),
+//                    ObjectUtils.asMap("folder", folder));
+//            return uploadResult.get("secure_url"); // Trả về URL của file đã upload
+//        } catch (IOException e) {
+//            throw new RuntimeException("Failed to upload image to Cloudinary", e);
+//        }
+//    }
+    public String saveFileMovieAndTrailer(MultipartFile file, String folder) throws IOException {
+        // Chuyển MultipartFile thành mảng byte
+        byte[] fileBytes = file.getBytes();
 
-            Map map = this.cloudinary.uploader().upload(file.getBytes(),
-                    ObjectUtils.asMap(
-                            "folder", folder,
-                            "public_id", publicId,
-                            "resource_type", "auto"));
-            return (String) map.get("secure_url");
+        // Xác định loại tài nguyên (ảnh, video)
+        String resourceType = file.getContentType().startsWith("image") ? "image" : "video";
 
-        } catch (Exception e) {
-            throw new DataProcessingException("Không lưu được tệp: " + e.getMessage());
-        }
+        // Upload tệp lên Cloudinary
+        Map uploadResult = cloudinary.uploader().upload(fileBytes, ObjectUtils.asMap(
+                "folder", folder,           // Chỉ định thư mục trên Cloudinary
+                "resource_type", resourceType)); // Xác định loại tài nguyên (image hoặc video)
+
+        // Trả về URL của tệp đã upload
+        return (String) uploadResult.get("url");
     }
+
 
 }

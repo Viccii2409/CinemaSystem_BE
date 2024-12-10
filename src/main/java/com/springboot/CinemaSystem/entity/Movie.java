@@ -167,5 +167,15 @@ public class Movie {
 		return (float) averageRating; // Chuyển thành float nếu cần.
 	}
 
+
+    // Getter và Setter cho genres
+    public List<Genre> getGenres() {
+        return genre;
+    }
+
+    public void setGenres(List<Genre> genres) {
+        this.genre = genres;
+    }
+
 }
 

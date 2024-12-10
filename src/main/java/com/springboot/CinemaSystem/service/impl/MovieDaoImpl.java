@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.sql.SQLOutput;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
@@ -25,13 +26,14 @@ import java.util.stream.Collectors;
 @Service
 public class MovieDaoImpl implements MovieDao {
 
-	private GenreRepository genreRepository;
-	private MovieRepository movieRepository;
-	private FileStorageService fileStorageService;
+	private final GenreRepository genreRepository;
+	private final MovieRepository movieRepository;
+	private final FileStorageService fileStorageService;
 
 
+	// Constructor cần thiết nếu bạn muốn tiêm FileStorageService
 	@Autowired
-	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository) {
+	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository, FileStorageService fileStorageService) {
 		this.genreRepository = genreRepository;
 		this.movieRepository = movieRepository;
 		this.fileStorageService = fileStorageService;
@@ -40,6 +42,12 @@ public class MovieDaoImpl implements MovieDao {
 // thêm và sửa phim
 @Override
 public Movie addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile) {
+
+	// Kiểm tra fileStorageService
+	if (fileStorageService == null) {
+		throw new NullPointerException("fileStorageService is not injected!");
+	}
+
 	Movie movie = new Movie();
 	movie.setTitle(movieRequestDto.getTitle());
 	movie.setDuration(movieRequestDto.getDuration());
@@ -48,7 +56,15 @@ public Movie addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, 
 	movie.setDirector(movieRequestDto.getDirector());
 	movie.setCast(movieRequestDto.getCast());
 	movie.setLanguage(movieRequestDto.getLanguage());
-	movie.setTrailer(movieRequestDto.getTrailer());
+	movie.setStatus(true);
+
+	// Xử lý danh sách thể loại
+	List<Genre> genre = movieRequestDto.getGenre()
+			.stream()
+			.map(dto -> genreRepository.findById(dto.getID())
+					.orElseThrow(() -> new RuntimeException("Genre not found")))
+			.collect(Collectors.toList());
+	movie.setGenres(genre);
 
 	try {
 		// Upload ảnh lên Cloudinary vào thư mục 'Movie'
@@ -64,6 +80,7 @@ public Movie addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, 
 		}
 
 	} catch (Exception e) {
+		e.printStackTrace();
 		throw new RuntimeException("Failed to upload files to Cloudinary", e);
 	}
 
@@ -72,9 +89,12 @@ public Movie addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, 
 
 	@Override
 	public Movie editMovie(long id, MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile) {
+		// Kiểm tra sự tồn tại của phim với id
 		Optional<Movie> movieOpt = movieRepository.findById(id);
 		if (movieOpt.isPresent()) {
 			Movie movie = movieOpt.get();
+
+			// Cập nhật các thuộc tính cơ bản của phim
 			movie.setTitle(movieRequestDto.getTitle());
 			movie.setDuration(movieRequestDto.getDuration());
 			movie.setReleaseDate(movieRequestDto.getReleaseDate());
@@ -82,28 +102,36 @@ public Movie addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, 
 			movie.setDirector(movieRequestDto.getDirector());
 			movie.setCast(movieRequestDto.getCast());
 			movie.setLanguage(movieRequestDto.getLanguage());
-			movie.setTrailer(movieRequestDto.getTrailer());
+
+			// Cập nhật thể loại
+			List<Genre> genres = movieRequestDto.getGenre()
+					.stream()
+					.map(dto -> genreRepository.findById(dto.getID())
+							.orElseThrow(() -> new RuntimeException("Genre not found")))
+					.collect(Collectors.toList());
+			movie.setGenres(genres);
 
 			try {
-				// Upload ảnh lên Cloudinary vào thư mục 'Image' nếu có thay đổi
+				// Upload ảnh lên Cloudinary vào thư mục 'Movie' nếu có thay đổi
 				if (imageFile != null && !imageFile.isEmpty()) {
-					String imageUrl = fileStorageService.saveFileMovieAndTrailer(imageFile, "Image");
-					movie.setImage(imageUrl);
+					String imageUrl = fileStorageService.saveFileMovieAndTrailer(imageFile, "Movie");
+					movie.setImage(imageUrl);  // Cập nhật ảnh mới
 				}
 
 				// Upload trailer lên Cloudinary vào thư mục 'Trailer' nếu có thay đổi
 				if (trailerFile != null && !trailerFile.isEmpty()) {
 					String trailerUrl = fileStorageService.saveFileMovieAndTrailer(trailerFile, "Trailer");
-					movie.setTrailer(trailerUrl);
+					movie.setTrailer(trailerUrl);  // Cập nhật trailer mới
 				}
 
 			} catch (Exception e) {
-				throw new RuntimeException("Failed to upload files to Cloudinary", e);
+				throw new RuntimeException("Failed to upload files to Cloudinary", e);  // Nếu có lỗi khi upload
 			}
 
+			// Lưu lại thông tin phim đã chỉnh sửa vào cơ sở dữ liệu
 			return movieRepository.save(movie);
 		} else {
-			throw new RuntimeException("Movie not found with id " + id);
+			throw new RuntimeException("Movie not found with id " + id);  // Trường hợp không tìm thấy phim với id
 		}
 	}
 
