@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/movie")
@@ -63,6 +64,14 @@ public class MovieController {
     @GetMapping("/public/slideshow")
     public List<Slideshow> getAllSlideshow(){
         return slideshowDao.getAllSlideshow();
+    }
+
+    @GetMapping("/public/genre")
+    public List<GenreDto> getAllGenre() {
+        return movieService.getAllGenres().stream()
+                .filter(entry -> entry.isStatus())
+                .map(entry -> GenreDto.toGenreDto(entry))
+                .collect(Collectors.toList());
     }
 
     @PreAuthorize("hasAuthority('MANAGER_PRICETICKET')")
@@ -194,18 +203,6 @@ public class MovieController {
         return movieService.getAllMovies();
     }
 
-//    @GetMapping("/public/discount")
-//    public List<DiscountDto> getAllDiscounts(){
-//        List<DiscountDto> discountDtos = new ArrayList<>();
-//        List<Discount> discounts = discountDao.getAllDiscounts();
-//        for(Discount discount : discounts) {
-//            discountDtos.add(discount.toDiscountDto());
-//        }
-//        return discountDtos;
-//    }
-
-
-
     // Thêm trailer mới hoặc cập nhật trailer nếu movieId đã tồn tại
     @PostMapping("/addTrailer")
     public String addTrailer(@RequestBody Trailer trailer) {
@@ -213,10 +210,6 @@ public class MovieController {
         trailerDao.saveOrUpdateTrailer(trailer);
         return "redirect:/movies"; // Quay lại trang danh sách movies
     }
-
-
-
-
 
 
     ///  LÊN LỊCH CHIẾU
@@ -246,7 +239,6 @@ public class MovieController {
         return ResponseEntity.ok().build();
     }
 
-
     // Xóa lịch chiếu
     @DeleteMapping("/showtime/{id}")
     public ResponseEntity<Void> deleteShowtime(@PathVariable long id) {
@@ -259,11 +251,5 @@ public class MovieController {
         showtimeDao.hideShowtimesByMovie(movieId);
         return ResponseEntity.ok().build();
     }
-
-//    // API trả về danh sách các rạp có status = 1 (hoạt động)
-//    @GetMapping("/theaters")
-//    public List<TheaterDto> getActiveTheaters() {
-//        return theaterDao.getActiveTheaters();  // Lấy danh sách các rạp có status = 1 từ service
-//    }
 
 }

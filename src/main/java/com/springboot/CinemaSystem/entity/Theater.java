@@ -53,6 +53,16 @@ public class Theater {
 				this.getAddress().getCity().getName();
 	}
 
+	public TheaterDto toTheaterDto() {
+		return new TheaterDto(
+				this.ID,
+				this.name,
+				this.getFullAddress(),
+				this.quantityRoom,
+				this.status
+		);
+	}
+
 	public TheaterRoomDto toTheaterRoomDto() {
 		TheaterRoomDto theaterRoomDto = new TheaterRoomDto();
 		theaterRoomDto.setId(this.getID());

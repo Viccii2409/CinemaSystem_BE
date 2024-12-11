@@ -103,6 +103,7 @@ public class Booking {
 				this.ID,
 				this.getDate(),
 				this.getBarcode(),
+				this.typeBooking,
 				nameSeats,
 				this.getShowtime().getDate(),
 				this.getShowtime().getStartTime(),

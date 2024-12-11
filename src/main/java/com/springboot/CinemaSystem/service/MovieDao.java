@@ -53,7 +53,4 @@ public interface MovieDao {
 	public boolean updateImage(Image image);
 
 	public float getMovieStat(Date startDate, Date endDate);
-
-
-
 }

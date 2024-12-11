@@ -14,9 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 @DiscriminatorValue("AGENT")
 public class Agent extends Employee {
-	@Transient
-	private int ticketsSold;
-
 	@ManyToOne
 	@JoinColumn(name = "managerID")
 	private Manager manager;

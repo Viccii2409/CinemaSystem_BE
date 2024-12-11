@@ -13,5 +13,10 @@ public class TheaterDto {
     private String address;
     private int quantityRoom;
     private boolean status;
+
+    public TheaterDto(long ID, String name) {
+        this.ID = ID;
+        this.name = name;
+    }
 }
 

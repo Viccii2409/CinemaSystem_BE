@@ -5,6 +5,8 @@ import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.repository.*;
 import com.springboot.CinemaSystem.service.UserDao;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,6 +27,10 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
 	@Autowired
 	private EmployeeRepository employeeRepository;
 	@Autowired
+	private ManagerRepository managerRepository;
+	@Autowired
+	private AdminRepository adminRepository;
+	@Autowired
 	private LevelRepository levelRepository;
 
 	@Autowired
@@ -40,6 +46,9 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
 		this.customerRepository = customerRepository;
 	}
 
+	@PersistenceContext
+	private EntityManager entityManager;
+
 
 	@Override
 	public User getUserByID(long userID) {
@@ -48,11 +57,15 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
 	}
 
 	@Override
-	public void updateUser(User user) {
+	public User updateUser(User user) {
 		if(!userRepository.existsById(user.getID())) {
 			throw new NotFoundException("No found user:" +user.getID());
 		}
-		userRepository.save(user);
+		try {
+			return userRepository.save(user);
+		} catch (Exception e) {
+			throw new DataProcessingException("Error updateUser: " + e.getMessage());
+		}
 	}
 
 	@Override
@@ -126,12 +139,120 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
 	}
 
 	@Override
-	public Employee updateEmployee(Employee employee) {
-//		if(!employeeRepository.existsById(employee.getID())) {
-//			throw new NotFoundException("Not found employee: " + employee.getID());
-//		}
-		return employeeRepository.save(employee);
+	public Employee addEmployee(Employee employee) {
+		try {
+			return employeeRepository.save(employee);
+		} catch (Exception e) {
+			throw new DataProcessingException(e.getMessage());
+		}
 
+	}
+
+	@Override
+	public Employee updateEmployee(Employee employee) {
+		if(!employeeRepository.existsById(employee.getID())) {
+			throw new NotFoundException("Not found employee: " + employee.getID());
+		}
+		try {
+			return employeeRepository.save(employee);
+		} catch (Exception e) {
+			throw new DataProcessingException(e.getMessage());
+		}
+	}
+
+	@Override
+	@Transactional
+	public Employee convertToEmployee(long id) {
+		entityManager.createNativeQuery("UPDATE user SET user_type = 'EMPLOYEE' WHERE userid = :id")
+				.setParameter("id", id).executeUpdate();
+		entityManager.flush();
+		entityManager.clear();
+		return employeeRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Not found Employee: " + id));
+	}
+
+	@Override
+	@Transactional
+	public Manager convertToManager(long id) {
+		entityManager.createNativeQuery("UPDATE user SET user_type = 'MANAGER' WHERE userid = :id")
+				.setParameter("id", id).executeUpdate();
+		entityManager.flush();
+		entityManager.clear();
+		return managerRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Not found Manager: " + id));
+	}
+
+	@Override
+	@Transactional
+	public Agent convertToAgent(long id) {
+		entityManager.createNativeQuery("UPDATE user SET user_type = 'AGENT' WHERE userid = :id")
+				.setParameter("id", id).executeUpdate();
+		entityManager.flush();
+		entityManager.clear();
+		return agentRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Not found Agent: " + id));
+	}
+
+	@Override
+	@Transactional
+	public Admin convertToAdmin(long id) {
+		entityManager.createNativeQuery("UPDATE user SET user_type = 'ADMIN' WHERE userid = :id")
+				.setParameter("id", id).executeUpdate();
+		entityManager.flush();
+		entityManager.clear();
+		return adminRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Not found Admin: " + id));
+	}
+
+	@Override
+	public Admin addAdmin(Admin admin) {
+		try {
+			return adminRepository.save(admin);
+		} catch (Exception e) {
+			throw new DataProcessingException(e.getMessage());
+		}
+	}
+
+	@Override
+	public Manager addManager(Manager manager) {
+		try {
+			return managerRepository.save(manager);
+		} catch (Exception e) {
+			throw new DataProcessingException(e.getMessage());
+		}
+	}
+
+	@Override
+	public Agent addAgent(Agent agent) {
+		try {
+			return agentRepository.save(agent);
+		} catch (Exception e) {
+			throw new DataProcessingException(e.getMessage());
+		}
+	}
+
+	@Override
+	public Employee getEmployeeById(long id) {
+		return employeeRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Not found Employee: " + id));
+	}
+
+	@Override
+	public Admin getAdminById(long id) {
+		return adminRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Not found admin: " + id));
+	}
+
+	@Override
+	public Manager getManagerById(long managerid) {
+		return managerRepository.findById(managerid)
+				.orElseThrow(() -> new NotFoundException("Not found manager: " + managerid));
+	}
+
+	@Override
+	public Agent getAgentById(long id) {
+		return agentRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Not found Agent: " + id));
 	}
 
 	@Override

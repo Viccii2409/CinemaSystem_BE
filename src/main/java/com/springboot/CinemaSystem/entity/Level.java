@@ -29,8 +29,4 @@ public class Level {
 		this.ID = ID;
 	}
 
-	public LevelDto toLevelDto() {
-		return new LevelDto(this.ID, this.name, this.quantityTicket);
-	}
-
 }

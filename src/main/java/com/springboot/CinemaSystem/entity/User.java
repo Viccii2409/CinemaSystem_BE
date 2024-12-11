@@ -40,7 +40,7 @@ public class User {
 	@Transient
 	private double totalSpending;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "roleID")
 	private Role role;
 

@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -35,11 +34,25 @@ public class TheaterController {
     }
 
     @GetMapping("/public/all")
+    public List<TheaterDto> getAllNameTheater(){
+        List<TheaterDto> theaters = theaterDao.getAllTheater().stream()
+                .filter(entry -> entry.isStatus())
+                .map(entry -> new TheaterDto(
+                        entry.getID(),
+                        entry.getName()
+                ))
+                .collect(Collectors.toList());
+
+        return theaters;
+    }
+
+    @PreAuthorize("hasAuthority('MANAGER_THEATER')")
+    @GetMapping("/all")
     public List<TheaterDto> getListTheater(){
-        List<TheaterDto> theaters = theaterDao.getAllTheaterDto();
-        if(theaters.isEmpty()){
-            throw new NotFoundException("No theaters found.");
-        }
+        List<TheaterDto> theaters = theaterDao.getAllTheater().stream()
+                .map(entry -> entry.toTheaterDto())
+                .collect(Collectors.toList());
+
         return theaters;
     }
 

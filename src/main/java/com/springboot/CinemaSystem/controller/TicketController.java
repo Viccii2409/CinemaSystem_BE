@@ -100,7 +100,6 @@ public class TicketController {
         return ticketDao.updateStatusToExpired(id);
     }
 
-    @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_SELLING')")
     @GetMapping("/booking/{id}")
     public BookingDto getBooking(@PathVariable("id") long id) {
         return ticketDao.getBookingById(id).toBookingDto2();

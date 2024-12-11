@@ -25,7 +25,7 @@ public class Role {
 	private long ID;
 	private String name;
 
-	@OneToMany(mappedBy = "role")
+	@OneToMany(mappedBy = "role", fetch = FetchType.EAGER)
 	@JsonIgnore
 	private List<User> users = new ArrayList<>();
 
@@ -39,19 +39,5 @@ public class Role {
 
 	public Role(long ID) {
 		this.ID = ID;
-	}
-
-	public RoleDto toRoleDto() {
-		return new RoleDto(
-				this.getID(),
-				this.getName(),
-				this.getUsers().size(),
-				this.getPermission().stream()
-						.map(entry2 -> new PermissionDto(
-								entry2.getID(),
-								entry2.getName()
-						))
-						.collect(Collectors.toList())
-		);
 	}
 }

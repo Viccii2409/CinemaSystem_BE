@@ -2,10 +2,7 @@ package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.springboot.CinemaSystem.dto.BookingDto;
-import com.springboot.CinemaSystem.dto.CustomerDto;
-import com.springboot.CinemaSystem.dto.DiscountDto;
-import com.springboot.CinemaSystem.dto.UserRegisterDto;
+import com.springboot.CinemaSystem.dto.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,13 +25,13 @@ public class Customer extends User {
 	@JoinColumn(name = "levelID")
 	private Level level;
 
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinTable(
 			name = "user_genre",
 			joinColumns = @JoinColumn(name = "userID"),
 			inverseJoinColumns = @JoinColumn(name = "genreID")
 	)
-	private List<Genre> genre;
+	private List<Genre> genre = new ArrayList<>();
 
 
 
@@ -43,61 +40,11 @@ public class Customer extends User {
 		customer.setName(userRegisterDto.getName());
 		customer.setGender(userRegisterDto.getGender());
 		customer.setDob(userRegisterDto.getDob());
+		customer.setPhone(userRegisterDto.getPhone());
 		customer.setAddress(userRegisterDto.getAddress());
 		customer.setEmail(userRegisterDto.getEmail());
 		customer.setAccount(new Account(userRegisterDto.getEmail(), userRegisterDto.getPassword()));
 		return customer;
 	}
 
-//	public CustomerDto toCustomerDto() {
-//		return new CustomerDto(
-//				this.getID(),
-//				this.getGender(),
-//				this.getDob(),
-//				this.getAddress(),
-//				this.getEmail(),
-//				this.getPhone(),
-//				this.getImage(),
-//				this.getStartDate(),
-//				this.getName(),
-//				this.getPoints(),
-//				this.getLevel().toLevelDto(),
-//				this.getDiscount().stream()
-//						.map(entry -> new DiscountDto(
-//								entry.getID()
-//						))
-//						.collect(Collectors.toList())
-//		);
-//	}
-
-	public CustomerDto toCustomerDto() {
-		List<Booking> bookings = this.getBooking();
-		List< BookingDto> bookingDtos = new ArrayList<>();
-		if(bookings.size() > 0) {
-			for(Booking b : bookings) {
-				System.out.println(b.getID());
-				bookingDtos.add(b.toBookingDto2());
-			}
-		}
-		return new CustomerDto(
-				this.getID(),
-				this.getGender(),
-				this.getDob(),
-				this.getAddress(),
-				this.getEmail(),
-				this.getPhone(),
-				this.getImage(),
-				this.getStartDate(),
-				this.getPoints(),
-				this.getLevel().toLevelDto(),
-				this.getDiscount().stream()
-						.map(entry -> new DiscountDto(
-								entry.getID()
-						))
-						.collect(Collectors.toList()),
-				this.getName(),
-				this.getAccount().getUsername(),
-				bookingDtos
-		);
-	}
 }

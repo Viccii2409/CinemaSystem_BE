@@ -16,6 +16,7 @@ public class UserRegisterDto {
     private String gender;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date dob;
+    private String phone;
     private String password;
     private String address;
 }
