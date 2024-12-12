@@ -11,8 +11,10 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Date;
 import java.sql.Time;
@@ -129,7 +131,9 @@ public class ShowtimeDaoImpl implements ShowtimeDao {
 
 		// Kiểm tra xung đột lịch chiếu
 		if (isScheduleConflict(dto.getRoomId(), dto.getDate(), dto.getStartTime(), endTimeObj)) {
-			throw new IllegalArgumentException("Showtime conflicts with existing schedule.");
+//			throw new IllegalArgumentException("Lịch chiếu bị trùng với lịch chiếu khác trong cùng phòng và ngày.");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lịch chiếu bị trùng với lịch chiếu khác trong cùng phòng và ngày.");
+
 		}
 
 		// 1. Tính toán DayOfWeek từ date

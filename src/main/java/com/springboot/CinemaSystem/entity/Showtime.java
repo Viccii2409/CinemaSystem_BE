@@ -28,6 +28,7 @@ public class Showtime {
 	@Column(nullable = false)
 	private Date date;
 	@Column(nullable = false)
+	@JsonFormat(pattern = "HH:mm:ss")
 	private Time startTime;
 	private Time endTime;
 	@Column(nullable = false)
