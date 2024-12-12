@@ -1,7 +1,8 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
-import com.springboot.CinemaSystem.dto.FeedbackDto;
+import com.springboot.CinemaSystem.dto.BookingDto;
+import com.springboot.CinemaSystem.dto.MovieFeedbackDto;
 import com.springboot.CinemaSystem.dto.UserDto;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -35,8 +36,8 @@ public class Feedback {
 	@JoinColumn(name = "bookingID")
 	private Booking booking;
 
-	public FeedbackDto toFeedbackDto() {
-		FeedbackDto feedbackDto = new FeedbackDto();
+	public MovieFeedbackDto toMovieFeedbackDto() {
+		MovieFeedbackDto feedbackDto = new MovieFeedbackDto();
 		feedbackDto.setID(this.ID);
 		feedbackDto.setText(this.text);
 		feedbackDto.setDate(this.date);
@@ -50,6 +51,12 @@ public class Feedback {
 		}
 		return feedbackDto;
 	}
+//	public FeedbackDto toFeedbackDto() {
+//		BookingDto bookingDto = new BookingDto(booking.getID(),
+//				booking.getShowtime().getMovie().getId(),
+//				booking.getUser().getName(),
+//				booking.getUser().getImage());
+//		return new FeedbackDto(this.ID, this.text, this.date, this.star,bookingDto);	}
 }
 
 

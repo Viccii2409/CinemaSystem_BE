@@ -5,7 +5,6 @@ import com.springboot.CinemaSystem.dto.*;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -81,16 +80,16 @@ public class Movie {
 		this.ID = ID;
 	}
 
-	public MovieDetailDto toMovieDetailDto(){
+	public MovieDetailAdminDto toMovieDetailAdminDto(){
 		List<GenreDto> genreDtos = new ArrayList<>();
-		List<FeedbackDto> feebackDtos = new ArrayList<>();
+		List<MovieFeedbackDto> feebackDtos = new ArrayList<>();
 		for(Genre g : this.genre){
 			genreDtos.add(g.toGenreDto());
 		}
 		for(Feedback f : this.feedback) {
-			feebackDtos.add(f.toFeedbackDto());
+			feebackDtos.add(f.toMovieFeedbackDto());
 		}
-		return new MovieDetailDto(
+		return new MovieDetailAdminDto(
 				this.ID,
 				this.title,
 				this.duration,

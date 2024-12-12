@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.springboot.CinemaSystem.dto.*;
 import com.springboot.CinemaSystem.entity.Movie;
-import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.repository.MovieRepository;
@@ -51,14 +50,15 @@ public class MovieController {
         return movieService.getAllMovies();
     }
 
-    @GetMapping("/{id}")
-    public MovieDetailDto getMovieById(@PathVariable("id") long id){
-        Movie movie = movieService.getMovieByID(id);
-        if(movie != null ){
-            return movie.toMovieDetailDto();
-        }
-        throw new NotFoundException("Movie not found with ID: " + id);
-    }
+
+//    @GetMapping("/{id}")
+//    public MovieDetailDto getMovieById(@PathVariable("id") long id){
+//        Movie movie = movieService.getMovieByID(id);
+//        if(movie != null ){
+//            return movie.toMovieDetailDto();
+//        }
+//        throw new NotFoundException("Movie not found with ID: " + id);
+//    }
 
     @GetMapping("/showingNow")
     public List<MovieDto> getShowingNowMovie(){
@@ -136,6 +136,14 @@ public class MovieController {
         }
     }
     // Quản lý phim
+    @GetMapping("moviedetails/{id}")
+    public MovieDetailAdminDto getMovieDetails(@PathVariable("id") long id){
+        Movie movie = movieService.getMovieDetails(id);
+        if(movie != null ){
+            return movie.toMovieDetailAdminDto();
+        }
+        throw new NotFoundException("Movie not found with ID: " + id);
+    }
 
     @PostMapping("/add")
     public boolean addMovie(@RequestParam("movie") String movieRequestDtoJson,

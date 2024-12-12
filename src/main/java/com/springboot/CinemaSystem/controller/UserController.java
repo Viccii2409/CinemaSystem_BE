@@ -47,11 +47,11 @@ public class UserController {
         return customers;
     }
 
-    @GetMapping("/inforaccount/{id}")
-    public CustomerDto getCustomerInfor(@PathVariable("id") long id) {
-        Customer customer = userDao.getCustomerById(id);
-        return customer.toCustomerDto2();
-    }
+//    @GetMapping("/inforaccount/{id}")
+//    public CustomerDto getCustomerInfor(@PathVariable("id") long id) {
+//        Customer customer = userDao.getCustomerById(id);
+//        return customer.toCustomerDto2();
+//    }
 
     @GetMapping("/login")
     public String showLoginForm() {

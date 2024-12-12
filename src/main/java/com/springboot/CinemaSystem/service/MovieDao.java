@@ -21,7 +21,7 @@ public interface MovieDao {
 	public Movie getMovieByID(long id);
 	public void deleteMovie(long id);
 	public List<MovieDto> searchMoviesByGenre(String genreName);
-
+	public Movie getMovieDetails(long movieID);
 
 	public List<Movie> getMoviesByGenre(int genreID);
 	public List<Movie> getMoviesByLanguage(int languageID);

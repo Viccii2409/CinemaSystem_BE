@@ -40,7 +40,7 @@ public class BookingDto {
 
     private String barcodePayment;
     private String statusPayment;
-    private FeedbackDto feedback;
+    private MovieFeedbackDto movieFeedback;
 
     public BookingDto(long ID, LocalDateTime dateBooking, String barcode, List<String> nameSeats, Date dateShowtime, Time startTime, Time endTime, String nameMovie, String image, String nameTheater, String address, String nameRoom, String typeRoom, float totalPrice, float discountPrice, float amount, String nameCustomer, String phone, String email) {
         this.ID = ID;
@@ -64,7 +64,7 @@ public class BookingDto {
         this.email = email;
     }
 
-    public BookingDto(long ID, LocalDateTime dateBooking, String barcode, List<String> nameSeats, Date dateShowtime, Time startTime, Time endTime, String nameMovie, String image, String nameTheater, String address, String nameRoom, String typeRoom, float totalPrice, float discountPrice, float amount, String nameCustomer, String phone, String email, String barcodePayment, String statusPayment, FeedbackDto feedback) {
+    public BookingDto(long ID, LocalDateTime dateBooking, String barcode, List<String> nameSeats, Date dateShowtime, Time startTime, Time endTime, String nameMovie, String image, String nameTheater, String address, String nameRoom, String typeRoom, float totalPrice, float discountPrice, float amount, String nameCustomer, String phone, String email, String barcodePayment, String statusPayment, MovieFeedbackDto feedback) {
         this.ID = ID;
         this.dateBooking = dateBooking;
         this.barcode = barcode;
@@ -86,6 +86,6 @@ public class BookingDto {
         this.email = email;
         this.barcodePayment = barcodePayment;
         this.statusPayment = statusPayment;
-        this.feedback = feedback;
+        this.movieFeedback = movieFeedback;
     }
 }

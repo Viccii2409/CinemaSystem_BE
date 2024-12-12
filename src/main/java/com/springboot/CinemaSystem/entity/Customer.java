@@ -63,33 +63,33 @@ public class Customer extends User {
 		);
 	}
 
-	public CustomerDto toCustomerDto2() {
-		List<Booking> bookings = this.getBooking();
-		List< BookingDto> bookingDtos = new ArrayList<>();
-		if(bookings.size() > 0) {
-			for(Booking b : bookings) {
-				bookingDtos.add(b.toBookingDto2());
-			}
-		}
-		return new CustomerDto(
-				this.getID(),
-				this.getGender(),
-				this.getDob(),
-				this.getAddress(),
-				this.getEmail(),
-				this.getPhone(),
-				this.getImage(),
-				this.getStartDate(),
-				this.getName(),
-				this.getPoints(),
-				this.getLevel().toLevelDto(),
-				this.getDiscount().stream()
-						.map(entry -> new DiscountDto(
-								entry.getID()
-						))
-						.collect(Collectors.toList()),
-				this.getName(),
-				bookingDtos
-		);
-	}
+//	public CustomerDto toCustomerDto2() {
+//		List<Booking> bookings = this.getBooking();
+//		List< BookingDto> bookingDtos = new ArrayList<>();
+//		if(bookings.size() > 0) {
+//			for(Booking b : bookings) {
+//				bookingDtos.add(b.toBookingDto2());
+//			}
+//		}
+//		return new CustomerDto(
+//				this.getID(),
+//				this.getGender(),
+//				this.getDob(),
+//				this.getAddress(),
+//				this.getEmail(),
+//				this.getPhone(),
+//				this.getImage(),
+//				this.getStartDate(),
+//				this.getName(),
+//				this.getPoints(),
+//				this.getLevel().toLevelDto(),
+//				this.getDiscount().stream()
+//						.map(entry -> new DiscountDto(
+//								entry.getID()
+//						))
+//						.collect(Collectors.toList()),
+//				this.getName(),
+//				bookingDtos
+//		);
+//	}
 }

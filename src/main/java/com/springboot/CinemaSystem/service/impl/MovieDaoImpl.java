@@ -203,6 +203,11 @@ public Movie addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, 
 	}
 
 	@Override
+	public Movie getMovieDetails(long movieID) {
+		return movieRepository.findById((long) movieID).orElse(null);
+	}
+
+	@Override
 	public List<Movie> getAllMovies() {
 		return movieRepository.findAll();
 	}

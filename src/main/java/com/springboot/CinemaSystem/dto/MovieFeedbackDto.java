@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FeedbackDto {
+public class MovieFeedbackDto {
     private long ID;
     private String text;
     private LocalDateTime date;
