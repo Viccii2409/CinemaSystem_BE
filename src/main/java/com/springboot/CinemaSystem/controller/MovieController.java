@@ -13,11 +13,13 @@ import com.springboot.CinemaSystem.repository.MovieRepository;
 import com.springboot.CinemaSystem.service.*;
 import com.springboot.CinemaSystem.service.impl.LanguageDaoImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -215,6 +217,24 @@ public class MovieController {
 
 
     ///  LÊN LỊCH CHIẾU     < chưa có hiển thị danh sách lịch chiếu khi chọn ngày + rạp>
+// Lấy danh sách phòng chiếu và lịch chiếu theo ngày và rạp
+    @GetMapping("/showtimes")
+    public ResponseEntity<List<RoomShowtimeDto>> getShowtimesByDateAndTheater(
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam("theaterId") long theaterId) {
+
+        // Lấy danh sách phòng và lịch chiếu theo ngày và rạp
+        List<RoomShowtimeDto> rooms = showtimeDao.getRoomsByTheater(theaterId);
+
+        // Gán danh sách lịch chiếu vào từng phòng chiếu cho ngày cụ thể
+        for (RoomShowtimeDto room : rooms) {
+            List<ShowtimeDto> showtimes = showtimeDao.getShowtimesByDateAndRoom(date, room.getRoomId());
+            room.setShowtimes(showtimes);  // Gán danh sách lịch chiếu
+        }
+
+        return ResponseEntity.ok(rooms);
+    }
+
     @PostMapping("/schedule")
     public ResponseEntity<Showtime> scheduleShowtime(@RequestBody ShowtimeRequestDto dto) {
         Showtime showtime = showtimeDao.scheduleShowtime(dto);

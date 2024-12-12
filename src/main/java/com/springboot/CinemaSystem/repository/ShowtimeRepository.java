@@ -1,5 +1,7 @@
 package com.springboot.CinemaSystem.repository;
 
+import com.springboot.CinemaSystem.dto.RoomShowtimeDto;
+import com.springboot.CinemaSystem.dto.ShowtimeDto;
 import com.springboot.CinemaSystem.entity.Showtime;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -41,8 +43,6 @@ public interface ShowtimeRepository extends JpaRepository<Showtime, Long> {
     public void updateActionToEnded(@Param("currentDate") Date currentDate, @Param("currentTime") Time currentTime);
 
 
-
-
 //    public List<Showtime> findByRoomIdAndDate(long roomId, LocalDate date);
 //    public List<Showtime> findByMovieStatusAndDateAfter(int movieStatus, LocalDate date);
 
@@ -53,9 +53,10 @@ public interface ShowtimeRepository extends JpaRepository<Showtime, Long> {
             "OR (:endTime BETWEEN s.startTime AND s.endTime) " +
             "OR (s.startTime BETWEEN :startTime AND :endTime))")
     public List<Showtime> findConflictingShowtimes(@Param("roomId") long roomId,
-                                            @Param("date") Date date,
-                                            @Param("startTime") Time startTime,
-                                            @Param("endTime") Time endTime);
+                                                   @Param("date") Date date,
+                                                   @Param("startTime") Time startTime,
+                                                   @Param("endTime") Time endTime);
+
     // Ẩn hoặc mở lịch chiếu theo yêu cầu người dùng
     @Transactional
     @Modifying
@@ -76,10 +77,37 @@ public interface ShowtimeRepository extends JpaRepository<Showtime, Long> {
             "WHERE s.movieid = :movieId AND m.status = 0", nativeQuery = true)
     void hideShowtimesByMovieStatus(@Param("movieId") long movieId);
 
-//    // Tìm các lịch chiếu theo theaterId
-//    List<Showtime> findByTheaterId(long theaterId);
+    //danh sách lịch chiếu
+//    @Query("SELECT new com.springboot.CinemaSystem.dto.ShowtimeDto(" +
+//            "s.ID, s.date, s.startTime, s.endTime, s.action, " +
+//            "new com.springboot.CinemaSystem.dto.MovieShowtimeDto(m.id, m.title, m.duration, m.description, m.image)) " +
+//            "FROM Showtime s JOIN s.movie m WHERE s.date = :date AND s.room.ID = :roomId")
+//    List<ShowtimeDto> findShowtimesByDateAndRoom(@Param("date") LocalDate date, @Param("roomId") long roomId);
+
+    // Lấy danh sách phòng chiếu và lịch chiếu theo ngày và rạp
+    @Query("SELECT new com.springboot.CinemaSystem.dto.RoomShowtimeDto(r.ID, r.name) " +
+            "FROM Room r WHERE r.theater.ID = :theaterId")
+    List<RoomShowtimeDto> findRoomsByTheater(@Param("theaterId") long theaterId);
 
 
+
+    // Lấy danh sách lịch chiếu của một phòng chiếu vào ngày cụ thể
+//    @Query("SELECT new com.springboot.CinemaSystem.dto.ShowtimeDto(s.ID, s.date, s.startTime, s.endTime, s.action, " +
+//            "new com.springboot.CinemaSystem.dto.MovieShowtimeDto(m.ID, m.title, m.duration, m.description, m.image)) " +
+//            "FROM Showtime s JOIN s.room r JOIN s.movie m " +
+//            "WHERE s.date = :date AND r.ID = :roomId")
+//    List<ShowtimeDto> findShowtimesByDateAndRoom(@Param("date") LocalDate date, @Param("roomId") long roomId);
+
+    @Query("SELECT new com.springboot.CinemaSystem.dto.ShowtimeDto(s.ID, s.date, s.startTime, s.endTime, s.action, " +
+            "new com.springboot.CinemaSystem.dto.MovieShowtimeDto(m.ID, m.title, m.duration, m.description, m.image), " +
+            "s.status) " +
+            "FROM Showtime s JOIN s.room r JOIN s.movie m " +
+            "WHERE s.date = :date AND r.ID = :roomId")
+    List<ShowtimeDto> findShowtimesByDateAndRoom(@Param("date") LocalDate date, @Param("roomId") long roomId);
 
 
 }
+
+
+
+

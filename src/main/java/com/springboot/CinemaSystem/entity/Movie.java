@@ -131,8 +131,6 @@ public class Movie {
 				.map(Genre::toGenreDto)
 				.collect(Collectors.toList());
 		dto.setGenres(genreDtos);
-
-		// Chuyển đổi các thuộc tính khác nếu cần
 		return dto;
 	}
 
@@ -164,7 +162,7 @@ public class Movie {
 				.average() // Tính trung bình
 				.orElse(0); // Nếu không có giá trị nào thì trả về 0.
 
-		return (float) averageRating; // Chuyển thành float nếu cần.
+		return (float) averageRating;
 	}
 
 

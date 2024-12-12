@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.service;
 
+import com.springboot.CinemaSystem.dto.RoomShowtimeDto;
 import com.springboot.CinemaSystem.dto.ShowtimeDto;
 import com.springboot.CinemaSystem.dto.ShowtimeRequestDto;
 import com.springboot.CinemaSystem.dto.ShowtimeRoomDto;
@@ -23,10 +24,11 @@ public interface ShowtimeDao {
 	public boolean checkAvailability(int showtimeID);
 
 
-//	public List<ShowtimeDto> getShowtimesByDateAndRoom(long theaterId, LocalDate date);
+//	public List<RoomShowtimeDto> getShowtimesByDateAndTheater(LocalDate date, long theaterId);
+	public List<ShowtimeDto> getShowtimesByDateAndRoom(LocalDate date, long roomId);
+	public List<RoomShowtimeDto> getRoomsByTheater(long theaterId);
 
 	public void updateShowtimeStatus();
-
 
 	public void deleteShowtime(long showtimeId);
 

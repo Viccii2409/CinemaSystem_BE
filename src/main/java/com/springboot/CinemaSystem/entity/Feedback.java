@@ -21,9 +21,10 @@ public class Feedback {
 	private String text;
 	private LocalDateTime date;
 
-	@ManyToOne
-	@JoinColumn(name = "ratingID")
-	private Rating rating;
+//	@ManyToOne
+//	@JoinColumn(name = "ratingID")
+//	private Rating rating;
+	private int star;
 
 	@ManyToOne
 	@JoinColumn(name = "movieID")
