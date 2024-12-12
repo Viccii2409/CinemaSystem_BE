@@ -16,7 +16,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)  // Thêm annotation này
-
 public class MovieRequestDto {
     private String title;
     private int duration;

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000") // Chỉ cho phép yêu cầu từ localhost:3000
 @RequestMapping("/api/movie")
 public class MovieController {
     private MovieDao movieService;
@@ -136,7 +137,7 @@ public class MovieController {
         }
     }
     // Quản lý phim
-    @GetMapping("moviedetails/{id}")
+    @GetMapping("/moviedetails/{id}")
     public MovieDetailAdminDto getMovieDetails(@PathVariable("id") long id){
         Movie movie = movieService.getMovieDetails(id);
         if(movie != null ){
@@ -169,14 +170,15 @@ public class MovieController {
     @PutMapping("/{ID}")
     public boolean editMovie(@PathVariable long ID,
                              @RequestParam("movie") String movieRequestDtoJson,
-                             @RequestParam("image") MultipartFile imageFile,
-                             @RequestParam("trailer") MultipartFile trailerFile) {
+                             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+                             @RequestParam(value = "trailerFile", required = false) MultipartFile trailerFile) {
         try {
             // Chuyển đổi JSON movieRequestDto thành đối tượng MovieRequestDto
             MovieRequestDto movieRequestDto = new ObjectMapper().readValue(movieRequestDtoJson, MovieRequestDto.class);
 
             // Gọi service để sửa movie
             return movieService.editMovie(ID, movieRequestDto, imageFile, trailerFile) != null;
+
         } catch (Exception e) {
             e.printStackTrace();
             return false;
