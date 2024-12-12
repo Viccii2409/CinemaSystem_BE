@@ -1,6 +1,5 @@
 package com.springboot.CinemaSystem.dto;
 
-import com.springboot.CinemaSystem.entity.Rating;
 import lombok.*;
 
 import java.time.LocalDateTime;

@@ -40,7 +40,7 @@ public class Feedback {
 		feedbackDto.setID(this.ID);
 		feedbackDto.setText(this.text);
 		feedbackDto.setDate(this.date);
-		feedbackDto.setRating(this.rating);
+		feedbackDto.setStar(this.star);
 		// Lấy thông tin User thông qua Booking
 		if (this.booking != null && this.booking.getCustomer() != null) {
 			UserDto userDto = new UserDto();

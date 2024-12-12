@@ -149,20 +149,21 @@ public class Movie {
 		return this.image;
 	}
 
-// tính rating phim
+	// Tính rating phim
 	public float calculateAverageRating() {
 		if (this.feedback == null || this.feedback.isEmpty()) {
 			return 0; // Nếu không có feedback nào, trả về 0.
 		}
 
+		// Lọc và tính trung bình cộng các giá trị star (int) từ feedback
 		double averageRating = this.feedback.stream()
-				.map(Feedback::getRating) // Lấy Rating từ Feedback
-				.filter(Objects::nonNull) // Bỏ qua Rating null
-				.mapToInt(Rating::getStar) // Lấy điểm số (star) từ Rating
-				.average() // Tính trung bình
-				.orElse(0); // Nếu không có giá trị nào thì trả về 0.
+				.map(Feedback::getStar) // Lấy star từ feedback
+				.filter(Objects::nonNull) // Bỏ qua các giá trị null
+				.mapToInt(Integer::intValue) // Chuyển đổi từ Integer sang int
+				.average() // Tính trung bình cộng
+				.orElse(0); // Nếu không có giá trị hợp lệ, trả về 0.
 
-		return (float) averageRating;
+		return (float) averageRating; // Trả về kết quả dưới dạng float
 	}
 
 
