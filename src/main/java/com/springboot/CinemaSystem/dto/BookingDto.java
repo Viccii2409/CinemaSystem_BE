@@ -1,5 +1,7 @@
 package com.springboot.CinemaSystem.dto;
 
+import com.springboot.CinemaSystem.entity.Booking;
+import com.springboot.CinemaSystem.entity.Ticket;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -66,5 +69,45 @@ public class BookingDto {
         this.nameCustomer = nameCustomer;
         this.phone = phone;
         this.email = email;
+    }
+
+    public static BookingDto toBookingDto(Booking booking) {
+        List<String> nameSeats = new ArrayList<>();
+        for (Ticket t : booking.getTicket()) {
+            nameSeats.add(t.getSeat().getName());
+        }
+        BookingDto dto = new BookingDto(
+                booking.getID(),
+                booking.getDate(),
+                booking.getBarcode(),
+                nameSeats,
+                booking.getShowtime().getDate(),
+                booking.getShowtime().getStartTime(),
+                booking.getShowtime().getEndTime(),
+                booking.getShowtime().getMovie().getTitle(),
+                booking.getShowtime().getMovie().getFirstImage(),
+                booking.getShowtime().getRoom().getTheater().getName(),
+                booking.getShowtime().getRoom().getTheater().getFullAddress(),
+                booking.getShowtime().getRoom().getName(),
+                booking.getShowtime().getRoom().getTypeRoom().getName(),
+                booking.getPayment().getTotalPrice(),
+                booking.getPayment().getDiscountPrice(),
+                booking.getPayment().getAmount(),
+                (booking.getUser() != null) ? booking.getUser().getName() : "",
+                (booking.getUser() != null) ? booking.getUser().getPhone() : "",
+                (booking.getUser() != null) ? booking.getUser().getEmail() : ""
+        );
+        return dto;
+    }
+
+    public static BookingDto toBookingDto2 (Booking booking) {
+        BookingDto dto = toBookingDto(booking);
+        dto.setBarcodePayment(booking.getPayment().getBarcode());
+        dto.setStatusPayment(booking.getPayment().getStatus());
+        if(booking.getFeedback() != null) {
+            dto.setFeedback(booking.getFeedback().toFeedbackDto());
+        }
+        dto.setTypeBooking(booking.getTypeBooking());
+        return dto;
     }
 }

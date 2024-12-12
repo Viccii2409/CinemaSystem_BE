@@ -5,11 +5,9 @@ import com.springboot.CinemaSystem.dto.GenreDto;
 import com.springboot.CinemaSystem.dto.MovieDto;
 import com.springboot.CinemaSystem.dto.ShowtimeTheaterIDDto;
 import com.springboot.CinemaSystem.entity.*;
+import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.exception.NotFoundException;
-import com.springboot.CinemaSystem.repository.GenreRepository;
-import com.springboot.CinemaSystem.repository.ImageRepository;
-import com.springboot.CinemaSystem.repository.MovieRepository;
-import com.springboot.CinemaSystem.repository.TrailerRepository;
+import com.springboot.CinemaSystem.repository.*;
 import com.springboot.CinemaSystem.service.MovieDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,14 +25,17 @@ public class MovieDaoImpl implements MovieDao {
 	private MovieRepository movieRepository;
 	private TrailerRepository trailerRepository;
 	private ImageRepository imageRepository;
+	private SlideshowRepository slideshowRepository;
 
 	@Autowired
-	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository, TrailerRepository trailerRepository, ImageRepository imageRepository) {
+	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository, TrailerRepository trailerRepository, ImageRepository imageRepository, SlideshowRepository slideshowRepository) {
 		this.genreRepository = genreRepository;
 		this.movieRepository = movieRepository;
 		this.trailerRepository = trailerRepository;
 		this.imageRepository = imageRepository;
+		this.slideshowRepository = slideshowRepository;
 	}
+
 
 
 	@Override
@@ -102,10 +103,6 @@ public class MovieDaoImpl implements MovieDao {
 		return false;  // Trường hợp không tìm thấy movie với ID
 	}
 
-
-
-
-
 	@Override
 	public List<MovieDto> getCommingSoonMovie() {
 		LocalDate today = LocalDate.now();
@@ -122,6 +119,32 @@ public class MovieDaoImpl implements MovieDao {
 				.filter(movie -> movie.getReleaseDate().isBefore(today) || movie.getReleaseDate().isEqual(today))
 				.map(this::convertToDto)
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<Slideshow> getAllSlideshow() {
+		try {
+			return slideshowRepository.findAll();
+		} catch (Exception e) {
+			throw new DataProcessingException("Failed to retrieve slideshows: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public Trailer saveOrUpdateTrailer(Trailer trailer) {
+		// Kiểm tra trailer có sẵn với movieId
+		Optional<Trailer> existingTrailer = trailerRepository.findByMovieId(trailer.getMovie().getId());
+
+		if (existingTrailer.isPresent()) {
+			// Nếu đã tồn tại trailer cho movieId, cập nhật thông tin trailer
+			Trailer currentTrailer = existingTrailer.get();
+			currentTrailer.setDescription(trailer.getDescription());
+			currentTrailer.setLink(trailer.getLink());
+			return trailerRepository.save(currentTrailer); // Cập nhật trailer
+		} else {
+			// Nếu chưa có trailer cho movieId, lưu mới
+			return trailerRepository.save(trailer);
+		}
 	}
 
 

@@ -2,8 +2,8 @@ package com.springboot.CinemaSystem.controller;
 
 import com.springboot.CinemaSystem.dto.*;
 import com.springboot.CinemaSystem.entity.*;
-import com.springboot.CinemaSystem.filter.JwtTokenUtil;
-import com.springboot.CinemaSystem.service.FileStorageService;
+import com.springboot.CinemaSystem.util.JwtTokenUtil;
+import com.springboot.CinemaSystem.service.FileStorageDao;
 import com.springboot.CinemaSystem.service.MovieDao;
 import com.springboot.CinemaSystem.service.TheaterDao;
 import com.springboot.CinemaSystem.service.UserDao;
@@ -31,23 +31,22 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/user")
 public class UserController {
     private UserDao userDao;
-    @Autowired
     private TheaterDao theaterDao;
-    @Autowired
     private MovieDao movieDao;
     private AuthenticationManager authenticationManager;
     private JwtTokenUtil jwtTokenUtil;
     PasswordEncoder passwordEncoder;
-    @Autowired
-    private FileStorageService fileStorageService;
-
+    private FileStorageDao fileStorageDao;
 
     @Autowired
-    public UserController(UserDao userDao, AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil, PasswordEncoder passwordEncoder) {
+    public UserController(UserDao userDao, TheaterDao theaterDao, MovieDao movieDao, AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil, PasswordEncoder passwordEncoder, FileStorageDao fileStorageDao) {
         this.userDao = userDao;
+        this.theaterDao = theaterDao;
+        this.movieDao = movieDao;
         this.authenticationManager = authenticationManager;
         this.jwtTokenUtil = jwtTokenUtil;
         this.passwordEncoder = passwordEncoder;
+        this.fileStorageDao = fileStorageDao;
     }
 
     @PostMapping("/public/login")
@@ -73,17 +72,17 @@ public class UserController {
     }
 
     @PostMapping("/public/register")
-    public  String register(@RequestBody UserRegisterDto userRegisterDto) {
-        String password = userRegisterDto.getPassword();
-        System.out.println(userRegisterDto);
-        String encodedPassword = passwordEncoder.encode(userRegisterDto.getPassword());
-        userRegisterDto.setPassword(encodedPassword);
-        Customer customer = Customer.toCustomer(userRegisterDto);
+    public  String register(@RequestBody UserDto userDto) {
+        String password = userDto.getPassword();
+        System.out.println(userDto);
+        String encodedPassword = passwordEncoder.encode(userDto.getPassword());
+        userDto.setPassword(encodedPassword);
+        Customer customer = Customer.toCustomer(userDto);
         customer.setStatus(true);
         customer.setRole(userDao.getRoleById(4));
         customer.setLevel(userDao.getLevelById(1));
         userDao.addCustomer(customer);
-        return this.login(new Account(userRegisterDto.getEmail(), password));
+        return this.login(new Account(userDto.getEmail(), password));
     }
 
     @GetMapping("/public/verify")
@@ -96,7 +95,7 @@ public class UserController {
         UserDto userDto = UserDto.toUserVerifyDto(user);
         if(userDto.getRole().getID() != 4) {
             Employee employee = userDao.getEmployeeById(userDto.getId());
-            userDto.setStatusEmployee(employee.isStatusEmployee());
+            userDto.setStatusEmployee(employee.getStatusEmployee());
         }
         else {
             userDto.setStatusEmployee(false);
@@ -182,7 +181,7 @@ public class UserController {
     public String updateImage(@RequestParam(value = "id") long id, @RequestParam(value = "file") MultipartFile file) {
         User user = userDao.getUserByID(id);
         if(user != null) {
-            String imageUrl = fileStorageService.updateFile(file, user.getImage());
+            String imageUrl = fileStorageDao.updateFile(file, user.getImage(), "Image/User");
             user.setImage(imageUrl);
             userDao.updateUser(user);
             return imageUrl;
@@ -212,10 +211,10 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('MANAGER_ROLE')")
     @PostMapping("/role/add")
-    public RoleDto addRole(@RequestBody RoleRequestDto roleRequestDto) {
+    public RoleDto addRole(@RequestBody RoleDto dto) {
         Role role = new Role();
-        role.setName(roleRequestDto.getName());
-        for(Long l : roleRequestDto.getPermission()){
+        role.setName(dto.getName());
+        for(Long l : dto.getPermission()){
             Permission permission = userDao.getPermissionById(l);
             role.getPermission().add(permission);
         }
@@ -225,11 +224,11 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('MANAGER_ROLE')")
     @PutMapping("/role/update")
-    public RoleDto updateRole(@RequestBody RoleRequestDto roleRequestDto) {
-        Role role = userDao.getRoleById(roleRequestDto.getId());
-        role.setName(roleRequestDto.getName());
+    public RoleDto updateRole(@RequestBody RoleDto dto) {
+        Role role = userDao.getRoleById(dto.getID());
+        role.setName(dto.getName());
         role.getPermission().clear();
-        for(Long l : roleRequestDto.getPermission()){
+        for(Long l : dto.getPermission()){
             Permission permission = userDao.getPermissionById(l);
             role.getPermission().add(permission);
         }
@@ -256,20 +255,11 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('MANAGER_EMPLOYEE')")
     @PostMapping("/employee/check")
-    public EmployeeRequestDto checkEmployee(@RequestBody Map<String, String> requestBody) {
+    public UserDto checkEmployee(@RequestBody Map<String, String> requestBody) {
         String username = requestBody.get("username");
         User user = userDao.getUserByUsername(username);
         if(user != null) {
-            return new EmployeeRequestDto(
-                    user.getID(),
-                    user.getName(),
-                    user.getEmail(),
-                    user.getDob(),
-                    user.getPhone(),
-                    user.getAddress(),
-                    user.getAccount().getUsername(),
-                    user.getRole().getID()
-            );
+            return UserDto.toUserCheck(user);
         }
         return null;
     }
@@ -278,42 +268,43 @@ public class UserController {
     @PreAuthorize("hasAuthority('MANAGER_EMPLOYEE')")
     @PostMapping("/employee/add")
     @Transactional
-    public UserDto addEmployee(@RequestBody EmployeeRequestDto employeeRequestDto) {
+    public UserDto addEmployee(@RequestBody UserDto userDto) {
         Employee employee;
-        long id = employeeRequestDto.getID();
-        if(id > 0) {
+        long id;
+        if(userDto.getId() != null) {
+            id = userDto.getId();
             employee = userDao.convertToEmployee(id);
         }
         else {
             employee = new Employee();
-            String encodePassword = passwordEncoder.encode(employeeRequestDto.getPassword());
-            Account account = new Account(employeeRequestDto.getUsername(), encodePassword);
+            String encodePassword = passwordEncoder.encode(userDto.getPassword());
+            Account account = new Account(userDto.getUsername(), encodePassword);
             employee.setAccount(account);
         }
-        employee.setName(employeeRequestDto.getName());
-        employee.setEmail(employeeRequestDto.getEmail());
-        employee.setDob(employeeRequestDto.getDob());
-        employee.setPhone(employeeRequestDto.getPhone());
-        employee.setAddress(employeeRequestDto.getAddress());
-        Role role = userDao.getRoleById(employeeRequestDto.getRoleid());
+        employee.setName(userDto.getName());
+        employee.setEmail(userDto.getEmail());
+        employee.setDob(userDto.getDob());
+        employee.setPhone(userDto.getPhone());
+        employee.setAddress(userDto.getAddress());
+        Role role = userDao.getRoleById(userDto.getRoleid());
         employee.setRole(role);
         employee.setStatusEmployee(true);
         Employee employee_new = userDao.addEmployee(employee);
         System.out.println(role.getName());
         if(role.getName().equals("ADMIN")) {
             Admin admin = userDao.convertToAdmin(employee_new.getID());
-            admin.setAccessLevel(employeeRequestDto.getAccessLevel());
+            admin.setAccessLevel(userDto.getAccessLevel());
             Admin admin_new = userDao.addAdmin(admin);
         }
         else if (role.getName().equals("MANAGER")) {
             Manager manager = userDao.convertToManager(employee_new.getID());
-            Theater theater = theaterDao.getTheaterByID(employeeRequestDto.getTheaterid());
+            Theater theater = theaterDao.getTheaterByID(userDto.getTheaterid());
             manager.setTheater(theater);
             Manager manager_new = userDao.addManager(manager);
         }
         else if (role.getName().equals("AGENT")) {
             Agent agent = userDao.convertToAgent(employee_new.getID());
-            Manager manager = userDao.getManagerById(employeeRequestDto.getManagerid());
+            Manager manager = userDao.getManagerById(userDto.getManagerid());
             agent.setManager(manager);
             Agent agent_new = userDao.addAgent(agent);
         }
@@ -323,9 +314,9 @@ public class UserController {
     @PutMapping("/employee/{id}/updatestatus")
     public boolean updateStatusEmployee(@PathVariable("id") long id) {
         Employee employee = userDao.getEmployeeById(id);
-        employee.setStatusEmployee(!employee.isStatusEmployee());
+        employee.setStatusEmployee(!employee.getStatusEmployee());
         Employee employee_new = userDao.updateEmployee(employee);
-        return employee_new.isStatusEmployee();
+        return employee_new.getStatusEmployee();
     }
 
     @PreAuthorize("hasAuthority('MANAGER_CUSTOMER')")

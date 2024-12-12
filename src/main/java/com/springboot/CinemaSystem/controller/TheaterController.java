@@ -5,11 +5,9 @@ import com.springboot.CinemaSystem.dto.*;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.exception.NotFoundException;
-import com.springboot.CinemaSystem.mapper.TheaterMapper;
-import com.springboot.CinemaSystem.service.FileStorageService;
+import com.springboot.CinemaSystem.service.FileStorageDao;
 import com.springboot.CinemaSystem.service.TheaterDao;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,24 +21,20 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/theater")
 public class TheaterController {
-
     private TheaterDao theaterDao;
-    private FileStorageService fileStorageService;
+    private FileStorageDao fileStorageDao;
 
     @Autowired
-    public TheaterController(TheaterDao theaterDao, FileStorageService fileStorageService) {
+    public TheaterController(TheaterDao theaterDao, FileStorageDao fileStorageDao) {
         this.theaterDao = theaterDao;
-        this.fileStorageService = fileStorageService;
+        this.fileStorageDao = fileStorageDao;
     }
 
     @GetMapping("/public/all")
     public List<TheaterDto> getAllNameTheater(){
         List<TheaterDto> theaters = theaterDao.getAllTheater().stream()
                 .filter(entry -> entry.isStatus())
-                .map(entry -> new TheaterDto(
-                        entry.getID(),
-                        entry.getName()
-                ))
+                .map(entry -> TheaterDto.toNameTheaterDto(entry))
                 .collect(Collectors.toList());
 
         return theaters;
@@ -50,9 +44,8 @@ public class TheaterController {
     @GetMapping("/all")
     public List<TheaterDto> getListTheater(){
         List<TheaterDto> theaters = theaterDao.getAllTheater().stream()
-                .map(entry -> entry.toTheaterDto())
+                .map(entry -> TheaterDto.toTheaterDto(entry))
                 .collect(Collectors.toList());
-
         return theaters;
     }
 
@@ -64,17 +57,17 @@ public class TheaterController {
 
     @PreAuthorize("hasAuthority('MANAGER_THEATER')")
     @PostMapping("/add")
-    public TheaterDto addTheater(@ModelAttribute TheaterAddDto theaterAddDto,
+    public TheaterDto addTheater(@ModelAttribute TheaterDto dto,
                                  @RequestParam(value = "file", required = false) MultipartFile file){
         try {
-            Theater theater = TheaterMapper.toTheaterAdd(theaterAddDto);
+            Theater theater = Theater.convertTheaterAddtoTheater(dto);
             theater.setStatus(false);
             if(file != null && !file.isEmpty()){
-                String imageUrl = fileStorageService.saveFileFromCloudinary(file);
+                String imageUrl = fileStorageDao.saveFileFromCloudinary(file, "Image/Theater");
                 theater.setImage(imageUrl);
             }
             Theater saveTheater = theaterDao.addTheater(theater);
-            return TheaterMapper.toTheaterDto(theater);
+            return TheaterDto.toTheaterDto(saveTheater);
         } catch (Exception e) {
             throw new DataProcessingException("Lỗi thêm rạp: " + e.getMessage());
         }
@@ -83,22 +76,22 @@ public class TheaterController {
 
     @PreAuthorize("hasAuthority('MANAGER_THEATER')")
     @PutMapping("/update")
-    public TheaterDto editTheater(@ModelAttribute TheaterEditDto theaterEditDto,
+    public TheaterDto editTheater(@ModelAttribute TheaterDto dto,
                                   @RequestParam(value = "file", required = false) MultipartFile file
     ){
         try {
-            Theater theater = TheaterMapper.toTheaterEdit(theaterEditDto);
+            Theater theater = Theater.convertTheaterEdittoTheater(dto);
             Theater theater_old = theaterDao.getTheaterByID(theater.getID());
             theater.setImage(theater_old.getImage());
             theater.setQuantityRoom(theater_old.getQuantityRoom());
             theater.setStatus(theater_old.isStatus());
             theater.setRoom(theater_old.getRoom());
             if(file != null && !file.isEmpty()){
-                String imageUrl = fileStorageService.updateFile(file, theater_old.getImage());
+                String imageUrl = fileStorageDao.updateFile(file, theater_old.getImage(), "Image/Theater");
                 theater.setImage(imageUrl);
             }
             Theater updateTheater = theaterDao.updateTheater(theater);
-            return TheaterMapper.toTheaterDto(theater);
+            return TheaterDto.toTheaterDto(updateTheater);
         } catch (Exception e) {
             throw new DataProcessingException("Lỗi thêm rạp: " + e.getMessage());
         }
@@ -107,12 +100,8 @@ public class TheaterController {
 
     @PreAuthorize("hasAuthority('MANAGER_THEATER')")
     @GetMapping("/{id}")
-    public TheaterViewDto getTheaterById(@PathVariable("id") long id){
-        Theater theater = theaterDao.getTheaterByID(id);
-        if(theater != null ){
-            return theater.toTheaterViewDto();
-        }
-        throw new NotFoundException("Theater not found with ID: " + id);
+    public TheaterDto getTheaterById(@PathVariable("id") long id){
+        return TheaterDto.toTheaterView(theaterDao.getTheaterByID(id));
     }
 
     @PreAuthorize("hasAuthority('MANAGER_THEATER')")
@@ -123,13 +112,11 @@ public class TheaterController {
 
     @PreAuthorize("hasAuthority('MANAGER_ROOM')")
     @GetMapping("/room")
-    public List<TheaterRoomDto> getTheaterRoomDtos() {
-        List<Theater> theaters = theaterDao.getAllTheaters();
-        List<TheaterRoomDto> theaterRoomDtos = new ArrayList<>();
-        for(Theater theater : theaters) {
-            theaterRoomDtos.add(theater.toTheaterRoomDto());
-        }
-        return theaterRoomDtos;
+    public List<TheaterDto> getTheaterRoomDtos() {
+        List<TheaterDto> dtos = theaterDao.getAllTheater().stream()
+                .map(entry -> TheaterDto.toTheaterRoomDto(entry))
+                .collect(Collectors.toList());
+        return dtos;
     }
 
     @PreAuthorize("hasAuthority('MANAGER_ROOM')")
@@ -162,11 +149,9 @@ public class TheaterController {
     @PreAuthorize("hasAnyAuthority('MANAGER_ROOM', 'MANAGER_PRICETICKET')")
     @GetMapping("/typeroom")
     public List<TypeRoomDto> getTypeRoom() {
-        List<TypeRoom> typeRooms = theaterDao.getAllTypeRooms();
-        List<TypeRoomDto> typeRoomDtos = new ArrayList<>();
-        for(TypeRoom t : typeRooms) {
-            typeRoomDtos.add(t.toTypeRoomDto());
-        }
+        List<TypeRoomDto> typeRoomDtos = theaterDao.getAllTypeRooms().stream()
+                .map(entry -> TypeRoomDto.toTypeRoomDto(entry))
+                .collect(Collectors.toList());
         return typeRoomDtos;
     }
 
@@ -200,8 +185,8 @@ public class TheaterController {
 
     @PreAuthorize("hasAuthority('MANAGER_ROOM')")
     @GetMapping("/room/{id}")
-    public RoomSeatDto getRoom(@PathVariable("id") long id) {
-        return theaterDao.getRoomByID(id).toRoomSeatDto();
+    public RoomDto getRoom(@PathVariable("id") long id) {
+        return RoomDto.toRoomSeatDto(theaterDao.getRoomByID(id));
     }
 
     @PreAuthorize("hasAuthority('MANAGER_ROOM')")
@@ -256,20 +241,5 @@ public class TheaterController {
     @GetMapping("/typeseat")
     public List<TypeSeat> getTypeSeat() {
         return theaterDao.getAllTypeSeats();
-    }
-
-//    @GetMapping("/{id}/room")
-//    public List<Room> getRoomByTheater(@PathVariable("id") long id){
-//        return theaterDao.getRoomByTheater(id);
-//    }
-
-
-
-
-
-    @GetMapping("/except/{id}")
-    public ResponseEntity<List<TheaterExceptDto>> getTheatersExcept(@PathVariable Long id) {
-        List<TheaterExceptDto> theaters = theaterDao.getTheatersExcept(id);
-        return ResponseEntity.ok(theaters);
     }
 }

@@ -1,7 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
-import com.springboot.CinemaSystem.dto.DiscountAddDto;
 import com.springboot.CinemaSystem.dto.DiscountDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -47,21 +46,16 @@ public class Discount {
 		this.ID = ID;
 	}
 
-	public static Discount toDiscount(DiscountAddDto discountAddDto) {
+	public static Discount toDiscount(DiscountDto dto) {
 		Discount discount = new Discount();
-		discount.setID(discountAddDto.getId());
-		discount.setName(discountAddDto.getName());
-		discount.setReducedValue(discountAddDto.getReducedValue());
-		discount.setDiscountCode(discountAddDto.getDiscountCode());
-		discount.setStart(Date.valueOf(discountAddDto.getStart()));
-		discount.setEnd(Date.valueOf(discountAddDto.getEnd()));
-		discount.setDescription(discountAddDto.getDescription());
-		discount.setStatus(discountAddDto.isStatus());
+		discount.setID(dto.getId());
+		discount.setName(dto.getName());
+		discount.setReducedValue(dto.getReducedValue());
+		discount.setDiscountCode(dto.getDiscountCode());
+		discount.setStart(dto.getStart());
+		discount.setEnd(dto.getEnd());
+		discount.setDescription(dto.getDescription());
+		discount.setStatus(dto.isStatus());
 		return discount;
-	}
-
-	public DiscountDto toDiscountDto() {
-		return new DiscountDto(this.ID, this.name, this.typeDiscount.toTypeDiscountDto(), this.reducedValue, this.discountCode,
-				this.start, this.end, this.description, this.image, this.status);
 	}
 }

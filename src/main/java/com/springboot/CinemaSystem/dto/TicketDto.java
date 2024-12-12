@@ -4,14 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TheaterRoomDto {
+public class TicketDto {
     private long id;
-    private String name;
-    private List<RoomDto> room;
-    private boolean status;
+    private long selectedSeatID;
 }

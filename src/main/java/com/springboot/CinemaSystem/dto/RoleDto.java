@@ -17,20 +17,22 @@ public class RoleDto {
     private long quantityUser;
     private List<PermissionDto> permissions;
 
+    private List<Long> permission;
+
     public RoleDto(long ID, String name) {
         this.ID = ID;
         this.name = name;
     }
 
     public static RoleDto toRoleDto(Role role) {
-        return new RoleDto(
-                role.getID(),
-                role.getName(),
-                role.getUsers().size(),
-                role.getPermission().stream()
-                        .map(entry -> PermissionDto.toPermissionDto(entry))
-                        .collect(Collectors.toList())
-        );
+        RoleDto dto = new RoleDto();
+        dto.setID(role.getID());
+        dto.setName(role.getName());
+        dto.setQuantityUser(role.getUsers().size());
+        dto.setPermissions(role.getPermission().stream()
+                .map(entry -> PermissionDto.toPermissionDto(entry))
+                .collect(Collectors.toList()));
+        return dto;
     }
 
     public static RoleDto toRoleDto2(Role role) {

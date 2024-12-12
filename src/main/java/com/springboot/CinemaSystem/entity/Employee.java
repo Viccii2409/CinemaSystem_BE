@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class Employee extends User {
 	private String position;
 	private Date dayInWork;
-	private boolean statusEmployee;
+	private Boolean statusEmployee;
 
 	@PrePersist
 	private void prePerisistDayInWork() {

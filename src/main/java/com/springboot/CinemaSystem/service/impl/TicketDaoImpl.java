@@ -28,13 +28,10 @@ public class TicketDaoImpl implements TicketDao {
 	private TicketRepository ticketRepository;
 	private PayOnlineRepository payOnlineRepository;
 	private SimpMessagingTemplate simpMessagingTemplate;
-
-	@Autowired
 	private PaymentRepository paymentRepository;
 
-
 	@Autowired
-	public TicketDaoImpl(DayOfWeekRepository dayOfWeekRepository, TimeFrameRepository timeFrameRepository, TypeCustomerRepository typeCustomerRepository, BasePriceRepository basePriceRepository, SelectedSeatRepository selectedSeatRepository, BookingRepository bookingRepository, PayCashRepository payCashRepository, PayTypeCustomerRepository payTypeCustomerRepository, TicketRepository ticketRepository, PayOnlineRepository payOnlineRepository, SimpMessagingTemplate simpMessagingTemplate) {
+	public TicketDaoImpl(DayOfWeekRepository dayOfWeekRepository, TimeFrameRepository timeFrameRepository, TypeCustomerRepository typeCustomerRepository, BasePriceRepository basePriceRepository, SelectedSeatRepository selectedSeatRepository, BookingRepository bookingRepository, PayCashRepository payCashRepository, PayTypeCustomerRepository payTypeCustomerRepository, TicketRepository ticketRepository, PayOnlineRepository payOnlineRepository, SimpMessagingTemplate simpMessagingTemplate, PaymentRepository paymentRepository) {
 		this.dayOfWeekRepository = dayOfWeekRepository;
 		this.timeFrameRepository = timeFrameRepository;
 		this.typeCustomerRepository = typeCustomerRepository;
@@ -46,7 +43,9 @@ public class TicketDaoImpl implements TicketDao {
 		this.ticketRepository = ticketRepository;
 		this.payOnlineRepository = payOnlineRepository;
 		this.simpMessagingTemplate = simpMessagingTemplate;
+		this.paymentRepository = paymentRepository;
 	}
+
 
 	@Override
 	@Scheduled(fixedRate = 60000)
@@ -115,14 +114,7 @@ public class TicketDaoImpl implements TicketDao {
 			long id = selectedSeatRepository.save(selectedSeat).getID();
 			simpMessagingTemplate.convertAndSend(
 					"/topic/showtime/" + selectedSeat.getShowtime().getID() + "/seat",
-					new SelectedSeatDto(
-							selectedSeat.getID(),
-							selectedSeat.getUser().getID(),
-							selectedSeat.getSeat().getID(),
-							selectedSeat.getStart(),
-							selectedSeat.getEnd(),
-							selectedSeat.getStatus()
-					)
+					SelectedSeatDto.toSelectedSeatDto(selectedSeat)
 			);
 			return id;
 		} catch (Exception e) {
@@ -145,14 +137,7 @@ public class TicketDaoImpl implements TicketDao {
 			selectedSeatRepository.save(selectedSeat);
 			simpMessagingTemplate.convertAndSend(
 					"/topic/showtime/" + selectedSeat.getShowtime().getID() + "/seat",
-					new SelectedSeatDto(
-							selectedSeat.getID(),
-							selectedSeat.getUser().getID(),
-							selectedSeat.getSeat().getID(),
-							selectedSeat.getStart(),
-							selectedSeat.getEnd(),
-							selectedSeat.getStatus()
-					)
+					SelectedSeatDto.toSelectedSeatDto(selectedSeat)
 			);
 			return true;
 		} catch (Exception e) {

@@ -7,14 +7,12 @@ import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.repository.MovieRepository;
 import com.springboot.CinemaSystem.service.*;
-import com.springboot.CinemaSystem.service.impl.TrailerDaoImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,24 +21,16 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/movie")
 public class MovieController {
     private MovieDao movieService;
-    private DiscountDao discountDao;
-    private TheaterDao theaterDao;
-    private SlideshowDao slideshowDao;
     private ShowtimeDao showtimeDao;
-    private MovieRepository movieRepository;
-    private TrailerDaoImpl trailerDao;
 
 
     @Autowired
-    public MovieController(MovieDao movieService, DiscountDao discountDao, TheaterDao theaterDao, SlideshowDao slideshowDao, ShowtimeDao showtimeDao, MovieRepository movieRepository, TrailerDaoImpl trailerDao) {
+    public MovieController(MovieDao movieService, ShowtimeDao showtimeDao) {
         this.movieService = movieService;
-        this.discountDao = discountDao;
-        this.theaterDao = theaterDao;
-        this.slideshowDao = slideshowDao;
         this.showtimeDao = showtimeDao;
-        this.movieRepository = movieRepository;
-        this.trailerDao = trailerDao;
     }
+
+
 
     @GetMapping("/public/{id}")
     public MovieDetailDto getMovieById(@PathVariable("id") long id){
@@ -63,7 +53,7 @@ public class MovieController {
 
     @GetMapping("/public/slideshow")
     public List<Slideshow> getAllSlideshow(){
-        return slideshowDao.getAllSlideshow();
+        return movieService.getAllSlideshow();
     }
 
     @GetMapping("/public/genre")
@@ -207,7 +197,7 @@ public class MovieController {
     @PostMapping("/addTrailer")
     public String addTrailer(@RequestBody Trailer trailer) {
         // Lưu trailer, nếu trùng movieId thì sẽ cập nhật, không thì sẽ lưu mới
-        trailerDao.saveOrUpdateTrailer(trailer);
+        movieService.saveOrUpdateTrailer(trailer);
         return "redirect:/movies"; // Quay lại trang danh sách movies
     }
 

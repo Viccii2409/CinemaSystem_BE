@@ -33,7 +33,6 @@ public interface UserDao {
 
 
 	public List<Role> getAllRole();
-
 	public Role getRoleById(long id);
 	Role addRole(Role role);
 	Role updateRole(Role role);
@@ -42,6 +41,5 @@ public interface UserDao {
 	public Level getLevelById(long id);
 
 	List<Permission> getAllPermision();
-
 	Permission getPermissionById(Long id);
 }

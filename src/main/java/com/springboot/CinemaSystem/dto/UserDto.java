@@ -28,6 +28,7 @@ public class UserDto {
     private String gender;
     private boolean status;
     private String username;
+    private String password;
     private RoleDto role;
     private List<DiscountDto> discounts;
     private List<BookingDto> bookings;
@@ -52,13 +53,18 @@ public class UserDto {
     // agent
     private String nameManager;
 
+    private long theaterid;
+    private long managerid;
+    private long roleid;
+
+
     public static UserDto toEmployeeDto(Employee employee) {
         UserDto dto = new UserDto();
         dto.setId(employee.getID());
         dto.setUsername(employee.getAccount().getUsername());
         dto.setName(employee.getName());
         dto.setRole(RoleDto.toRoleDto2(employee.getRole()));
-        dto.setStatusEmployee(employee.isStatusEmployee());
+        dto.setStatusEmployee(employee.getStatusEmployee());
         return dto;
     }
 
@@ -71,9 +77,22 @@ public class UserDto {
         dto.setStatus(user.isStatus());
         dto.setRole(RoleDto.toRoleDto(user.getRole()));
         List<DiscountDto> discountDtos = user.getDiscount().stream()
-                .map(entry -> entry.toDiscountDto())
+                .map(entry -> DiscountDto.toDiscountDto(entry))
                 .collect(Collectors.toList());
         dto.setDiscounts(discountDtos);
+        return dto;
+    }
+
+    public static UserDto toUserCheck(User user) {
+        UserDto dto = new UserDto();
+        dto.setId(user.getID());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setDob(user.getDob());
+        dto.setPhone(user.getPhone());
+        dto.setAddress(user.getAddress());
+        dto.setUsername(user.getAccount().getUsername());
+        dto.setRoleid(user.getRole().getID());
         return dto;
     }
 
@@ -93,11 +112,11 @@ public class UserDto {
         RoleDto roleDto = RoleDto.toRoleDto2(user.getRole());
         dto.setRole(roleDto);
         List<DiscountDto> discountDtos = user.getDiscount().stream()
-                .map(entry -> entry.toDiscountDto())
+                .map(entry -> DiscountDto.toDiscountDto(entry))
                 .collect(Collectors.toList());
         dto.setDiscounts(discountDtos);
         List<BookingDto> bookingDtos = user.getBooking().stream()
-                .map(entry -> entry.toBookingDto2())
+                .map(entry -> BookingDto.toBookingDto2(entry))
                 .collect(Collectors.toList());
         dto.setBookings(bookingDtos);
         return dto;
@@ -119,7 +138,7 @@ public class UserDto {
         User user = employee;
         UserDto dto = convertUsertoUserDto(user);
         dto.setPosition(employee.getPosition());
-        dto.setStatusEmployee(employee.isStatusEmployee());
+        dto.setStatusEmployee(employee.getStatusEmployee());
         dto.setDayInWork(employee.getDayInWork());
         return dto;
     }

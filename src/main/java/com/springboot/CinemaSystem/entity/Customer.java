@@ -1,16 +1,12 @@
 package com.springboot.CinemaSystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.springboot.CinemaSystem.dto.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Date;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Data
 @Entity
@@ -35,15 +31,15 @@ public class Customer extends User {
 
 
 
-	public static Customer toCustomer(UserRegisterDto userRegisterDto) {
+	public static Customer toCustomer(UserDto userDto) {
 		Customer customer = new Customer();
-		customer.setName(userRegisterDto.getName());
-		customer.setGender(userRegisterDto.getGender());
-		customer.setDob(userRegisterDto.getDob());
-		customer.setPhone(userRegisterDto.getPhone());
-		customer.setAddress(userRegisterDto.getAddress());
-		customer.setEmail(userRegisterDto.getEmail());
-		customer.setAccount(new Account(userRegisterDto.getEmail(), userRegisterDto.getPassword()));
+		customer.setName(userDto.getName());
+		customer.setGender(userDto.getGender());
+		customer.setDob(userDto.getDob());
+		customer.setPhone(userDto.getPhone());
+		customer.setAddress(userDto.getAddress());
+		customer.setEmail(userDto.getEmail());
+		customer.setAccount(new Account(userDto.getEmail(), userDto.getPassword()));
 		return customer;
 	}
 

@@ -24,26 +24,25 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
 	private UserRepository userRepository;
 	private AgentRepository agentRepository;
 	private CustomerRepository customerRepository;
-	@Autowired
 	private EmployeeRepository employeeRepository;
-	@Autowired
 	private ManagerRepository managerRepository;
-	@Autowired
 	private AdminRepository adminRepository;
-	@Autowired
 	private LevelRepository levelRepository;
-
-	@Autowired
 	private RoleRepository roleRepository;
-
-	@Autowired
 	private PermisionRepository permisionRepository;
 
 	@Autowired
-	public UserDaoImpl(UserRepository userRepository, AgentRepository agentRepository, CustomerRepository customerRepository) {
+	public UserDaoImpl(UserRepository userRepository, AgentRepository agentRepository, CustomerRepository customerRepository, EmployeeRepository employeeRepository, ManagerRepository managerRepository, AdminRepository adminRepository, LevelRepository levelRepository, RoleRepository roleRepository, PermisionRepository permisionRepository, EntityManager entityManager) {
 		this.userRepository = userRepository;
 		this.agentRepository = agentRepository;
 		this.customerRepository = customerRepository;
+		this.employeeRepository = employeeRepository;
+		this.managerRepository = managerRepository;
+		this.adminRepository = adminRepository;
+		this.levelRepository = levelRepository;
+		this.roleRepository = roleRepository;
+		this.permisionRepository = permisionRepository;
+		this.entityManager = entityManager;
 	}
 
 	@PersistenceContext

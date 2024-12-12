@@ -35,8 +35,4 @@ public class TypeSeat {
 		this.ID = ID;
 	}
 
-	public TypeSeatDto toTypeSeatDto() {
-		return new TypeSeatDto(this.getID(), this.getName(), this.surcharge);
-	}
-
 }

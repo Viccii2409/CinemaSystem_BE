@@ -9,7 +9,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentRequestDto {
+public class PaymentDto {
     private long showtimeid;
     private long userid;
     private long discountid;
@@ -21,5 +21,5 @@ public class PaymentRequestDto {
     private float received;
     private float moneyReturned;
     private Map<Long, Map<Long, Integer>> paytypecustomer;
-    private List<TicketRequestDto> ticket;
+    private List<TicketDto> ticket;
 }
