@@ -33,7 +33,10 @@ public class Feedback {
 	private Booking booking;
 
 	public FeedbackDto toFeedbackDto() {
-		BookingDto bookingDto = new BookingDto();
+		BookingDto bookingDto = new BookingDto(booking.getID(),
+				booking.getShowtime().getMovie().getId(),
+				booking.getUser().getName(),
+				booking.getUser().getImage());
 		return new FeedbackDto(this.ID, this.text, this.date, this.star,bookingDto);	}
 
 

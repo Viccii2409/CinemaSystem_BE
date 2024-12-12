@@ -1,6 +1,5 @@
 package com.springboot.CinemaSystem.repository;
 
-import com.springboot.CinemaSystem.dto.FeedbackDto;
 import com.springboot.CinemaSystem.entity.Feedback;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,5 +15,5 @@ public interface FeedbackRepository extends JpaRepository<Feedback,Long> {
     @Query("SELECT f FROM Feedback f WHERE f.movie.id = :movieId")
     List<Feedback> findByMovieId(@Param("movieId") long movieId);
     // Kiểm tra xem đã có Feedback cho booking và movie này chưa
-    boolean existsByBooking_IDAndMovieId(long bookingID, long movieID);
+    boolean existsByBooking_ID(long bookingID);
 }

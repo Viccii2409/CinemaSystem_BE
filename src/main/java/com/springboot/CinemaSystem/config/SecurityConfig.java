@@ -57,10 +57,11 @@ public class SecurityConfig{
                 .csrf(csrf -> csrf.disable()) // Tắt CSRF nếu ứng dụng của bạn là stateless
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers(
-                                "/api/theater/public/*",
-                                "/api/movie/public/*",
-                                "/api/ticket/public/*",
-                                "/api/user/public/*")
+                                "/api/theater/public/**",
+                                "/api/movie/public/**",
+                                "/api/ticket/public/**",
+                                "/api/user/public/**",
+                                "/api/feedback/public/*")
                         .permitAll()
                         .anyRequest().authenticated()
                 )

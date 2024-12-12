@@ -34,6 +34,7 @@ public class BookingDto {
     private float amount;
 
     private String nameCustomer;
+    private String imageCustomer;
     private String phone;
     private String email;
 
@@ -91,8 +92,10 @@ public class BookingDto {
         this.feedback = feedback;
     }
 
-    public BookingDto(long ID, long movieID) {
+    public BookingDto(long ID, long movieID,String nameCustomer,String imageCustomer) {
         this.ID=ID;
         this.movieID=movieID;
+        this.nameCustomer=nameCustomer;
+    this.imageCustomer=imageCustomer;
     }
 }

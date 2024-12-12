@@ -232,7 +232,14 @@ public class UserController {
         userDao.deleteRole(role);
         return true;
     }
-
+    @GetMapping("/public/recommend/{customerID}")
+    public List<MovieDto> recommendMovies(@PathVariable("customerID") Long customerID) {
+        List<Genre> genres = movieDao.customerGenre(customerID);
+        List<Long> genreIds = genres.stream()
+                .map(Genre::getID)
+                .collect(Collectors.toList());
+        return  movieDao.recommendMovies(genreIds);
+    }
 
 
 //    @GetMapping("/inforaccount/{id}")
@@ -319,12 +326,5 @@ public class UserController {
 //            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cập nhật thất bại: " + e.getMessage());
 //        }
 //    }
-    @GetMapping("/recommend/{customerID}")
-    public List<MovieDto> recommendMovies(@PathVariable("customerID") Long customerID) {
-        List<Genre> genres = movieDao.customerGenre(customerID);
-        List<Long> genreIds = genres.stream()
-                .map(Genre::getID)
-                .collect(Collectors.toList());
-        return  movieDao.recommendMovies(genreIds);
-    }
+
 }

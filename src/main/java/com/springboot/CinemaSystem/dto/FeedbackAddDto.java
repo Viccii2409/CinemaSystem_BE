@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FeedbackAddDto {
+    private long bookingId;
     private String text;
     private String star;
 }

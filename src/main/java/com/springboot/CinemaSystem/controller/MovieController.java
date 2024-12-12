@@ -83,8 +83,7 @@ public class MovieController {
         return showtimeDao.getAllTimeFrames();
     }
 
-    @PreAuthorize("hasAuthority('MANAGER_GENRE')")
-    @GetMapping("/genre")
+    @GetMapping("/public/genre")
     public List<GenreDto> getAllGenres(){
         List<GenreDto> genreDtos = new ArrayList<>();
         List<Genre> genres = movieService.getAllGenres();

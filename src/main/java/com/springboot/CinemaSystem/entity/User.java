@@ -29,6 +29,7 @@ public class User {
 	private String image;
 	private LocalDateTime startDate;
 	private String name;
+	private boolean status;
 	@Embedded
 	private Account account;
 //    @Column(insertable = false, updatable = false)	// không được phép thay đổi (update) hoặc chèn (insert) thông qua các thao tác của JPA

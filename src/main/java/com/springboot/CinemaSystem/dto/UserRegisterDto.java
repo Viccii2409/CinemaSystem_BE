@@ -18,4 +18,5 @@ public class UserRegisterDto {
     private Date dob;
     private String password;
     private String address;
+    private String phone;
 }

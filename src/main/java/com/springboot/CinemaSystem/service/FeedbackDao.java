@@ -13,5 +13,5 @@ public interface FeedbackDao {
 	public List<Feedback> getFeedbacksByRating(int ratingID, int movieID);
 
 
-	boolean existsByBookingIdAndMovieId(long bookingID, long movieID);
+	boolean existsByBookingIdAndMovieId(long bookingID);
 }

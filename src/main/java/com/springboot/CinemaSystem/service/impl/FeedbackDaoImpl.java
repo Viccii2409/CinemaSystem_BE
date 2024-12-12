@@ -3,7 +3,6 @@ package com.springboot.CinemaSystem.service.impl;
 
 import com.springboot.CinemaSystem.dto.BookingDto;
 import com.springboot.CinemaSystem.dto.FeedbackDto;
-import com.springboot.CinemaSystem.entity.Booking;
 import com.springboot.CinemaSystem.entity.Feedback;
 import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.repository.BookingRepository;
@@ -47,7 +46,9 @@ public class FeedbackDaoImpl implements FeedbackDao {
 				feedback.getStar(),
 				new BookingDto(
 						feedback.getBooking().getID(),
-						feedback.getBooking().getShowtime().getMovie().getId()
+						feedback.getBooking().getShowtime().getMovie().getId(),
+						feedback.getBooking().getUser().getName(),
+						feedback.getBooking().getUser().getImage()
 				)
 		);
 	};
@@ -68,7 +69,7 @@ public class FeedbackDaoImpl implements FeedbackDao {
 	}
 
 	@Override
-	public boolean existsByBookingIdAndMovieId(long bookingID, long movieID) {
-		return feedbackRepository.existsByBooking_IDAndMovieId(bookingID, movieID);
+	public boolean existsByBookingIdAndMovieId(long bookingID) {
+		return feedbackRepository.existsByBooking_ID(bookingID);
 	}
 }

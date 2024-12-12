@@ -11,6 +11,7 @@ import com.springboot.CinemaSystem.repository.BookingRepository;
 import com.springboot.CinemaSystem.repository.MovieRepository;
 import com.springboot.CinemaSystem.service.FeedbackDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,30 +26,29 @@ public class FeedbackController {
 private BookingRepository bookingRepository;
 @Autowired
 private MovieRepository movieRepository;
-
-    @PostMapping("add")
-    public FeedbackDto addFeedback(@ModelAttribute FeedbackAddDto feedbackAddDto,  @RequestParam long movieId, @RequestParam long bookingId){
+@PreAuthorize("hasAuthority('VIEW_CUSTOMER_INFOR')")
+    @PostMapping("/add-feedback")
+    public FeedbackDto addFeedback(@RequestBody FeedbackAddDto feedbackAddDto){
         try {
             if (feedbackAddDto == null || feedbackAddDto.getText() == null || feedbackAddDto.getStar() == null) {
                 throw new IllegalArgumentException("Thiếu thông tin cần thiết cho Feedback");
             }
 
-            // Lấy Movie và Booking từ cơ sở dữ liệu
-            Movie movie = movieRepository.findById(movieId).orElseThrow(() -> new IllegalArgumentException("Movie not found"));
-            Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new IllegalArgumentException("Booking not found"));
-            // Kiểm tra xem đã có Feedback cho booking và movie này chưa
-            if (feedbackDao.existsByBookingIdAndMovieId(bookingId, movieId)) {
-                throw new IllegalArgumentException("Feedback đã tồn tại cho booking và movie này");
+            // Lấy Booking từ cơ sở dữ liệu
+            Booking booking = bookingRepository.findById(feedbackAddDto.getBookingId()).orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+            // Kiểm tra xem đã có Feedback cho booking này chưa
+            if (feedbackDao.existsByBookingIdAndMovieId(feedbackAddDto.getBookingId())) {
+                throw new IllegalArgumentException("Feedback đã tồn tại cho booking này");
             }
             // Chuyển đổi FeedbackAddDto thành Feedback entity
-            Feedback feedback = FeedbackMapper.toFeedbackAdd(feedbackAddDto, movie, booking);
+            Feedback feedback = FeedbackMapper.toFeedbackAdd(feedbackAddDto, booking);
             Feedback saveFeedback = feedbackDao.addFeedback(feedback);
             return FeedbackMapper.toFeedbackDto(saveFeedback);
         } catch (Exception e) {
             throw new DataProcessingException("Lỗi thêm feedback: " + e.getMessage());
         }
     }
-    @GetMapping("/{movieId}")
+    @GetMapping("/public/{movieId}")
     public List<FeedbackDto> getFeedbackByMovie(@PathVariable long movieId) {
         return feedbackDao.getFeedbackByMovie(movieId);
     }
