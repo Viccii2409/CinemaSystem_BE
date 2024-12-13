@@ -15,10 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -42,7 +39,6 @@ public class TheaterController {
         }
         return theaters;
     }
-
     @PreAuthorize("hasAuthority('MANAGER_THEATER')")
     @PutMapping("/{id}/updatestatus")
     public boolean updateStatusTheater(@PathVariable("id") long id){
@@ -92,8 +88,7 @@ public class TheaterController {
 
     }
 
-    @PreAuthorize("hasAuthority('MANAGER_THEATER')")
-    @GetMapping("/{id}")
+    @GetMapping("/public/{id}")
     public TheaterViewDto getTheaterById(@PathVariable("id") long id){
         Theater theater = theaterDao.getTheaterByID(id);
         if(theater != null ){

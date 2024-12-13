@@ -87,6 +87,7 @@ public class Customer extends User {
 				this.getEmail(),
 				this.getPhone(),
 				this.getImage(),
+				this.isStatus(),
 				this.getStartDate(),
 				this.getPoints(),
 				this.getLevel().toLevelDto(),

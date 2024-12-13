@@ -8,6 +8,7 @@ import com.springboot.CinemaSystem.entity.*;
 import java.sql.Time;
 import java.sql.Date;
 import java.util.List;
+import java.util.Optional;
 
 public interface TheaterDao {
 
@@ -52,6 +53,8 @@ public interface TheaterDao {
 	public TheaterMovieDto getShowtimeByTheater(Theater theater);
 
 	public List<TheaterExceptDto> getTheatersExcept(long theaterID);
+
+	public Optional<Theater> getTheaterCustomer(long theaterID);
 
 //	// Phương thức tìm các rạp có status = true
 //	List<Theater> findByStatus(boolean status);

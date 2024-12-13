@@ -2,14 +2,12 @@ package com.springboot.CinemaSystem.controller;
 
 import com.springboot.CinemaSystem.dto.*;
 import com.springboot.CinemaSystem.entity.*;
-import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.filter.JwtTokenUtil;
 import com.springboot.CinemaSystem.service.FileStorageService;
 import com.springboot.CinemaSystem.service.MovieDao;
 import com.springboot.CinemaSystem.service.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -241,21 +239,18 @@ public class UserController {
         return  movieDao.recommendMovies(genreIds);
     }
 
-
+//    @PreAuthorize("hasAuthority('MANAGER_CUSTOMER')")
 //    @GetMapping("/inforaccount/{id}")
 //    public CustomerDto getCustomerInfor(@PathVariable("id") long id) {
 //        Customer customer = userDao.getCustomerById(id);
-//        return customer.toCustomerDto2();
+//        return customer.toCustomerDto();
 //    }
+@PreAuthorize("hasAuthority('MANAGER_CUSTOMER')")
+    @GetMapping("/all-customers")
+    public List<CustomerDto> getAllCustomers() {
+        return userDao.getAllCustomers();
 
-//    @GetMapping("/all-customers")
-//    public List<UserDto> getAllCustomers() {
-//        List<UserDto> customers = userDao.getAllCustomers();
-//        if ( customers.isEmpty()) {
-//            throw new NotFoundException("No customers found.");
-//        }
-//        return customers;
-//    }
+    }
 
 //    public static class LoginResponse {
 //        private String token;

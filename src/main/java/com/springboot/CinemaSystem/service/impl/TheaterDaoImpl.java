@@ -18,6 +18,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -107,6 +108,11 @@ public class TheaterDaoImpl implements TheaterDao {
 	@Override
 	public List<TheaterExceptDto> getTheatersExcept(long theaterID) {
 		return theaterRepository.findAllExcept(theaterID);
+	}
+
+	@Override
+	public Optional<Theater> getTheaterCustomer(long theaterID) {
+		return theaterRepository.findById(theaterID);
 	}
 
 	@Override

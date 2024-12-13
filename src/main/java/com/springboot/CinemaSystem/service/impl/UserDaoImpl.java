@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.service.impl;
 
+import com.springboot.CinemaSystem.dto.CustomerDto;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.exception.NotFoundException;
@@ -83,14 +84,23 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
 	}
 
 	@Override
-	public List<Customer> getAllCustomers() {
+	public List<CustomerDto> getAllCustomers() {
 		try {
-			return customerRepository.findAll();
+			return customerRepository.findAll().stream()
+					.map(this::convertToDto)
+					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new NotFoundException("Error getAllCustomers: " + e.getMessage());
 		}
 	}
-
+private CustomerDto convertToDto(Customer customer){
+		return new CustomerDto(
+				customer.getID(),
+				customer.getEmail(),
+				customer.getPhone(),
+				customer.getName(), customer.getAddress()
+		);
+}
 	@Override
 	public UserDetails loadUserByUsername(String username) {
 		User user = userRepository.findByUsername(username)

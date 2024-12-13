@@ -21,6 +21,7 @@ public class CustomerDto {
     private String email;
     private String phone;
     private String image;
+    private boolean status;
     private LocalDateTime startDate;
     private int points;
     private LevelDto level;
@@ -45,7 +46,7 @@ public class CustomerDto {
         this.discounts = discounts;
     }
 
-    public CustomerDto(long ID, String gender, Date dob, String address, String email, String phone, String image, LocalDateTime startDate, String username, int points, LevelDto level, List<DiscountDto> discounts, String name, List<BookingDto> bookings) {
+    public CustomerDto(long ID, String gender, Date dob, String address, String email, String phone, String image,boolean status, LocalDateTime startDate, String username, int points, LevelDto level, List<DiscountDto> discounts, String name, List<BookingDto> bookings) {
         this.ID = ID;
         this.gender = gender;
         this.dob = dob;
@@ -53,6 +54,7 @@ public class CustomerDto {
         this.email = email;
         this.phone = phone;
         this.image = image;
+        this.status=status;
         this.startDate = startDate;
         this.username = username;
         this.points = points;
@@ -60,5 +62,13 @@ public class CustomerDto {
         this.discounts = discounts;
         this.name = name;
         this.bookings = bookings;
+    }
+
+    public CustomerDto(long ID, String email, String phone, String name, String address) {
+        this.ID=ID;
+        this.email=email;
+        this.phone=phone;
+        this.name=name;
+        this.address=address;
     }
 }

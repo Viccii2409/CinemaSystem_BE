@@ -1,6 +1,7 @@
 package com.springboot.CinemaSystem.service;
 
 
+import com.springboot.CinemaSystem.dto.CustomerDto;
 import com.springboot.CinemaSystem.entity.*;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -12,7 +13,7 @@ public interface UserDao {
 	public Customer getCustomerById(long id);
 	public Customer addCustomer(Customer customer);
 	public void updateCustomer(Customer customer);
-	public List<Customer> getAllCustomers();
+	public List<CustomerDto> getAllCustomers();
 	public UserDetails loadUserByUsername(String username);
 	public User getUserByUsername(String username);
 

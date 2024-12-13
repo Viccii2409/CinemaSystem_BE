@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class MovieDto {
     private Long id;
     private String title;
-    private String link;
+    private String image;
     private LocalDate releaseDate;
     private boolean status;
     private List<GenreDto> genres;

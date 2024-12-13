@@ -3,13 +3,16 @@ package com.springboot.CinemaSystem.service.impl;
 
 import com.springboot.CinemaSystem.dto.GenreDto;
 import com.springboot.CinemaSystem.dto.MovieDto;
+import com.springboot.CinemaSystem.dto.MovieRequestDto;
 import com.springboot.CinemaSystem.dto.ShowtimeTheaterIDDto;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.repository.*;
+import com.springboot.CinemaSystem.service.FileStorageService;
 import com.springboot.CinemaSystem.service.MovieDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -20,16 +23,14 @@ public class MovieDaoImpl implements MovieDao {
 
 	private GenreRepository genreRepository;
 	private MovieRepository movieRepository;
-	private TrailerRepository trailerRepository;
-	private ImageRepository imageRepository;
 private CustomerRepository customerRepository;
+	private final FileStorageService fileStorageService;
 	@Autowired
-	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository, TrailerRepository trailerRepository, ImageRepository imageRepository,CustomerRepository customerRepository) {
+	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository, CustomerRepository customerRepository,FileStorageService fileStorageService) {
 		this.genreRepository = genreRepository;
 		this.movieRepository = movieRepository;
-		this.trailerRepository = trailerRepository;
-		this.imageRepository = imageRepository;
 		this.customerRepository=customerRepository;
+		this.fileStorageService = fileStorageService;
 	}
 
 
@@ -39,64 +40,55 @@ private CustomerRepository customerRepository;
 		return true;
 	}
 
-
 	@Override
-	public boolean editMovie(Long ID, Movie movie) {
-		if (movieRepository.existsById(ID)) {
-			// Lấy movie hiện tại từ database
-			Movie existingMovie = movieRepository.findById(ID).orElseThrow(() -> new RuntimeException("Movie not found"));
+	public Movie editMovie(long id, MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile) {
+		// Kiểm tra sự tồn tại của phim với id
+		Optional<Movie> movieOpt = movieRepository.findById(id);
+		if (movieOpt.isPresent()) {
+			Movie movie = movieOpt.get();
 
-			// Cập nhật các trường của movie nếu cần
-			existingMovie.setTitle(movie.getTitle());
-			existingMovie.setDuration(movie.getDuration());
-			existingMovie.setReleaseDate(movie.getReleaseDate());
-			existingMovie.setDescription(movie.getDescription());
-			existingMovie.setStatus(movie.isStatus());
-			existingMovie.setLanguage(movie.getLanguage());
-			existingMovie.setRating(movie.getRating());
-			existingMovie.setDirector(movie.getDirector());
+			// Cập nhật các thuộc tính cơ bản của phim
+			movie.setTitle(movieRequestDto.getTitle());
+			movie.setDuration(movieRequestDto.getDuration());
+			movie.setReleaseDate(movieRequestDto.getReleaseDate());
+			movie.setDescription(movieRequestDto.getDescription());
+			movie.setDirector(movieRequestDto.getDirector());
+			movie.setCast(movieRequestDto.getCast());
+			movie.setLanguage(movieRequestDto.getLanguage());
 
-			// Cập nhật danh sách cast (nếu có sự thay đổi)
-			if (movie.getCast() != null) {
-				existingMovie.setCast(movie.getCast());
-			}
+			// Cập nhật thể loại
+			List<Genre> genres = movieRequestDto.getGenre()
+					.stream()
+					.map(dto -> genreRepository.findById(dto.getID())
+							.orElseThrow(() -> new RuntimeException("Genre not found")))
+					.collect(Collectors.toList());
+			movie.setGenres(genres);
 
-			// Cập nhật danh sách genre (nếu có sự thay đổi)
-			if (movie.getGenre() != null) {
-				existingMovie.setGenre(movie.getGenre());
-			}
-
-
-			// Cập nhật trailer (nếu có sự thay đổi)
-			Trailer trailer = movie.getTrailer();
-			if (trailer != null) {
-				// Kiểm tra trailer đã tồn tại chưa, nếu có thì cập nhật
-				Optional<Trailer> existingTrailer = trailerRepository.findByMovieId(existingMovie.getId());
-				if (existingTrailer.isPresent()) {
-					// Cập nhật trailer nếu đã tồn tại
-					Trailer currentTrailer = existingTrailer.get();
-					currentTrailer.setDescription(trailer.getDescription());
-					currentTrailer.setLink(trailer.getLink());
-					trailerRepository.save(currentTrailer);  // Cập nhật trailer
-				} else {
-					// Nếu trailer chưa có, lưu mới
-					trailer.setMovie(existingMovie);  // Đảm bảo liên kết 2 chiều
-					trailerRepository.save(trailer);  // Lưu trailer mới
+			try {
+				// Upload ảnh lên Cloudinary vào thư mục 'Movie' nếu có thay đổi
+				if (imageFile != null && !imageFile.isEmpty()) {
+					String imageUrl = fileStorageService.saveFileMovieAndTrailer(imageFile, "Movie");
+					movie.setImage(imageUrl);  // Cập nhật ảnh mới
 				}
+
+				// Upload trailer lên Cloudinary vào thư mục 'Trailer' nếu có thay đổi
+				if (trailerFile != null && !trailerFile.isEmpty()) {
+					String trailerUrl = fileStorageService.saveFileMovieAndTrailer(trailerFile, "Trailer");
+					movie.setTrailer(trailerUrl);  // Cập nhật trailer mới
+				}
+
+			} catch (Exception e) {
+				throw new RuntimeException("Failed to upload files to Cloudinary", e);  // Nếu có lỗi khi upload
 			}
 
-			if (movie.getImage() != null) {
-				existingMovie.getImage().clear();
-				movie.getImage().forEach(image -> image.setMovie(existingMovie));  // Gán movie cho ảnh
-				imageRepository.saveAll(movie.getImage());
-			}
-
-			// Lưu movie đã cập nhật
-			movieRepository.save(existingMovie);
-			return true;
+			// Lưu lại thông tin phim đã chỉnh sửa vào cơ sở dữ liệu
+			return movieRepository.save(movie);
+		} else {
+			throw new RuntimeException("Movie not found with id " + id);  // Trường hợp không tìm thấy phim với id
 		}
-		return false;  // Trường hợp không tìm thấy movie với ID
 	}
+
+
 	public List<Genre> customerGenre(Long customerID){
 		return customerRepository.findGenresByCustomerId(customerID);
 	}
@@ -127,15 +119,13 @@ private CustomerRepository customerRepository;
 
 
 	private MovieDto convertToDto(Movie movie) {
-		// Kiểm tra danh sách image
-		String link = (movie.getImage() == null || movie.getImage().isEmpty()) ? null : movie.getImage().get(0).getLink();
 		List<GenreDto> genreDtos = movie.getGenre().stream()
 				.map(Genre::toGenreDto)
 				.collect(Collectors.toList());
 		return new MovieDto(
 				movie.getId(),
 				movie.getTitle(),
-				link,
+				movie.getImage(),
 				movie.getReleaseDate(),
 				movie.isStatus(),
 				genreDtos,
@@ -343,36 +333,6 @@ private CustomerRepository customerRepository;
 	@Override
 	public List<Language> getAllLanguages() {
 		return List.of();
-	}
-
-	@Override
-	public boolean addTrailer(Trailer trailer) {
-		return false;
-	}
-
-	@Override
-	public boolean updateTrailer(Trailer trailer) {
-		return false;
-	}
-
-	@Override
-	public Trailer getTrailerByID(int trailerID) {
-		return null;
-	}
-
-	@Override
-	public Image getImage(int imageID) {
-		return null;
-	}
-
-	@Override
-	public boolean addImage(Image image) {
-		return false;
-	}
-
-	@Override
-	public boolean updateImage(Image image) {
-		return false;
 	}
 
 	@Override
