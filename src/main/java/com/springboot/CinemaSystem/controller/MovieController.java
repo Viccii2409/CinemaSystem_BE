@@ -266,7 +266,7 @@ public class MovieController {
 
     // Sửa lịch chiếu
     @PutMapping("/showtime/update/{showtimeId}")
-    public ResponseEntity<Void> updateShowtime(@PathVariable long showtimeId, @RequestBody ShowtimeRequestDto showtimeRequestDto) {
+    public ResponseEntity<Showtime> updateShowtime(@PathVariable long showtimeId, @RequestBody ShowtimeRequestDto showtimeRequestDto) {
         showtimeDao.updateShowtime(showtimeId, showtimeRequestDto);
         return ResponseEntity.ok().build();
     }
@@ -284,6 +284,17 @@ public class MovieController {
         showtimeDao.hideShowtimesByMovie(movieId);
         return ResponseEntity.ok().build();
     }
+    // API để lấy chi tiết lịch chiếu
+    @GetMapping("/showtime/{id}")
+    public ResponseEntity<ShowtimeDetailDto> getShowtimeDetail(@PathVariable long id) {
+        ShowtimeDetailDto showtimeDetail = showtimeDao.getShowtimeDetailById(id);
+        if (showtimeDetail != null) {
+            return ResponseEntity.ok(showtimeDetail);
+        } else {
+            return ResponseEntity.notFound().build();  // Nếu không tìm thấy lịch chiếu
+        }
+    }
+
 
 //    // API trả về danh sách các rạp có status = 1 (hoạt động)
 //    @GetMapping("/theaters")

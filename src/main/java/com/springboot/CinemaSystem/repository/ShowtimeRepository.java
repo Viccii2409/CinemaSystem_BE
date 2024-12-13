@@ -14,6 +14,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ShowtimeRepository extends JpaRepository<Showtime, Long> {
@@ -46,7 +47,7 @@ public interface ShowtimeRepository extends JpaRepository<Showtime, Long> {
 //    public List<Showtime> findByRoomIdAndDate(long roomId, LocalDate date);
 //    public List<Showtime> findByMovieStatusAndDateAfter(int movieStatus, LocalDate date);
 
-    // check trùng
+    // check trùng cho thêm mới
     @Query("SELECT s FROM Showtime s WHERE s.room.ID = :roomId " +
             "AND s.date = :date " +
             "AND ((:startTime BETWEEN s.startTime AND s.endTime) " +
@@ -56,6 +57,16 @@ public interface ShowtimeRepository extends JpaRepository<Showtime, Long> {
                                                    @Param("date") Date date,
                                                    @Param("startTime") Time startTime,
                                                    @Param("endTime") Time endTime);
+
+    // check trùng hco cập nhật
+    @Query("SELECT s FROM Showtime s WHERE s.room.id = :roomId AND s.date = :date " +
+            "AND (:startTime < s.endTime AND :endTime > s.startTime) AND s.id <> :showtimeId")
+    List<Showtime> findConflictingShowtimesExcludeCurrent(@Param("roomId") long roomId,
+                                                          @Param("date") Date date,
+                                                          @Param("startTime") Time startTime,
+                                                          @Param("endTime") Time endTime,
+                                                          @Param("showtimeId") Long showtimeId);
+
 
     // Ẩn hoặc mở lịch chiếu theo yêu cầu người dùng
     @Transactional
@@ -105,6 +116,8 @@ public interface ShowtimeRepository extends JpaRepository<Showtime, Long> {
             "WHERE s.date = :date AND r.ID = :roomId")
     List<ShowtimeDto> findShowtimesByDateAndRoom(@Param("date") LocalDate date, @Param("roomId") long roomId);
 
+    // Tìm lịch chiếu theo ID
+    Optional<Showtime> findById(long showtimeId);
 
 }
 
