@@ -1,6 +1,5 @@
 package com.springboot.CinemaSystem.repository;
 
-import com.springboot.CinemaSystem.dto.CustomerDto;
 import com.springboot.CinemaSystem.entity.Customer;
 import com.springboot.CinemaSystem.entity.Genre;
 import org.springframework.data.jpa.repository.JpaRepository;

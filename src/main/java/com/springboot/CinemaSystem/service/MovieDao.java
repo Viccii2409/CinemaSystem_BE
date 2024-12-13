@@ -10,9 +10,11 @@ import java.util.List;
 
 public interface MovieDao {
 	public boolean addMovie(Movie movie);
-	public Movie editMovie(long id, MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile);
+//	public Movie editMovie(long id, MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile);
 	public List<MovieDto> getCommingSoonMovie();
 	public List<MovieDto> getShowingNowMovie();
+	public List<Slideshow> getAllSlideshow();
+//	public Trailer saveOrUpdateTrailer(Trailer trailer);
 	public boolean updateStatusMovie(int movieID);
 	public Movie getMovieByID(int movieID);
 	public List<Movie> getAllMovies();

@@ -1,10 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
-import com.springboot.CinemaSystem.dto.PermissionDto;
-import com.springboot.CinemaSystem.dto.RoleDto;
-import com.springboot.CinemaSystem.dto.UserRegisterDto;
-import com.springboot.CinemaSystem.dto.UserVerifyDto;
 import jakarta.persistence.*;
 import lombok.*;
 import java.sql.Date;
@@ -38,7 +34,7 @@ public class User {
 	@Transient
 	private double totalSpending;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "roleID")
 	private Role role;
 
@@ -58,41 +54,10 @@ public class User {
 	)
 	private List<Discount> discount;
 
-//	public User(String name, String gender, Date dob, String address, String email, Account account) {
-//		this.name = name;
-//		this.gender = gender;
-//		this.dob = dob;
-//		this.address = address;
-//		this.email = email;
-//		this.account = account;
-//	}
-
 	@PrePersist
 	private void prePersistDate() {
 		if (this.startDate == null) {
 			this.startDate = LocalDateTime.now();
 		}
-	}
-
-	public UserVerifyDto toUserVerifyDto() {
-		return new UserVerifyDto(
-				this.ID,
-				this.name,
-				this.dob,
-				this.address,
-				this.email,
-				this.phone,
-				this.image,
-				this.status,
-				new RoleDto(
-						this.role.getID(),
-						this.role.getName(),
-						this.role.getUsers().size(),
-						this.role.getPermission().stream()
-						.map(entry -> new PermissionDto(entry.getID(), entry.getName()))
-						.collect(Collectors.toList())
-				),
-				this.discount.stream().map(entry -> entry.toDiscountDto()).collect(Collectors.toList())
-		);
 	}
 }

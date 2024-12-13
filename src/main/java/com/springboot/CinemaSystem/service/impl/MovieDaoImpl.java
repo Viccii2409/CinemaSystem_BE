@@ -3,12 +3,12 @@ package com.springboot.CinemaSystem.service.impl;
 
 import com.springboot.CinemaSystem.dto.GenreDto;
 import com.springboot.CinemaSystem.dto.MovieDto;
-import com.springboot.CinemaSystem.dto.MovieRequestDto;
 import com.springboot.CinemaSystem.dto.ShowtimeTheaterIDDto;
 import com.springboot.CinemaSystem.entity.*;
+import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.repository.*;
-import com.springboot.CinemaSystem.service.FileStorageService;
+import com.springboot.CinemaSystem.service.FileStorageDao;
 import com.springboot.CinemaSystem.service.MovieDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,15 +23,19 @@ public class MovieDaoImpl implements MovieDao {
 
 	private GenreRepository genreRepository;
 	private MovieRepository movieRepository;
-private CustomerRepository customerRepository;
-	private final FileStorageService fileStorageService;
+    private CustomerRepository customerRepository;
+	private SlideshowRepository slideshowRepository;
+    private FileStorageDao fileStorageDao;
+
 	@Autowired
-	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository, CustomerRepository customerRepository,FileStorageService fileStorageService) {
+	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository, CustomerRepository customerRepository, SlideshowRepository slideshowRepository, FileStorageDao fileStorageDao) {
 		this.genreRepository = genreRepository;
 		this.movieRepository = movieRepository;
-		this.customerRepository=customerRepository;
-		this.fileStorageService = fileStorageService;
+        this.customerRepository=customerRepository;
+		this.slideshowRepository = slideshowRepository;
+		this.fileStorageDao = fileStorageDao;
 	}
+
 
 
 	@Override
@@ -40,53 +44,53 @@ private CustomerRepository customerRepository;
 		return true;
 	}
 
-	@Override
-	public Movie editMovie(long id, MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile) {
-		// Kiểm tra sự tồn tại của phim với id
-		Optional<Movie> movieOpt = movieRepository.findById(id);
-		if (movieOpt.isPresent()) {
-			Movie movie = movieOpt.get();
-
-			// Cập nhật các thuộc tính cơ bản của phim
-			movie.setTitle(movieRequestDto.getTitle());
-			movie.setDuration(movieRequestDto.getDuration());
-			movie.setReleaseDate(movieRequestDto.getReleaseDate());
-			movie.setDescription(movieRequestDto.getDescription());
-			movie.setDirector(movieRequestDto.getDirector());
-			movie.setCast(movieRequestDto.getCast());
-			movie.setLanguage(movieRequestDto.getLanguage());
-
-			// Cập nhật thể loại
-			List<Genre> genres = movieRequestDto.getGenre()
-					.stream()
-					.map(dto -> genreRepository.findById(dto.getID())
-							.orElseThrow(() -> new RuntimeException("Genre not found")))
-					.collect(Collectors.toList());
-			movie.setGenres(genres);
-
-			try {
-				// Upload ảnh lên Cloudinary vào thư mục 'Movie' nếu có thay đổi
-				if (imageFile != null && !imageFile.isEmpty()) {
-					String imageUrl = fileStorageService.saveFileMovieAndTrailer(imageFile, "Movie");
-					movie.setImage(imageUrl);  // Cập nhật ảnh mới
-				}
-
-				// Upload trailer lên Cloudinary vào thư mục 'Trailer' nếu có thay đổi
-				if (trailerFile != null && !trailerFile.isEmpty()) {
-					String trailerUrl = fileStorageService.saveFileMovieAndTrailer(trailerFile, "Trailer");
-					movie.setTrailer(trailerUrl);  // Cập nhật trailer mới
-				}
-
-			} catch (Exception e) {
-				throw new RuntimeException("Failed to upload files to Cloudinary", e);  // Nếu có lỗi khi upload
-			}
-
-			// Lưu lại thông tin phim đã chỉnh sửa vào cơ sở dữ liệu
-			return movieRepository.save(movie);
-		} else {
-			throw new RuntimeException("Movie not found with id " + id);  // Trường hợp không tìm thấy phim với id
-		}
-	}
+//	@Override
+//	public Movie editMovie(long id, MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile) {
+//		// Kiểm tra sự tồn tại của phim với id
+//		Optional<Movie> movieOpt = movieRepository.findById(id);
+//		if (movieOpt.isPresent()) {
+//			Movie movie = movieOpt.get();
+//
+//			// Cập nhật các thuộc tính cơ bản của phim
+//			movie.setTitle(movieRequestDto.getTitle());
+//			movie.setDuration(movieRequestDto.getDuration());
+//			movie.setReleaseDate(movieRequestDto.getReleaseDate());
+//			movie.setDescription(movieRequestDto.getDescription());
+//			movie.setDirector(movieRequestDto.getDirector());
+//			movie.setCast(movieRequestDto.getCast());
+//			movie.setLanguage(movieRequestDto.getLanguage());
+//
+//			// Cập nhật thể loại
+//			List<Genre> genres = movieRequestDto.getGenre()
+//					.stream()
+//					.map(dto -> genreRepository.findById(dto.getID())
+//							.orElseThrow(() -> new RuntimeException("Genre not found")))
+//					.collect(Collectors.toList());
+//			movie.setGenres(genres);
+//
+//			try {
+//				// Upload ảnh lên Cloudinary vào thư mục 'Movie' nếu có thay đổi
+//				if (imageFile != null && !imageFile.isEmpty()) {
+//					String imageUrl = fileStorageDao.saveFileMovieAndTrailer(imageFile, "Movie");
+//					movie.setImage(imageUrl);  // Cập nhật ảnh mới
+//				}
+//
+//				// Upload trailer lên Cloudinary vào thư mục 'Trailer' nếu có thay đổi
+//				if (trailerFile != null && !trailerFile.isEmpty()) {
+//					String trailerUrl = fileStorageDao.saveFileMovieAndTrailer(trailerFile, "Trailer");
+//					movie.setTrailer(trailerUrl);  // Cập nhật trailer mới
+//				}
+//
+//			} catch (Exception e) {
+//				throw new RuntimeException("Failed to upload files to Cloudinary", e);  // Nếu có lỗi khi upload
+//			}
+//
+//			// Lưu lại thông tin phim đã chỉnh sửa vào cơ sở dữ liệu
+//			return movieRepository.save(movie);
+//		} else {
+//			throw new RuntimeException("Movie not found with id " + id);  // Trường hợp không tìm thấy phim với id
+//		}
+//	}
 
 
 	public List<Genre> customerGenre(Long customerID){
@@ -116,6 +120,32 @@ private CustomerRepository customerRepository;
 				.map(this::convertToDto)
 				.collect(Collectors.toList());
 	}
+
+	@Override
+	public List<Slideshow> getAllSlideshow() {
+		try {
+			return slideshowRepository.findAll();
+		} catch (Exception e) {
+			throw new DataProcessingException("Failed to retrieve slideshows: " + e.getMessage());
+		}
+	}
+
+//	@Override
+//	public Trailer saveOrUpdateTrailer(Trailer trailer) {
+//		// Kiểm tra trailer có sẵn với movieId
+//		Optional<Trailer> existingTrailer = trailerRepository.findByMovieId(trailer.getMovie().getId());
+//
+//		if (existingTrailer.isPresent()) {
+//			// Nếu đã tồn tại trailer cho movieId, cập nhật thông tin trailer
+//			Trailer currentTrailer = existingTrailer.get();
+//			currentTrailer.setDescription(trailer.getDescription());
+//			currentTrailer.setLink(trailer.getLink());
+//			return trailerRepository.save(currentTrailer); // Cập nhật trailer
+//		} else {
+//			// Nếu chưa có trailer cho movieId, lưu mới
+//			return trailerRepository.save(trailer);
+//		}
+//	}
 
 
 	private MovieDto convertToDto(Movie movie) {

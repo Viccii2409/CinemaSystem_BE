@@ -4,7 +4,6 @@ import com.springboot.CinemaSystem.dto.*;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.service.*;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -26,6 +25,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/ticket")
@@ -35,26 +35,23 @@ public class TicketController {
     private ShowtimeDao showtimeDao;
     private DiscountDao discountDao;
     private UserDao userDao;
-    private FileStorageService fileStorageService;
+    private FileStorageDao fileStorageDao;
 
     @Autowired
-    public TicketController(TicketDao ticketDao, TheaterDao theaterDao, ShowtimeDao showtimeDao, DiscountDao discountDao, UserDao userDao, FileStorageService fileStorageService) {
+    public TicketController(TicketDao ticketDao, TheaterDao theaterDao, ShowtimeDao showtimeDao, DiscountDao discountDao, UserDao userDao, FileStorageDao fileStorageDao) {
         this.ticketDao = ticketDao;
         this.theaterDao = theaterDao;
         this.showtimeDao = showtimeDao;
         this.discountDao = discountDao;
         this.userDao = userDao;
-        this.fileStorageService = fileStorageService;
+        this.fileStorageDao = fileStorageDao;
     }
 
     @GetMapping("/public/discount")
     public List<DiscountDto> getAllDiscount() {
-        List<DiscountDto> discountDtos = new ArrayList<>();
-        List<Discount> discounts = discountDao.getAllDiscounts();
-        for(Discount discount : discounts) {
-            discountDtos.add(discount.toDiscountDto());
-        }
-        return discountDtos;
+        return discountDao.getAllDiscounts().stream()
+                .map(entry -> DiscountDto.toDiscountDto(entry))
+                .collect(Collectors.toList());
     }
 
     @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_PRICETICKET', 'MANAGER_SELLING')")
@@ -65,20 +62,17 @@ public class TicketController {
 
     @PreAuthorize("hasAuthority('MANAGER_SELLING')")
     @GetMapping("/showtime")
-    public List<TheaterMovieDto> getShowtime() {
+    public List<TheaterDto> getShowtime() {
         LocalDate localDate = LocalDate.now();
         Date currentDate = Date.valueOf(localDate);
         LocalTime localTime = LocalTime.now();
         Time currentTime = Time.valueOf(localTime);
-        System.out.println(currentDate);
-        System.out.println(currentTime);
-        List<Theater> theaters = theaterDao.getAllTheaters();
-        List<TheaterMovieDto> theaterMovieDtos = new ArrayList<>();
+        List<Theater> theaters = theaterDao.getAllTheater();
+        List<TheaterDto> dto = new ArrayList<>();
         for(Theater theater : theaters) {
-//            theaterMovieDtos.add(theaterDao.getShowtimeByTheaterAndDateTime(theater, currentDate, currentTime));
-            theaterMovieDtos.add(theaterDao.getShowtimeByTheater(theater));
+            dto.add(theaterDao.getShowtimeByTheater(theater));
         }
-        return theaterMovieDtos;
+        return dto;
     }
 
     @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_SELLING')")
@@ -100,45 +94,44 @@ public class TicketController {
         return ticketDao.updateStatusToExpired(id);
     }
 
-    @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_SELLING')")
     @GetMapping("/booking/{id}")
     public BookingDto getBooking(@PathVariable("id") long id) {
-        return ticketDao.getBookingById(id).toBookingDto2();
+        return BookingDto.toBookingDto2(ticketDao.getBookingById(id));
     }
 
     @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_SELLING')")
     @GetMapping("/booking/payonline/{barcode}")
     public BookingDto getBookingByBarcode(@PathVariable("barcode") String barcode) {
-        return ticketDao.getBookingByBarcode(barcode).toBookingDto();
+        return BookingDto.toBookingDto(ticketDao.getBookingByBarcode(barcode));
     }
 
     @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_SELLING')")
     @PostMapping("/booking/payonline/add")
     @Transactional
-    public String addPayOnline(@RequestBody PaymentRequestDto paymentRequestDto) {
+    public String addPayOnline(@RequestBody PaymentDto paymentDto) {
         String orderId = "MOMO" + System.currentTimeMillis();
-        createPayment(paymentRequestDto, orderId);
+        createPayment(paymentDto, orderId);
         String redirectUrl = "http://localhost:3000/view-booking";
-        String payUrl = this.createPayOnline(orderId, paymentRequestDto.getAmount(), redirectUrl);
+        String payUrl = this.createPayOnline(orderId, paymentDto.getAmount(), redirectUrl);
         return payUrl;
     }
 
     @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_SELLING')")
     @PostMapping("/admin/booking/payonline/add")
     @Transactional
-    public String addPayOnlineAdmin(@RequestBody PaymentRequestDto paymentRequestDto) {
+    public String addPayOnlineAdmin(@RequestBody PaymentDto paymentDto) {
         String orderId = "MOMO" + System.currentTimeMillis();
-        createPayment(paymentRequestDto, orderId);
+        createPayment(paymentDto, orderId);
         String redirectUrl = "http://localhost:3000/admin/view-ticket-admin";
-        String payUrl = this.createPayOnline(orderId, paymentRequestDto.getAmount(), redirectUrl);
+        String payUrl = this.createPayOnline(orderId, paymentDto.getAmount(), redirectUrl);
         return payUrl;
     }
 
     @PreAuthorize("hasAuthority('MANAGER_SELLING')")
     @PostMapping("/booking/paycash/add")
     @Transactional
-    public long addPayCash(@RequestBody PaymentRequestDto paymentRequestDto) {
-        return this.createPayment(paymentRequestDto, null);
+    public long addPayCash(@RequestBody PaymentDto paymentDto) {
+        return this.createPayment(paymentDto, null);
     }
 
     @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_SELLING', 'VIEW_CUSTOMER_INFOR')")
@@ -246,19 +239,19 @@ public class TicketController {
 
     @PreAuthorize("hasAuthority('MANAGER_DISCOUNT')")
     @PostMapping("/discount/add")
-    public DiscountDto addDiscount(@ModelAttribute DiscountAddDto discountAddDto,
+    public DiscountDto addDiscount(@ModelAttribute DiscountDto dto,
                                    @RequestParam(value = "file", required = false) MultipartFile file) {
         try {
-            Discount discount = Discount.toDiscount(discountAddDto);
-            TypeDiscount typeDiscount = discountDao.getTypeDiscountByID(discountAddDto.getTypeDiscountid());
+            Discount discount = Discount.toDiscount(dto);
+            TypeDiscount typeDiscount = discountDao.getTypeDiscountByID(dto.getTypeDiscountid());
             discount.setTypeDiscount(typeDiscount);
             discount.setStatus(true);
             if(file != null && !file.isEmpty()){
-                String imageUrl = fileStorageService.saveFileFromCloudinary(file);
+                String imageUrl = fileStorageDao.saveFileFromCloudinary(file, "Image/Discount");
                 discount.setImage(imageUrl);
             }
             Discount discount_new = discountDao.addDiscount(discount);
-            DiscountDto discountDto = discount_new.toDiscountDto();
+            DiscountDto discountDto = DiscountDto.toDiscountDto(discount_new);
             return discountDto;
         } catch (Exception e) {
             throw new DataProcessingException("Error addDiscount: " + e.getMessage());
@@ -276,53 +269,50 @@ public class TicketController {
 
     @PreAuthorize("hasAuthority('MANAGER_DISCOUNT')")
     @PutMapping("/discount/update")
-    public DiscountDto updateDiscount(@ModelAttribute DiscountAddDto discountAddDto,
+    public DiscountDto updateDiscount(@ModelAttribute DiscountDto dto,
                                       @RequestParam(value = "file", required = false) MultipartFile file) {
-        Discount discount_old = discountDao.getDiscountByID(discountAddDto.getId());
-        Discount discount = Discount.toDiscount(discountAddDto);
-        TypeDiscount typeDiscount = discountDao.getTypeDiscountByID(discountAddDto.getTypeDiscountid());
+        Discount discount_old = discountDao.getDiscountByID(dto.getId());
+        Discount discount = Discount.toDiscount(dto);
+        TypeDiscount typeDiscount = discountDao.getTypeDiscountByID(dto.getTypeDiscountid());
         discount.setTypeDiscount(typeDiscount);
         discount.setImage(discount_old.getImage());
         discount.setUser(discount_old.getUser());
         discount.setPayment(discount_old.getPayment());
         if(file != null && !file.isEmpty()){
-            String imageUrl = fileStorageService.updateFile(file, discount_old.getImage());
+            String imageUrl = fileStorageDao.updateFile(file, discount_old.getImage(), "Image/Discount");
             discount.setImage(imageUrl);
         }
         Discount discount_new = discountDao.updateDiscount(discount);
-        return discount_new.toDiscountDto();
+        return DiscountDto.toDiscountDto(discount_new);
     }
 
     @PreAuthorize("hasAuthority('MANAGER_DISCOUNT')")
     @DeleteMapping("/discount/{id}/delete")
     public boolean deleteDiscount(@PathVariable("id") long id) {
         Discount discount = discountDao.getDiscountByID(id);
-        fileStorageService.deleteFileFromCloudinary(discount.getImage());
+        fileStorageDao.deleteFileFromCloudinary(discount.getImage(), "Image/Discount");
         return discountDao.deleteDiscount(id);
     }
 
     @PreAuthorize("hasAuthority('MANAGER_DISCOUNT')")
     @GetMapping("/typediscount")
     public List<TypeDiscountDto> getTypeDiscountDtos() {
-        return discountDao.getAllTypeDiscount();
+        return discountDao.getAllTypeDiscount().stream()
+                .map(entry -> TypeDiscountDto.toTypeDiscountDto(entry))
+                .collect(Collectors.toList());
     }
 
-//    @PostMapping("/public/momo/ipn")
-//    public void payOnlineIpn() {
-//        System.out.println("12345678");
-//    }
-
-    private long createPayment(PaymentRequestDto paymentRequestDto, String orderId) {
+    private long createPayment(PaymentDto paymentDto, String orderId) {
         Booking booking = new Booking();
-        Showtime showtime = showtimeDao.getShowtimeByID(paymentRequestDto.getShowtimeid());
+        Showtime showtime = showtimeDao.getShowtimeByID(paymentDto.getShowtimeid());
         booking.setShowtime(showtime);
-        User user = userDao.getUserByID(paymentRequestDto.getUserid());
+        User user = userDao.getUserByID(paymentDto.getUserid());
         booking.setUser(user);
-        booking.setTypeBooking(paymentRequestDto.getTypeBooking());
+        booking.setTypeBooking(paymentDto.getTypeBooking());
         Booking booking_new = ticketDao.addBooking(booking);
 
         List<Ticket> tickets = new ArrayList<>();
-        for(TicketRequestDto dto : paymentRequestDto.getTicket()) {
+        for(TicketDto dto : paymentDto.getTicket()) {
             SelectedSeat selectedSeat = ticketDao.getSelectedSeatByID(dto.getSelectedSeatID());
             selectedSeat.setStatus("confirmed");
             Ticket ticket = new Ticket();
@@ -337,28 +327,28 @@ public class TicketController {
         Booking booking_new_2 = ticketDao.updateBooking(booking_new);
 //        ticketDao.addTicket(tickets);
         long paymentID;
-        if(paymentRequestDto.getTypePay().equals("PAYCASH")) {
+        if(paymentDto.getTypePay().equals("PAYCASH")) {
             PayCash payCash = new PayCash();
-            payCash.setTotalPrice(paymentRequestDto.getTotalPrice());
-            payCash.setDiscountPrice(paymentRequestDto.getDiscountPrice());
-            payCash.setAmount(paymentRequestDto.getAmount());
+            payCash.setTotalPrice(paymentDto.getTotalPrice());
+            payCash.setDiscountPrice(paymentDto.getDiscountPrice());
+            payCash.setAmount(paymentDto.getAmount());
             payCash.setStatus("confirmed");
             payCash.setBooking(booking_new_2);
-            payCash.setReceived(paymentRequestDto.getReceived());
-            payCash.setMoneyReturned(paymentRequestDto.getMoneyReturned());
+            payCash.setReceived(paymentDto.getReceived());
+            payCash.setMoneyReturned(paymentDto.getMoneyReturned());
             PayCash payCash_new = ticketDao.addPayCash(payCash);
             paymentID = payCash_new.getID();
         }
-        else if (paymentRequestDto.getTypePay().equals("PAYONLINE")) {
+        else if (paymentDto.getTypePay().equals("PAYONLINE")) {
             PayOnline payOnline = new PayOnline();
-            payOnline.setTotalPrice(paymentRequestDto.getTotalPrice());
-            payOnline.setDiscountPrice(paymentRequestDto.getDiscountPrice());
-            payOnline.setAmount(paymentRequestDto.getAmount());
+            payOnline.setTotalPrice(paymentDto.getTotalPrice());
+            payOnline.setDiscountPrice(paymentDto.getDiscountPrice());
+            payOnline.setAmount(paymentDto.getAmount());
             payOnline.setBarcode(orderId);
             payOnline.setStatus("pending");
             payOnline.setBooking(booking_new_2);
-            if(paymentRequestDto.getDiscountid() > 0){
-                Discount discount = discountDao.getDiscountByID(paymentRequestDto.getDiscountid());
+            if(paymentDto.getDiscountid() > 0){
+                Discount discount = discountDao.getDiscountByID(paymentDto.getDiscountid());
                 user.getDiscount().add(discount);
                 userDao.updateUser(user);
                 payOnline.setDiscount(discount);
@@ -373,7 +363,7 @@ public class TicketController {
         }
         System.out.println(paymentID);
         List<PayTypeCustomer> payTypeCustomers = new ArrayList<>();
-        Map<Long, Map<Long, Integer>> paytypecustomermap = paymentRequestDto.getPaytypecustomer();
+        Map<Long, Map<Long, Integer>> paytypecustomermap = paymentDto.getPaytypecustomer();
         if (paytypecustomermap != null) {
             paytypecustomermap.forEach((key, valueMap) -> {
                 TypeCustomer typeCustomer = new TypeCustomer(key);

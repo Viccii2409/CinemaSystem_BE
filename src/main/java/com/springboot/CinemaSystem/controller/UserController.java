@@ -2,11 +2,12 @@ package com.springboot.CinemaSystem.controller;
 
 import com.springboot.CinemaSystem.dto.*;
 import com.springboot.CinemaSystem.entity.*;
-import com.springboot.CinemaSystem.exception.NotFoundException;
-import com.springboot.CinemaSystem.filter.JwtTokenUtil;
-import com.springboot.CinemaSystem.service.FileStorageService;
+import com.springboot.CinemaSystem.util.JwtTokenUtil;
+import com.springboot.CinemaSystem.service.FileStorageDao;
 import com.springboot.CinemaSystem.service.MovieDao;
+import com.springboot.CinemaSystem.service.TheaterDao;
 import com.springboot.CinemaSystem.service.UserDao;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,21 +31,22 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/user")
 public class UserController {
     private UserDao userDao;
+    private TheaterDao theaterDao;
     private MovieDao movieDao;
     private AuthenticationManager authenticationManager;
     private JwtTokenUtil jwtTokenUtil;
     PasswordEncoder passwordEncoder;
-    @Autowired
-    private FileStorageService fileStorageService;
-
+    private FileStorageDao fileStorageDao;
 
     @Autowired
-    public UserController(UserDao userDao, MovieDao movieDao,AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil, PasswordEncoder passwordEncoder) {
+    public UserController(UserDao userDao, TheaterDao theaterDao, MovieDao movieDao, AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil, PasswordEncoder passwordEncoder, FileStorageDao fileStorageDao) {
         this.userDao = userDao;
+        this.theaterDao = theaterDao;
+        this.movieDao = movieDao;
         this.authenticationManager = authenticationManager;
         this.jwtTokenUtil = jwtTokenUtil;
         this.passwordEncoder = passwordEncoder;
-        this.movieDao= movieDao;
+        this.fileStorageDao = fileStorageDao;
     }
 
     @PostMapping("/public/login")
@@ -70,27 +72,35 @@ public class UserController {
     }
 
     @PostMapping("/public/register")
-    public  String register(@RequestBody UserRegisterDto userRegisterDto) {
-        String password = userRegisterDto.getPassword();
-        System.out.println(userRegisterDto);
-        String encodedPassword = passwordEncoder.encode(userRegisterDto.getPassword());
-        userRegisterDto.setPassword(encodedPassword);
-        Customer customer = Customer.toCustomer(userRegisterDto);
+    public  String register(@RequestBody UserDto userDto) {
+        String password = userDto.getPassword();
+        System.out.println(userDto);
+        String encodedPassword = passwordEncoder.encode(userDto.getPassword());
+        userDto.setPassword(encodedPassword);
+        Customer customer = Customer.toCustomer(userDto);
         customer.setStatus(true);
         customer.setRole(userDao.getRoleById(4));
         customer.setLevel(userDao.getLevelById(1));
         userDao.addCustomer(customer);
-        return this.login(new Account(userRegisterDto.getEmail(), password));
+        return this.login(new Account(userDto.getEmail(), password));
     }
 
     @GetMapping("/public/verify")
-    public UserVerifyDto verifyUser() {
+    public UserDto verifyUser() {
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
             return null;
         }
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDao.getUserByUsername(userDetails.getUsername());
-        return user.toUserVerifyDto();
+        UserDto userDto = UserDto.toUserVerifyDto(user);
+        if(userDto.getRole().getID() != 4) {
+            Employee employee = userDao.getEmployeeById(userDto.getId());
+            userDto.setStatusEmployee(employee.getStatusEmployee());
+        }
+        else {
+            userDto.setStatusEmployee(false);
+        }
+        return userDto;
 
     }
 
@@ -107,28 +117,30 @@ public class UserController {
     }
 
 
-    @GetMapping("/public/employee")
-    public List<EmployeeDto> getEmployee() {
-        return userDao.getAllEmployee().stream()
-                .map(entry -> entry.toEmployeeDto())
-                .collect(Collectors.toList());
-    }
-
-    @GetMapping("/public/employee/{id}")
-    public boolean addEmployee(@PathVariable("id") long id) {
-        System.out.println(id);
-//        Customer customer = userDao.getCustomerById(id);
-//        Employee employee = Employee.convertCustomerToEmployee(customer);
-//        userDao.updateEmployee(employee);
-        return true;
-    }
-
-    @PreAuthorize("hasAnyAuthority('BOOKING', 'VIEW_CUSTOMER_INFOR')")
-    @GetMapping("/customer/{id}")
-    public CustomerDto getCustomerById(@PathVariable("id") long id) {
-        Customer customer = userDao.getCustomerById(id);
-        System.out.println(customer.getBooking().size());
-        return customer.toCustomerDto();
+    @GetMapping("/{id}")
+    public UserDto getUserById(@PathVariable("id") long id) {
+        User user = userDao.getUserByID(id);
+        System.out.println(user.getRole().getName());
+        if(user.getRole().getID() == 1) {
+            Admin admin = userDao.getAdminById(id);
+            return UserDto.convertAdminToUserDto(admin);
+        }
+        else if(user.getRole().getID() == 2) {
+            Manager manager = userDao.getManagerById(id);
+            return UserDto.convertManagertoUserDto(manager);
+        }
+        else if(user.getRole().getID() == 3) {
+            Agent agent = userDao.getAgentById(id);
+            return UserDto.convertAgenttoUserDto(agent);
+        }
+        else if(user.getRole().getID() == 4) {
+            Customer customer = userDao.getCustomerById(id);
+            return UserDto.convertCustomertoUserDto(customer);
+        }
+        else {
+            Employee employee = userDao.getEmployeeById(id);
+            return UserDto.convertEmployeeToUserDto(employee);
+        }
     }
 
     @PreAuthorize("hasAuthority('VIEW_CUSTOMER_INFOR')")
@@ -154,6 +166,7 @@ public class UserController {
     public boolean updateUser(@RequestBody UserDto userDto) {
         User user = userDao.getUserByID(userDto.getId());
         user.setName(userDto.getName());
+        System.out.println(userDto.getEmail());
         user.setEmail(userDto.getEmail());
         user.setPhone(userDto.getPhone());
         user.setGender(userDto.getGender());
@@ -168,7 +181,7 @@ public class UserController {
     public String updateImage(@RequestParam(value = "id") long id, @RequestParam(value = "file") MultipartFile file) {
         User user = userDao.getUserByID(id);
         if(user != null) {
-            String imageUrl = fileStorageService.updateFile(file, user.getImage());
+            String imageUrl = fileStorageDao.updateFile(file, user.getImage(), "Image/User");
             user.setImage(imageUrl);
             userDao.updateUser(user);
             return imageUrl;
@@ -176,11 +189,11 @@ public class UserController {
         return null;
     }
 
-    @PreAuthorize("hasAuthority('MANAGER_ROLE')")
+    @PreAuthorize("hasAnyAuthority('MANAGER_ROLE', 'MANAGER_EMPLOYEE')")
     @GetMapping("/role")
     public List<RoleDto> getAllRole() {
         List<RoleDto> roles = userDao.getAllRole().stream()
-                .map(entry -> entry.toRoleDto()).collect(Collectors.toList());
+                .map(entry -> RoleDto.toRoleDto(entry)).collect(Collectors.toList());
         return roles;
     }
 
@@ -198,29 +211,29 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('MANAGER_ROLE')")
     @PostMapping("/role/add")
-    public RoleDto addRole(@RequestBody RoleRequestDto roleRequestDto) {
+    public RoleDto addRole(@RequestBody RoleDto dto) {
         Role role = new Role();
-        role.setName(roleRequestDto.getName());
-        for(Long l : roleRequestDto.getPermission()){
+        role.setName(dto.getName());
+        for(Long l : dto.getPermission()){
             Permission permission = userDao.getPermissionById(l);
             role.getPermission().add(permission);
         }
         Role role_new = userDao.addRole(role);
-        return role_new.toRoleDto();
+        return RoleDto.toRoleDto(role_new);
     }
 
     @PreAuthorize("hasAuthority('MANAGER_ROLE')")
     @PutMapping("/role/update")
-    public RoleDto updateRole(@RequestBody RoleRequestDto roleRequestDto) {
-        Role role = userDao.getRoleById(roleRequestDto.getId());
-        role.setName(roleRequestDto.getName());
+    public RoleDto updateRole(@RequestBody RoleDto dto) {
+        Role role = userDao.getRoleById(dto.getID());
+        role.setName(dto.getName());
         role.getPermission().clear();
-        for(Long l : roleRequestDto.getPermission()){
+        for(Long l : dto.getPermission()){
             Permission permission = userDao.getPermissionById(l);
             role.getPermission().add(permission);
         }
         Role role_new = userDao.updateRole(role);
-        return role_new.toRoleDto();
+        return RoleDto.toRoleDto(role_new);
     }
 
     @PreAuthorize("hasAuthority('MANAGER_ROLE')")
@@ -230,6 +243,15 @@ public class UserController {
         userDao.deleteRole(role);
         return true;
     }
+
+    @PreAuthorize("hasAuthority('MANAGER_EMPLOYEE')")
+    @GetMapping("/employee")
+    public List<UserDto> getEmployee() {
+        return userDao.getAllEmployee().stream()
+                .map(entry -> UserDto.toEmployeeDto(entry))
+                .collect(Collectors.toList());
+    }
+
     @GetMapping("/public/recommend/{customerID}")
     public List<MovieDto> recommendMovies(@PathVariable("customerID") Long customerID) {
         List<Genre> genres = movieDao.customerGenre(customerID);
@@ -239,87 +261,103 @@ public class UserController {
         return  movieDao.recommendMovies(genreIds);
     }
 
-//    @PreAuthorize("hasAuthority('MANAGER_CUSTOMER')")
-//    @GetMapping("/inforaccount/{id}")
-//    public CustomerDto getCustomerInfor(@PathVariable("id") long id) {
-//        Customer customer = userDao.getCustomerById(id);
-//        return customer.toCustomerDto();
-//    }
-@PreAuthorize("hasAuthority('MANAGER_CUSTOMER')")
-    @GetMapping("/all-customers")
-    public List<CustomerDto> getAllCustomers() {
-        return userDao.getAllCustomers();
 
+    @PreAuthorize("hasAuthority('MANAGER_EMPLOYEE')")
+    @PostMapping("/employee/check")
+    public UserDto checkEmployee(@RequestBody Map<String, String> requestBody) {
+        String username = requestBody.get("username");
+        User user = userDao.getUserByUsername(username);
+        if(user != null) {
+            return UserDto.toUserCheck(user);
+        }
+        return null;
     }
 
-//    public static class LoginResponse {
-//        private String token;
-//
-//        public LoginResponse(String token) {
-//            this.token = token;
-//        }
-//
-//        // Getter
-//        public String getToken() {
-//            return token;
-//        }
-//    }
 
-//    @PostMapping("/public/pass/{p}")
-//    public String addPass(@PathVariable("p") String p) {
-//        return passwordEncoder.encode(p);
-//    }
+    @PreAuthorize("hasAuthority('MANAGER_EMPLOYEE')")
+    @PostMapping("/employee/add")
+    @Transactional
+    public UserDto addEmployee(@RequestBody UserDto userDto) {
+        Employee employee;
+        long id;
+        if(userDto.getId() != null) {
+            id = userDto.getId();
+            employee = userDao.convertToEmployee(id);
+        }
+        else {
+            employee = new Employee();
+            String encodePassword = passwordEncoder.encode(userDto.getPassword());
+            Account account = new Account(userDto.getUsername(), encodePassword);
+            employee.setAccount(account);
+        }
+        employee.setName(userDto.getName());
+        employee.setEmail(userDto.getEmail());
+        employee.setDob(userDto.getDob());
+        employee.setPhone(userDto.getPhone());
+        employee.setAddress(userDto.getAddress());
+        Role role = userDao.getRoleById(userDto.getRoleid());
+        employee.setRole(role);
+        employee.setStatusEmployee(true);
+        Employee employee_new = userDao.addEmployee(employee);
+        System.out.println(role.getName());
+        if(role.getName().equals("ADMIN")) {
+            Admin admin = userDao.convertToAdmin(employee_new.getID());
+            admin.setAccessLevel(userDto.getAccessLevel());
+            Admin admin_new = userDao.addAdmin(admin);
+        }
+        else if (role.getName().equals("MANAGER")) {
+            Manager manager = userDao.convertToManager(employee_new.getID());
+            Theater theater = theaterDao.getTheaterByID(userDto.getTheaterid());
+            manager.setTheater(theater);
+            Manager manager_new = userDao.addManager(manager);
+        }
+        else if (role.getName().equals("AGENT")) {
+            Agent agent = userDao.convertToAgent(employee_new.getID());
+            Manager manager = userDao.getManagerById(userDto.getManagerid());
+            agent.setManager(manager);
+            Agent agent_new = userDao.addAgent(agent);
+        }
+        return UserDto.toEmployeeDto(employee_new);
+    }
 
-//    @GetMapping("/public/role")
-//    public List<RoleDto> getRoleDto() {
-//        List<RoleDto> roles = userDao.getAllRole().stream()
-//                .map(entry -> new RoleDto(
-//                        entry.getID(),
-//                        entry.getName(),
-//                        entry.getPermission().stream() // Ensure getter name matches entity
-//                                .map(permission -> new PermissionDto(permission.getID(), permission.getName()))
-//                                .collect(Collectors.toList())
-//                ))
-//                .collect(Collectors.toList());
-//        return roles;
-//    }
+    @PutMapping("/employee/{id}/updatestatus")
+    public boolean updateStatusEmployee(@PathVariable("id") long id) {
+        Employee employee = userDao.getEmployeeById(id);
+        employee.setStatusEmployee(!employee.getStatusEmployee());
+        Employee employee_new = userDao.updateEmployee(employee);
+        return employee_new.getStatusEmployee();
+    }
 
-//    @GetMapping("/login")
-//    public String showLoginForm() {
-//        return "login"; // Trả về trang đăng nhập (login.html)
-//    }
+    @PreAuthorize("hasAuthority('MANAGER_CUSTOMER')")
+    @GetMapping("/customer")
+    public List<UserDto> getAllCustomer() {
+        return userDao.getAllCustomers().stream()
+                .map(entry -> UserDto.convertCustomertoUserDto(entry))
+                .collect(Collectors.toList());
+    }
 
-//    @PostMapping("/login")
-//    public ResponseEntity<?> login(@RequestBody Account account) {
-//        // Kiểm tra thông tin đăng nhập
-//        Account foundAccount = accountDao.findAccountByUsername(account.getEmail());
-//        if (foundAccount != null && foundAccount.getPassword().equals(account.getPassword())) {
-//            // Trả về thông tin user và loại tài khoản (user_type)
-//            return ResponseEntity.ok().body(new LoginResponse( foundAccount.getID(),foundAccount.getUser().getName(), foundAccount.getUser().getAddress(),
-//                            foundAccount.getUser().getDob(),foundAccount.getEmail(),foundAccount.getPassword(),foundAccount.getUser().getGender(),
-//                    foundAccount.getUser().getPhone(),
-//                    foundAccount.getUser().getPrivileges()
-//                   ));
-//
-//        } else {
-//            // Trả về lỗi nếu đăng nhập không thành công
-//            return ResponseEntity.status(401).body("Email hoặc mật khẩu không đúng");
-//        }
-//    }
+    @PreAuthorize("hasAuthority('MANAGER_CUSTOMER')")
+    @PutMapping("/{id}/updatestatus")
+    public boolean updateStatusUser(@PathVariable("id") long id) {
+        User user = userDao.getUserByID(id);
+        user.setStatus(!user.isStatus());
+        User user_new = userDao.updateUser(user);
+        return user_new.isStatus();
+    }
 
-//    @PostMapping("/login")
-//    public UserDto login(@RequestBody Account account) {
-//        User user = userDao.loadUserByAccount(account);
-//    }
+    @PostMapping("/customer/genre/add")
+    @Transactional
+    public void addGenreFauvorite(@RequestBody GenreRequestDto genreRequestDto) {
+        Customer customer = userDao.getCustomerById(genreRequestDto.getCustomerid());
+        if(customer != null) {
+            customer.getGenre().clear();
+            for(Integer genreid : genreRequestDto.getGenres()) {
+                Genre genre = movieDao.getGenreByID(genreid);
+                customer.getGenre().add(genre);
+            }
+            userDao.updateCustomer(customer);
+        }
+    }
 
-//    @PutMapping("/update")
-//    public ResponseEntity<String> updateProfile(@RequestBody User request) {
-//        try {
-//            userDao.updateUser(request);
-//            return ResponseEntity.ok("Thông tin cá nhân được cập nhật thành công!");
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cập nhật thất bại: " + e.getMessage());
-//        }
-//    }
 
 }

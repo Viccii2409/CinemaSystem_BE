@@ -17,27 +17,22 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/movie")
 public class MovieController {
     private MovieDao movieService;
-    private DiscountDao discountDao;
-    private TheaterDao theaterDao;
-    private SlideshowDao slideshowDao;
     private ShowtimeDao showtimeDao;
-    private MovieRepository movieRepository;
 
 
     @Autowired
-    public MovieController(MovieDao movieService, DiscountDao discountDao, TheaterDao theaterDao, SlideshowDao slideshowDao, ShowtimeDao showtimeDao, MovieRepository movieRepository) {
+    public MovieController(MovieDao movieService, ShowtimeDao showtimeDao) {
         this.movieService = movieService;
-        this.discountDao = discountDao;
-        this.theaterDao = theaterDao;
-        this.slideshowDao = slideshowDao;
         this.showtimeDao = showtimeDao;
-        this.movieRepository = movieRepository;
     }
+
+
 
     @GetMapping("/public/{id}")
     public MovieDetailDto getMovieById(@PathVariable("id") long id){
@@ -60,7 +55,15 @@ public class MovieController {
 
     @GetMapping("/public/slideshow")
     public List<Slideshow> getAllSlideshow(){
-        return slideshowDao.getAllSlideshow();
+        return movieService.getAllSlideshow();
+    }
+
+    @GetMapping("/public/genre")
+    public List<GenreDto> getAllGenre() {
+        return movieService.getAllGenres().stream()
+                .filter(entry -> entry.isStatus())
+                .map(entry -> GenreDto.toGenreDto(entry))
+                .collect(Collectors.toList());
     }
 
     @PreAuthorize("hasAuthority('MANAGER_PRICETICKET')")
@@ -81,7 +84,8 @@ public class MovieController {
         return showtimeDao.getAllTimeFrames();
     }
 
-    @GetMapping("/public/genre")
+    @PreAuthorize("hasAuthority('MANAGER_GENRE')")
+    @GetMapping("/genre")
     public List<GenreDto> getAllGenres(){
         List<GenreDto> genreDtos = new ArrayList<>();
         List<Genre> genres = movieService.getAllGenres();
@@ -143,23 +147,23 @@ public class MovieController {
         return movieService.addMovie(movie);
     }
 
-    @PreAuthorize("hasAuthority('MANAGER_MOVIE')")
-    @PutMapping("/{ID}")
-    public boolean editMovie(@PathVariable long ID,
-                             @RequestParam("movie") String movieRequestDtoJson,
-                             @RequestParam("image") MultipartFile imageFile,
-                             @RequestParam("trailer") MultipartFile trailerFile) {
-        try {
-            // Chuyển đổi JSON movieRequestDto thành đối tượng MovieRequestDto
-            MovieRequestDto movieRequestDto = new ObjectMapper().readValue(movieRequestDtoJson, MovieRequestDto.class);
-
-            // Gọi service để sửa movie
-            return movieService.editMovie(ID, movieRequestDto, imageFile, trailerFile) != null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+//    @PreAuthorize("hasAuthority('MANAGER_MOVIE')")
+//    @PutMapping("/{ID}")
+//    public boolean editMovie(@PathVariable long ID,
+//                             @RequestParam("movie") String movieRequestDtoJson,
+//                             @RequestParam("image") MultipartFile imageFile,
+//                             @RequestParam("trailer") MultipartFile trailerFile) {
+//        try {
+//            // Chuyển đổi JSON movieRequestDto thành đối tượng MovieRequestDto
+//            MovieRequestDto movieRequestDto = new ObjectMapper().readValue(movieRequestDtoJson, MovieRequestDto.class);
+//
+//            // Gọi service để sửa movie
+//            return movieService.editMovie(ID, movieRequestDto, imageFile, trailerFile) != null;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return false;
+//        }
+//    }
 
 
     @PreAuthorize("hasAuthority('MANAGER_MOVIE')")
@@ -204,16 +208,13 @@ public class MovieController {
         return movieService.getAllMovies();
     }
 
-//    @GetMapping("/public/discount")
-//    public List<DiscountDto> getAllDiscounts(){
-//        List<DiscountDto> discountDtos = new ArrayList<>();
-//        List<Discount> discounts = discountDao.getAllDiscounts();
-//        for(Discount discount : discounts) {
-//            discountDtos.add(discount.toDiscountDto());
-//        }
-//        return discountDtos;
+    // Thêm trailer mới hoặc cập nhật trailer nếu movieId đã tồn tại
+//    @PostMapping("/addTrailer")
+//    public String addTrailer(@RequestBody Trailer trailer) {
+//        // Lưu trailer, nếu trùng movieId thì sẽ cập nhật, không thì sẽ lưu mới
+//        movieService.saveOrUpdateTrailer(trailer);
+//        return "redirect:/movies"; // Quay lại trang danh sách movies
 //    }
-
 
 
     ///  LÊN LỊCH CHIẾU
@@ -243,7 +244,6 @@ public class MovieController {
         return ResponseEntity.ok().build();
     }
 
-
     // Xóa lịch chiếu
     @DeleteMapping("/showtime/{id}")
     public ResponseEntity<Void> deleteShowtime(@PathVariable long id) {
@@ -256,11 +256,5 @@ public class MovieController {
         showtimeDao.hideShowtimesByMovie(movieId);
         return ResponseEntity.ok().build();
     }
-
-//    // API trả về danh sách các rạp có status = 1 (hoạt động)
-//    @GetMapping("/theaters")
-//    public List<TheaterDto> getActiveTheaters() {
-//        return theaterDao.getActiveTheaters();  // Lấy danh sách các rạp có status = 1 từ service
-//    }
 
 }

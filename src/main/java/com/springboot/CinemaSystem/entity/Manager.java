@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Formula;
 
 import java.util.List;
 
@@ -13,9 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 @DiscriminatorValue("MANAGER")
 public class Manager extends Employee {
-	@Transient
-	private int managedEmployees;
-
 	@OneToOne
 	@JoinColumn(name = "theaterID")
 	private Theater theater;

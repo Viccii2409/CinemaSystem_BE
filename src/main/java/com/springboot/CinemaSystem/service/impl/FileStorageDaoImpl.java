@@ -3,7 +3,7 @@ package com.springboot.CinemaSystem.service.impl;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.springboot.CinemaSystem.exception.DataProcessingException;
-import com.springboot.CinemaSystem.service.FileStorageService;
+import com.springboot.CinemaSystem.service.FileStorageDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,7 +16,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 @Service
-public class FileStorageServiceImpl implements FileStorageService {
+public class FileStorageDaoImpl implements FileStorageDao {
 
     @Autowired
     private Cloudinary cloudinary;
@@ -51,13 +51,13 @@ public class FileStorageServiceImpl implements FileStorageService {
         }
     }
 
-    public String saveFileFromCloudinary(MultipartFile file) {
+    public String saveFileFromCloudinary(MultipartFile file, String folder) {
         try {
             String publicId = "image_" + System.currentTimeMillis();
 
             Map map = this.cloudinary.uploader().upload(file.getBytes(),
                     ObjectUtils.asMap(
-                            "folder", "Image",
+                            "folder", folder,
                             "public_id", publicId,
                             "resource_type", "image"));
             return  (String) map.get("secure_url");
@@ -70,58 +70,51 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public String updateFile(MultipartFile file, String image) {
+    public String updateFile(MultipartFile file, String image, String folder) {
         try{
             if(image != null) {
-                deleteFileFromCloudinary(image);
+                deleteFileFromCloudinary(image, folder);
             }
-            return saveFileFromCloudinary(file);
+            return saveFileFromCloudinary(file, folder);
         }catch (Exception e){
             throw new DataProcessingException("Không cập nhật được tệp: " + e.getMessage());
         }
     }
 
     @Override
-    public void deleteFileFromCloudinary(String image) {
+    public void deleteFileFromCloudinary(String image, String folder) {
         try {
             URL url = new URL(image);
             String path = url.getPath();
             String[] segments = path.split("/");
             String filename = segments[segments.length - 1];
             String imageName = filename.substring(0, filename.lastIndexOf('.'));
-            String publicId = "Image/" + imageName;
+            String publicId = folder + "/" + imageName;
 
             Map checkResult = cloudinary.api().resource(publicId, ObjectUtils.emptyMap());
             if (checkResult.containsKey("public_id")) {
                 Map result = cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("invalidate", true));
             }
-
-//            Map result = cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("invalidate", true));
-//            if ("ok".equals(result.get("result"))) {
-//                System.out.println("Đã xóa tệp trên Cloudinary: " + publicId);
-//            } else {
-//                System.out.println("Không thể xóa tệp trên Cloudinary: " + publicId);
-//            }
         } catch (Exception e) {
             throw new DataProcessingException("Không thể xóa tệp trên Cloudinary: " + e.getMessage());
         }
     }
 
-    @Override
-    public String saveFileMovieAndTrailer(MultipartFile file, String folder) throws IOException {
-        // Chuyển MultipartFile thành mảng byte
-        byte[] fileBytes = file.getBytes();
-
-        // Xác định loại tài nguyên (ảnh, video)
-        String resourceType = file.getContentType().startsWith("image") ? "image" : "video";
-
-        // Upload tệp lên Cloudinary
-        Map uploadResult = cloudinary.uploader().upload(fileBytes, ObjectUtils.asMap(
-                "folder", folder,           // Chỉ định thư mục trên Cloudinary
-                "resource_type", resourceType)); // Xác định loại tài nguyên (image hoặc video)
-
-        // Trả về URL của tệp đã upload
-        return (String) uploadResult.get("url");
-    }
+//    @Override
+//    public String saveFileMovieAndTrailer(MultipartFile file, String folder) throws IOException {
+//        // Chuyển MultipartFile thành mảng byte
+//        byte[] fileBytes = file.getBytes();
+//
+//        // Xác định loại tài nguyên (ảnh, video)
+//        String resourceType = file.getContentType().startsWith("image") ? "image" : "video";
+//
+//        // Upload tệp lên Cloudinary
+//        Map uploadResult = cloudinary.uploader().upload(fileBytes, ObjectUtils.asMap(
+//                "folder", folder,           // Chỉ định thư mục trên Cloudinary
+//                "resource_type", resourceType)); // Xác định loại tài nguyên (image hoặc video)
+//
+//        // Trả về URL của tệp đã upload
+//        return (String) uploadResult.get("url");
+//    }
 
 }

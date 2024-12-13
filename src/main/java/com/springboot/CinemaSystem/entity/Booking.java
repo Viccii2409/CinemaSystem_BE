@@ -1,8 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
-import aj.org.objectweb.asm.commons.Remapper;
 import com.fasterxml.jackson.annotation.*;
-import com.springboot.CinemaSystem.dto.BookingDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -62,70 +60,5 @@ public class Booking {
 			}
 			this.barcode = numericBarcode.toString();
 		}
-	}
-
-	public Booking(long ID) {
-		this.ID = ID;
-	}
-
-	public BookingDto toBookingDto() {
-		List<String> nameSeats = new ArrayList<>();
-		for (Ticket t : this.getTicket()) {
-			nameSeats.add(t.getSeat().getName());
-		}
-		return new BookingDto(
-				this.ID,
-				this.getDate(),
-				this.getBarcode(),
-				nameSeats,
-				this.getShowtime().getDate(),
-				this.getShowtime().getStartTime(),
-				this.getShowtime().getEndTime(),
-				this.getShowtime().getMovie().getId(),
-				this.getShowtime().getMovie().getTitle(),
-				this.getShowtime().getMovie().getFirstImage(),
-				this.getShowtime().getRoom().getTheater().getName(),
-				this.getShowtime().getRoom().getTheater().getFullAddress(),
-				this.getShowtime().getRoom().getName(),
-				this.getShowtime().getRoom().getTypeRoom().getName(),
-				this.getPayment().getTotalPrice(),
-				this.getPayment().getDiscountPrice(),
-				this.getPayment().getAmount(),
-				(this.user != null) ? this.user.getName() : "",
-				(this.user != null) ? this.user.getPhone() : "",
-				(this.user != null) ? this.user.getEmail() : ""
-		);
-	}
-
-	public BookingDto toBookingDto2() {
-		List<String> nameSeats = new ArrayList<>();
-		for (Ticket t : this.getTicket()) {
-			nameSeats.add(t.getSeat().getName());
-		}
-		return new BookingDto(
-				this.ID,
-				this.getDate(),
-				this.getBarcode(),
-				nameSeats,
-				this.getShowtime().getDate(),
-				this.getShowtime().getStartTime(),
-				this.getShowtime().getEndTime(),
-				this.getShowtime().getMovie().getId(),
-				this.getShowtime().getMovie().getTitle(),
-				this.getShowtime().getMovie().getFirstImage(),
-				this.getShowtime().getRoom().getTheater().getName(),
-				this.getShowtime().getRoom().getTheater().getFullAddress(),
-				this.getShowtime().getRoom().getName(),
-				this.getShowtime().getRoom().getTypeRoom().getName(),
-				this.getPayment().getTotalPrice(),
-				this.getPayment().getDiscountPrice(),
-				this.getPayment().getAmount(),
-				(this.user != null) ? this.user.getName() : "",
-				(this.user != null) ? this.user.getPhone() : "",
-				(this.user != null) ? this.user.getEmail() : "",
-				this.getPayment().getBarcode(),
-				this.getPayment().getStatus(),
-				(this.feedback != null) ? this.feedback.toFeedbackDto(): null
-		);
 	}
 }

@@ -2,8 +2,6 @@ package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
 import com.springboot.CinemaSystem.dto.RoomDto;
-import com.springboot.CinemaSystem.dto.RoomSeatDto;
-import com.springboot.CinemaSystem.dto.SeatDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Formula;
@@ -61,13 +59,6 @@ public class Room {
 		return roomDto;
 	}
 
-	public RoomSeatDto toRoomSeatDto() {
-		List<SeatDto> seatDtos = new ArrayList<>();
-		for (Seat s : this.getSeat()) {
-			seatDtos.add(s.toSeatDto());
-		}
-		return new RoomSeatDto(this.ID, this.name, this.getTypeRoom().toTypeRoomDto(), this.getQuantitySeat(), this.numRows, this.numColumn, this.status, seatDtos, this.getTheater().getName());
-	}
 	@Override
 	public String toString() {
 		return "Room{id=" + ID + ", name='" + name + "', typeRoom=" + (typeRoom != null ? typeRoom.getName() : "N/A") + ", status=" + status + "}";
