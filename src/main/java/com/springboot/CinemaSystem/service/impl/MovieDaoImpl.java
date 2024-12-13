@@ -6,10 +6,12 @@ import com.springboot.CinemaSystem.dto.MovieDto;
 import com.springboot.CinemaSystem.dto.MovieRequestDto;
 import com.springboot.CinemaSystem.dto.ShowtimeTheaterIDDto;
 import com.springboot.CinemaSystem.entity.*;
+import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.repository.GenreRepository;
 import com.springboot.CinemaSystem.repository.MovieRepository;
-import com.springboot.CinemaSystem.service.FileStorageService;
+import com.springboot.CinemaSystem.repository.*;
+import com.springboot.CinemaSystem.service.FileStorageDao;
 import com.springboot.CinemaSystem.service.MovieDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,9 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.sql.SQLOutput;
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,12 +28,14 @@ public class MovieDaoImpl implements MovieDao {
 
 	private final GenreRepository genreRepository;
 	private final MovieRepository movieRepository;
-	private final FileStorageService fileStorageService;
-
-
-	// Constructor cần thiết nếu bạn muốn tiêm FileStorageService
+	private final FileStorageDao fileStorageService;
 	@Autowired
-	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository, FileStorageService fileStorageService) {
+	private CustomerRepository customerRepository;
+	@Autowired
+	private SlideshowRepository slideshowRepository;
+
+	@Autowired
+	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository, FileStorageDao fileStorageService) {
 		this.genreRepository = genreRepository;
 		this.movieRepository = movieRepository;
 		this.fileStorageService = fileStorageService;
@@ -135,6 +137,17 @@ public Movie addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, 
 		}
 	}
 
+    public List<Genre> customerGenre(Long customerID){
+        return customerRepository.findGenresByCustomerId(customerID);
+    }
+
+    public List<MovieDto> recommendMovies(List<Long> genreIds) {
+        List<Movie> movies=movieRepository.findMoviesByGenres(genreIds);
+        return movies.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
 
 
 	@Override
@@ -155,6 +168,32 @@ public Movie addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, 
 				.collect(Collectors.toList());
 	}
 
+	@Override
+	public List<Slideshow> getAllSlideshow() {
+		try {
+			return slideshowRepository.findAll();
+		} catch (Exception e) {
+			throw new DataProcessingException("Failed to retrieve slideshows: " + e.getMessage());
+		}
+	}
+
+//	@Override
+//	public Trailer saveOrUpdateTrailer(Trailer trailer) {
+//		// Kiểm tra trailer có sẵn với movieId
+//		Optional<Trailer> existingTrailer = trailerRepository.findByMovieId(trailer.getMovie().getId());
+//
+//		if (existingTrailer.isPresent()) {
+//			// Nếu đã tồn tại trailer cho movieId, cập nhật thông tin trailer
+//			Trailer currentTrailer = existingTrailer.get();
+//			currentTrailer.setDescription(trailer.getDescription());
+//			currentTrailer.setLink(trailer.getLink());
+//			return trailerRepository.save(currentTrailer); // Cập nhật trailer
+//		} else {
+//			// Nếu chưa có trailer cho movieId, lưu mới
+//			return trailerRepository.save(trailer);
+//		}
+//	}
+
 
 	private MovieDto convertToDto(Movie movie) {
 		// Kiểm tra danh sách image
@@ -165,7 +204,7 @@ public Movie addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, 
 		return new MovieDto(
 				movie.getId(),
 				movie.getTitle(),
-				link,
+				movie.getImage(),
 				movie.getReleaseDate(),
 				movie.isStatus(),
 				genreDtos,
@@ -268,7 +307,6 @@ public Movie addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, 
 				})
 				.collect(Collectors.toList());
 	}
-
 
 	@Override
 	public List<Movie> getMoviesByGenre(int genreID) {
@@ -377,5 +415,4 @@ public Movie addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, 
 	public float getMovieStat(Date startDate, Date endDate) {
 		return 0;
 	}
-
 }

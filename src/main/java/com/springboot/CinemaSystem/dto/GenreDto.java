@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.dto;
 
+import com.springboot.CinemaSystem.entity.Genre;
 import lombok.*;
 
 @Data
@@ -8,13 +9,17 @@ import lombok.*;
 @Getter
 @Setter
 public class GenreDto {
+    private long ID;
+    private String name;
+    private String description;
+    private boolean status;
+
     public GenreDto(long ID, String name) {
         this.name = name;
         this.ID = ID;
     }
 
-    private long ID;
-    private String name;
-    private String description;
-    private boolean status;
+    public static GenreDto toGenreDto(Genre genre) {
+        return new GenreDto(genre.getID(), genre.getName());
+    }
 }

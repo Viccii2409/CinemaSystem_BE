@@ -3,12 +3,16 @@ package com.springboot.CinemaSystem.entity;
 import com.fasterxml.jackson.annotation.*;
 import com.springboot.CinemaSystem.dto.TypeSeatDto;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.*;
 
 @Data
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class TypeSeat {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,8 +31,8 @@ public class TypeSeat {
 	@JsonIgnore
 	private List<PayTypeCustomer> payTypeCustomers;
 
-	public TypeSeatDto toTypeSeatDto() {
-		return new TypeSeatDto(this.getID(), this.getName(), this.surcharge);
+	public TypeSeat(long ID) {
+		this.ID = ID;
 	}
 
 }

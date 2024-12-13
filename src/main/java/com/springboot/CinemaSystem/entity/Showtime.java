@@ -1,6 +1,7 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
+import com.springboot.CinemaSystem.dto.RoomDto;
 import com.springboot.CinemaSystem.dto.SelectedSeatDto;
 import com.springboot.CinemaSystem.dto.ShowtimeDetailDto;
 import com.springboot.CinemaSystem.dto.ShowtimeRoomDto;
@@ -76,6 +77,10 @@ public class Showtime {
 	@JoinColumn(name = "timeFrameID")
 	private TimeFrame timeFrame;
 
+	public Showtime(long ID) {
+		this.ID = ID;
+	}
+
 	public ShowtimeRoomDto toShowtimeRoomDto(){
 		ShowtimeRoomDto showtimeRoomDto = new ShowtimeRoomDto(
 				this.getID(),
@@ -86,17 +91,10 @@ public class Showtime {
 				this.getAction(),
 				this.getPriceTicket(),
 				this.getMovie().toMovieShowtimeDto(),
-				this.getRoom().toRoomSeatDto(),
+				RoomDto.toRoomSeatDto(this.getRoom()),
 				this.getSelectedSeats().stream()
 						.filter(entry -> entry.getStatus() != null && !"expired".equals(entry.getStatus()))
-						.map(entry -> new SelectedSeatDto(
-								entry.getID(),
-								entry.getUser().getID(),
-								entry.getSeat().getID(),
-								entry.getStart(),
-								entry.getEnd(),
-								entry.getStatus()
-						))
+						.map(entry -> SelectedSeatDto.toSelectedSeatDto(entry))
 						.collect(Collectors.toList())
 		);
 		return showtimeRoomDto;

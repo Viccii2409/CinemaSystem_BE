@@ -7,10 +7,9 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class TheaterMovieDto {
-    private long ID;
-    private String name;
-    private List<MovieShowtimeDto> movie;
+@AllArgsConstructor
+public class GenreRequestDto {
+    private long customerid;
+    private List<Integer> genres;
 }

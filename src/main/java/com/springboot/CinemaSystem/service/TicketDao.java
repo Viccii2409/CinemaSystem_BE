@@ -1,42 +1,35 @@
 package com.springboot.CinemaSystem.service;
 
-import com.springboot.CinemaSystem.dto.BookingDto;
-import com.springboot.CinemaSystem.dto.TypeDiscountDto;
 import com.springboot.CinemaSystem.entity.*;
 
 import java.util.List;
 
 public interface TicketDao {
-	public List<TimeFrame> getAllTimeFrames();
-	public List<DayOfWeek> getAllDayOfWeeks();
+	public void updateAllSelectedSeat();
+	public void updateStatusPayOnlineToExpired();
 	public List<TypeCustomer> getAllTypeCustomer();
-	public BasePrice getBasePrice();
 
 	public TypeCustomer getTypeCustomerById(long id);
 	public void updateTypeCustomer(TypeCustomer typeCustomer);
 
-	public DayOfWeek getDayOfWeekById(Long key);
-	public void updateDayOfWeek(DayOfWeek dayOfWeek);
-
-	public TimeFrame getTimeFrameById(Long key);
-	public void updateTimeFrame(TimeFrame timeFrame);
-
-	public void updateAllSelectedSeat();
 	public long addSelectedSeat(SelectedSeat selectedSeat);
 	public SelectedSeat getSelectedSeatByID(long selectedSeatID);
 	public boolean updateStatusToExpired(long id);
 
 	public Booking addBooking(Booking booking);
+	public Booking updateBooking(Booking booking);
 	public PayCash addPayCash(PayCash payCash);
 	public void addPayTypeCustomer(List<PayTypeCustomer> payTypeCustomers);
 	public void addTicket(List<Ticket> tickets);
 	public Booking getBookingById(long id);
 
+	public Payment addPayment(Payment payment);
+	public Payment updatePayment(Payment paymentNew);
+	public Payment getPaymentByBarcode(String barcode);
 	public PayOnline addPayOnline(PayOnline payOnline);
 	public PayOnline getPayOnlineByBarcode(String orderId);
 	public PayOnline updatePayOnline(PayOnline payOnline);
 	public void updateSelectSeatStatusToExpired(long showtimeID, long userid, long seatid);
 	public Booking getBookingByBarcode(String barcode);
-	public void updateStatusPayOnlineToExpired();
 
 }

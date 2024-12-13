@@ -1,14 +1,24 @@
 package com.springboot.CinemaSystem.entity;
 
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Formula;
+
+import java.util.List;
 
 @Data
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @DiscriminatorValue("MANAGER")
 public class Manager extends Employee {
+	@OneToOne
+	@JoinColumn(name = "theaterID")
+	private Theater theater;
 
-	private int managedEmployees;
+	@OneToMany(mappedBy = "manager")
+	private List<Agent> agents;
 
 }

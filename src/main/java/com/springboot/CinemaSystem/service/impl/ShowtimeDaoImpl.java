@@ -384,4 +384,61 @@ public Showtime updateShowtime(Long showtimeId, ShowtimeRequestDto showtimeReque
 		return null;  // Nếu không tìm thấy lịch chiếu, trả về null
 	}
 
+
+
+	@Override
+	public BasePrice getBasePrice() {
+		try {
+			return basePriceRepository.findTopByOrderByIDDesc();
+		} catch (Exception e) {
+			throw new NotFoundException("Error get baseprice" + e.getMessage());
+		}
+	}
+
+	@Override
+	public List<DayOfWeek> getAllDayOfWeeks() {
+		try {
+			return dayOfWeekRepository.findAll();
+		} catch (Exception e) {
+			throw new NotFoundException("Error get all day of week" + e.getMessage());
+		}
+	}
+
+	@Override
+	public DayOfWeek getDayOfWeekById(Long key) {
+		return dayOfWeekRepository.findById(key)
+				.orElseThrow(() -> new NotFoundException("Error get dayofweek by ID"));
+	}
+
+	@Override
+	public void updateDayOfWeek(DayOfWeek dayOfWeek) {
+		if(!dayOfWeekRepository.existsById(dayOfWeek.getID())){
+			throw new NotFoundException("Error get dayofweek by ID");
+		}
+		dayOfWeekRepository.save(dayOfWeek);
+	}
+
+	@Override
+	public List<TimeFrame> getAllTimeFrames() {
+		try {
+			return timeFrameRepository.findAll();
+		} catch (Exception e) {
+			throw new NotFoundException("Error get all timeframe" + e.getMessage());
+		}
+	}
+
+	@Override
+	public TimeFrame getTimeFrameById(Long key) {
+		return timeFrameRepository.findById(key)
+				.orElseThrow(() -> new NotFoundException("Error timeframe by ID"));
+	}
+
+	@Override
+	public void updateTimeFrame(TimeFrame timeFrame) {
+		if(!timeFrameRepository.existsById(timeFrame.getID())){
+			throw new NotFoundException("Error timeframe by ID");
+		}
+		timeFrameRepository.save(timeFrame);
+	}
+
 }

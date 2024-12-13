@@ -13,6 +13,8 @@ public interface MovieDao {
 	public Movie editMovie(long id, MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile);
 	public List<MovieDto> getCommingSoonMovie();
 	public List<MovieDto> getShowingNowMovie();
+	public List<Slideshow> getAllSlideshow();
+//	public Trailer saveOrUpdateTrailer(Trailer trailer);
 	public boolean updateStatusMovie(int movieID);
 	public Movie getMovieByID(int movieID);
 	public List<Movie> getAllMovies();
@@ -23,6 +25,8 @@ public interface MovieDao {
 	public List<MovieDto> searchMoviesByGenre(String genreName);
 	public Movie getMovieDetails(long movieID);
 
+	public List<Genre> customerGenre(Long customerID);
+	public List<MovieDto> recommendMovies(List<Long> genreIds);
 	public List<Movie> getMoviesByGenre(int genreID);
 	public List<Movie> getMoviesByLanguage(int languageID);
 	public List<Movie> searchMoviesByTitle(String title);
@@ -44,8 +48,6 @@ public interface MovieDao {
 	public Language getLanguageByID(int languageID);
 	public List<Language> getAllLanguages();
 
+
 	public float getMovieStat(Date startDate, Date endDate);
-
-
-
 }

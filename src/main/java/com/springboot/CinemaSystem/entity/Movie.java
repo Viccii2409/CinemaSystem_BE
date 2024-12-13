@@ -82,12 +82,12 @@ public class Movie {
 
 	public MovieDetailAdminDto toMovieDetailAdminDto(){
 		List<GenreDto> genreDtos = new ArrayList<>();
-		List<MovieFeedbackDto> feebackDtos = new ArrayList<>();
+		List<FeedbackDto> feebackDtos = new ArrayList<>();
 		for(Genre g : this.genre){
 			genreDtos.add(g.toGenreDto());
 		}
 		for(Feedback f : this.feedback) {
-			feebackDtos.add(f.toMovieFeedbackDto());
+			feebackDtos.add(FeedbackDto.toFeedbackDto(f));
 		}
 		return new MovieDetailAdminDto(
 				this.ID,

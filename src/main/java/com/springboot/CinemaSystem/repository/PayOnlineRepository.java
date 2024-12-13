@@ -11,8 +11,6 @@ import java.util.List;
 
 @Repository
 public interface PayOnlineRepository extends JpaRepository<PayOnline, Long> {
-    PayOnline findByBarcode(String orderId);
-
     @Query("SELECT s FROM PayOnline s WHERE s.dateExpire <= :localDateTime AND s.status = 'pending'")
     List<PayOnline> getPayOnlineActive(@Param("localDateTime") LocalDateTime localDateTime);
 }

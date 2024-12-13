@@ -1,16 +1,19 @@
 package com.springboot.CinemaSystem.entity;
 
 import com.fasterxml.jackson.annotation.*;
-import com.springboot.CinemaSystem.dto.DiscountAddDto;
 import com.springboot.CinemaSystem.dto.DiscountDto;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 import java.util.*;
 
 @Data
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 public class Discount {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,26 +37,25 @@ public class Discount {
 
 	@ManyToMany(mappedBy = "discount")
 	@JsonIgnore
-	private List<Customer> customer;
+	private List<User> user;
 
 	@OneToMany(mappedBy = "discount")
 	private List<Payment> payment;
 
-	public static Discount toDiscount(DiscountAddDto discountAddDto) {
-		Discount discount = new Discount();
-		discount.setID(discountAddDto.getId());
-		discount.setName(discountAddDto.getName());
-		discount.setReducedValue(discountAddDto.getReducedValue());
-		discount.setDiscountCode(discountAddDto.getDiscountCode());
-		discount.setStart(Date.valueOf(discountAddDto.getStart()));
-		discount.setEnd(Date.valueOf(discountAddDto.getEnd()));
-		discount.setDescription(discountAddDto.getDescription());
-		discount.setStatus(discountAddDto.isStatus());
-		return discount;
+	public Discount(long ID) {
+		this.ID = ID;
 	}
 
-	public DiscountDto toDiscountDto() {
-		return new DiscountDto(this.ID, this.name, this.typeDiscount.toTypeDiscountDto(), this.reducedValue, this.discountCode,
-				this.start, this.end, this.description, this.image, this.status);
+	public static Discount toDiscount(DiscountDto dto) {
+		Discount discount = new Discount();
+		discount.setID(dto.getId());
+		discount.setName(dto.getName());
+		discount.setReducedValue(dto.getReducedValue());
+		discount.setDiscountCode(dto.getDiscountCode());
+		discount.setStart(dto.getStart());
+		discount.setEnd(dto.getEnd());
+		discount.setDescription(dto.getDescription());
+		discount.setStatus(dto.isStatus());
+		return discount;
 	}
 }
