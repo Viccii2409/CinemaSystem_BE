@@ -1,11 +1,10 @@
 package com.springboot.CinemaSystem.repository;
 
-import com.springboot.CinemaSystem.entity.Theater;
+import com.springboot.CinemaSystem.entity.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
-public interface TheaterRepository extends JpaRepository<Theater, Long> {
+public interface PaymentRepository extends JpaRepository<Payment, Long> {
+    Payment findByBarcode(String barcode);
 }

@@ -1,6 +1,5 @@
 package com.springboot.CinemaSystem.entity;
 
-import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,14 +11,14 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@DiscriminatorValue("AGENT")
-public class Agent extends Employee {
-	@ManyToOne
-	@JoinColumn(name = "managerID")
-	private Manager manager;
+public class Permission {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "permissionID")
+    private long ID;
+    private String name;
+
+    @ManyToMany(mappedBy = "permission")
+    private List<Role> role;
 
 }
-
-
-
-

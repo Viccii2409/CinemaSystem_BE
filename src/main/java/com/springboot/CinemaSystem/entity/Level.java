@@ -1,17 +1,18 @@
 package com.springboot.CinemaSystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 import com.springboot.CinemaSystem.dto.LevelDto;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Data
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Level {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,11 +22,11 @@ public class Level {
 	private int quantityTicket;
 
 	@OneToMany(mappedBy = "level")
-	@JsonIgnoreProperties("level")
+	@JsonIgnore
 	private List<Customer> customer;
 
-	public LevelDto toLevelDto() {
-		return new LevelDto(this.ID, this.name, this.quantityTicket);
+	public Level(long ID) {
+		this.ID = ID;
 	}
 
 }

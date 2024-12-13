@@ -11,6 +11,8 @@ public interface MovieDao {
 	public boolean editMovie(Long ID, Movie movie);
 	public List<MovieDto> getCommingSoonMovie();
 	public List<MovieDto> getShowingNowMovie();
+	public List<Slideshow> getAllSlideshow();
+	public Trailer saveOrUpdateTrailer(Trailer trailer);
 	public boolean updateStatusMovie(int movieID);
 	public Movie getMovieByID(int movieID);
 	public List<Movie> getAllMovies();
@@ -53,7 +55,4 @@ public interface MovieDao {
 	public boolean updateImage(Image image);
 
 	public float getMovieStat(Date startDate, Date endDate);
-
-
-
 }

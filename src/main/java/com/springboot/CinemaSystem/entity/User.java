@@ -4,10 +4,14 @@ import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
 public class User {
@@ -15,33 +19,47 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "UserID")
 	private long ID;
-	private String gender;
+	private String name;
 	private Date dob;
 	private String address;
 	private String email;
 	private String phone;
 	private String image;
-	private Date startDate;
-	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private LocalDateTime startDate;
+	private String gender;	//	male, female, other
+	private boolean status;
+	@Embedded
 	private Account account;
-	private String privileges;
-    @Column(insertable = false, updatable = false)
-    private String user_type;
+//    @Column(insertable = false, updatable = false)	// không được phép thay đổi (update) hoặc chèn (insert) thông qua các thao tác của JPA
+//    private String userType;
 
-	private String name;
+	@Transient
+	private double totalSpending;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "levelID", referencedColumnName = "levelID")
-	private Level level;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "roleID")
+	private Role role;
 
-	@ManyToMany
-	@JoinTable(
-			name = "user_notification", // Tên bảng trung gian
-			joinColumns = @JoinColumn(name = "userID"), // Khóa ngoại từ bảng User
-			inverseJoinColumns = @JoinColumn(name = "notificationID")
-	)
-	private List<Notification> notification;
+	@OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<Booking> booking;
 
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+	@JsonIgnore
 	private List<SelectedSeat> selectedSeats;
+
+	@ManyToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinTable(
+			name = "user_discount",
+			joinColumns = @JoinColumn(name = "userID"),
+			inverseJoinColumns = @JoinColumn(name = "discountID")
+	)
+	private List<Discount> discount;
+
+	@PrePersist
+	private void prePersistDate() {
+		if (this.startDate == null) {
+			this.startDate = LocalDateTime.now();
+		}
+	}
 }

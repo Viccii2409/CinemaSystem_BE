@@ -17,9 +17,4 @@ public class TypeDiscount {
 
 	@OneToMany(mappedBy = "typeDiscount")
 	private List<Discount> discount;
-
-
-	public TypeDiscountDto toTypeDiscountDto() {
-		return new TypeDiscountDto(this.ID, this.name);
-	}
 }
