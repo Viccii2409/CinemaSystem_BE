@@ -48,13 +48,12 @@ public class Movie {
 	@JoinColumn(name = "languageID")
 	private Language language;
 
-	@OneToOne(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonManagedReference("movie-trailer")
-	private Trailer trailer;
+	@Column(name = "image", nullable = false)
+	private String image;
 
-	@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonManagedReference
-	private List<Image> image;
+	@Column(name = "trailer", nullable = false)
+	private String trailer;
+
 
 
 	@ManyToMany
@@ -149,10 +148,19 @@ public class Movie {
 
 
 	public MovieShowtimeDto toMovieShowtimeDto() {
-		return new MovieShowtimeDto(this.ID, this.title, this.duration, this.description, this.image.get(0).getLink());
+		return new MovieShowtimeDto(this.ID, this.title, this.duration, this.description, this.image);
 	}
 
 	public String getFirstImage() {
-		return this.image.get(0).getLink();
+		return this.image;
+	}
+
+	// Getter và Setter cho genres
+	public List<Genre> getGenres() {
+		return genre;
+	}
+
+	public void setGenres(List<Genre> genres) {
+		this.genre = genres;
 	}
 }

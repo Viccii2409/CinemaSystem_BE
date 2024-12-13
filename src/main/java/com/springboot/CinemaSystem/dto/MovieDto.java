@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class MovieDto {
     private Long id;
     private String title;
-    private String link;
+    private String image;
     private LocalDate releaseDate;
     private boolean status;
     private List<GenreDto> genres;
@@ -23,7 +23,6 @@ public class MovieDto {
         MovieDto dto = new MovieDto();
         dto.setId(movie.getId());
         dto.setTitle(movie.getTitle());
-
         // Chuyển đổi các thể loại của phim thành danh sách GenreDto
         List<GenreDto> genreDtos = movie.getGenre().stream()
                 .map(Genre::toGenreDto)

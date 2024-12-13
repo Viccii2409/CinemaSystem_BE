@@ -1,6 +1,7 @@
 package com.springboot.CinemaSystem.controller;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.springboot.CinemaSystem.dto.*;
 import com.springboot.CinemaSystem.entity.Movie;
 import com.springboot.CinemaSystem.exception.NotFoundException;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -145,11 +147,24 @@ public class MovieController {
         return movieService.addMovie(movie);
     }
 
-    @PreAuthorize("hasAuthority('MANAGER_MOVIE')")
-    @PutMapping("/{ID}")
-    public boolean editMovie(@PathVariable Long ID, @RequestBody Movie movie) {
-        return movieService.editMovie(ID, movie);
-    }
+//    @PreAuthorize("hasAuthority('MANAGER_MOVIE')")
+//    @PutMapping("/{ID}")
+//    public boolean editMovie(@PathVariable long ID,
+//                             @RequestParam("movie") String movieRequestDtoJson,
+//                             @RequestParam("image") MultipartFile imageFile,
+//                             @RequestParam("trailer") MultipartFile trailerFile) {
+//        try {
+//            // Chuyển đổi JSON movieRequestDto thành đối tượng MovieRequestDto
+//            MovieRequestDto movieRequestDto = new ObjectMapper().readValue(movieRequestDtoJson, MovieRequestDto.class);
+//
+//            // Gọi service để sửa movie
+//            return movieService.editMovie(ID, movieRequestDto, imageFile, trailerFile) != null;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return false;
+//        }
+//    }
+
 
     @PreAuthorize("hasAuthority('MANAGER_MOVIE')")
     @PutMapping("/update-status/{id}")
@@ -194,12 +209,12 @@ public class MovieController {
     }
 
     // Thêm trailer mới hoặc cập nhật trailer nếu movieId đã tồn tại
-    @PostMapping("/addTrailer")
-    public String addTrailer(@RequestBody Trailer trailer) {
-        // Lưu trailer, nếu trùng movieId thì sẽ cập nhật, không thì sẽ lưu mới
-        movieService.saveOrUpdateTrailer(trailer);
-        return "redirect:/movies"; // Quay lại trang danh sách movies
-    }
+//    @PostMapping("/addTrailer")
+//    public String addTrailer(@RequestBody Trailer trailer) {
+//        // Lưu trailer, nếu trùng movieId thì sẽ cập nhật, không thì sẽ lưu mới
+//        movieService.saveOrUpdateTrailer(trailer);
+//        return "redirect:/movies"; // Quay lại trang danh sách movies
+//    }
 
 
     ///  LÊN LỊCH CHIẾU

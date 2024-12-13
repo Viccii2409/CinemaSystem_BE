@@ -1,18 +1,20 @@
 package com.springboot.CinemaSystem.service;
 
 import com.springboot.CinemaSystem.dto.MovieDto;
+import com.springboot.CinemaSystem.dto.MovieRequestDto;
 import com.springboot.CinemaSystem.entity.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
 
 public interface MovieDao {
 	public boolean addMovie(Movie movie);
-	public boolean editMovie(Long ID, Movie movie);
+//	public Movie editMovie(long id, MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile);
 	public List<MovieDto> getCommingSoonMovie();
 	public List<MovieDto> getShowingNowMovie();
 	public List<Slideshow> getAllSlideshow();
-	public Trailer saveOrUpdateTrailer(Trailer trailer);
+//	public Trailer saveOrUpdateTrailer(Trailer trailer);
 	public boolean updateStatusMovie(int movieID);
 	public Movie getMovieByID(int movieID);
 	public List<Movie> getAllMovies();
@@ -21,8 +23,8 @@ public interface MovieDao {
 	public Movie getMovieByID(long id);
 	public void deleteMovie(long id);
 	public List<MovieDto> searchMoviesByGenre(String genreName);
-
-
+	public List<Genre> customerGenre(Long customerID);
+	public List<MovieDto> recommendMovies(List<Long> genreIds);
 	public List<Movie> getMoviesByGenre(int genreID);
 	public List<Movie> getMoviesByLanguage(int languageID);
 	public List<Movie> searchMoviesByTitle(String title);
@@ -44,15 +46,6 @@ public interface MovieDao {
 	public Language getLanguageByID(int languageID);
 	public List<Language> getAllLanguages();
 
-	public boolean addTrailer(Trailer trailer);
-	public boolean updateTrailer(Trailer trailer);
-	public Trailer getTrailerByID(int trailerID);
-
-
-
-	public Image getImage(int imageID);
-	public boolean addImage(Image image);
-	public boolean updateImage(Image image);
 
 	public float getMovieStat(Date startDate, Date endDate);
 }

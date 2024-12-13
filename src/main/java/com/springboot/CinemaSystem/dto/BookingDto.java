@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.dto;
 
+import lombok.AllArgsConstructor;
 import com.springboot.CinemaSystem.entity.Booking;
 import com.springboot.CinemaSystem.entity.Ticket;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,7 @@ public class BookingDto {
     private Time startTime;
     private Time endTime;
 
+    private long movieID;
     private String nameMovie;
     private String image;
 
@@ -41,6 +43,7 @@ public class BookingDto {
     private float amount;
 
     private String nameCustomer;
+    private String imageCustomer;
     private String phone;
     private String email;
 
@@ -49,7 +52,7 @@ public class BookingDto {
     private String statusPayment;
     private FeedbackDto feedback;
 
-    public BookingDto(long ID, LocalDateTime dateBooking, String barcode, List<String> nameSeats, Date dateShowtime, Time startTime, Time endTime, String nameMovie, String image, String nameTheater, String address, String nameRoom, String typeRoom, float totalPrice, float discountPrice, float amount, String nameCustomer, String phone, String email) {
+    public BookingDto(long ID, LocalDateTime dateBooking, String barcode, List<String> nameSeats, Date dateShowtime, Time startTime, Time endTime,long movieID, String nameMovie, String image, String nameTheater, String address, String nameRoom, String typeRoom, float totalPrice, float discountPrice, float amount, String nameCustomer, String phone, String email) {
         this.ID = ID;
         this.dateBooking = dateBooking;
         this.barcode = barcode;
@@ -57,6 +60,7 @@ public class BookingDto {
         this.dateShowtime = dateShowtime;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.movieID=movieID;
         this.nameMovie = nameMovie;
         this.image = image;
         this.nameTheater = nameTheater;
@@ -84,6 +88,7 @@ public class BookingDto {
                 booking.getShowtime().getDate(),
                 booking.getShowtime().getStartTime(),
                 booking.getShowtime().getEndTime(),
+                booking.getShowtime().getMovie().getId(),
                 booking.getShowtime().getMovie().getTitle(),
                 booking.getShowtime().getMovie().getFirstImage(),
                 booking.getShowtime().getRoom().getTheater().getName(),
@@ -109,5 +114,12 @@ public class BookingDto {
         }
         dto.setTypeBooking(booking.getTypeBooking());
         return dto;
+    }
+
+    public BookingDto(long ID, long movieID,String nameCustomer,String imageCustomer) {
+        this.ID=ID;
+        this.movieID=movieID;
+        this.nameCustomer=nameCustomer;
+    this.imageCustomer=imageCustomer;
     }
 }

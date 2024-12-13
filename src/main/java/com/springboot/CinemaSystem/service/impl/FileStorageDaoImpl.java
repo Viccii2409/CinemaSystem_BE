@@ -99,4 +99,22 @@ public class FileStorageDaoImpl implements FileStorageDao {
             throw new DataProcessingException("Không thể xóa tệp trên Cloudinary: " + e.getMessage());
         }
     }
+
+//    @Override
+//    public String saveFileMovieAndTrailer(MultipartFile file, String folder) throws IOException {
+//        // Chuyển MultipartFile thành mảng byte
+//        byte[] fileBytes = file.getBytes();
+//
+//        // Xác định loại tài nguyên (ảnh, video)
+//        String resourceType = file.getContentType().startsWith("image") ? "image" : "video";
+//
+//        // Upload tệp lên Cloudinary
+//        Map uploadResult = cloudinary.uploader().upload(fileBytes, ObjectUtils.asMap(
+//                "folder", folder,           // Chỉ định thư mục trên Cloudinary
+//                "resource_type", resourceType)); // Xác định loại tài nguyên (image hoặc video)
+//
+//        // Trả về URL của tệp đã upload
+//        return (String) uploadResult.get("url");
+//    }
+
 }

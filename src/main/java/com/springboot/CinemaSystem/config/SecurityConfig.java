@@ -60,7 +60,8 @@ public class SecurityConfig{
                                 "/api/theater/public/**",
                                 "/api/movie/public/**",
                                 "/api/ticket/public/**",
-                                "/api/user/public/**")
+                                "/api/user/public/**",
+                                "/api/feedback/public/*")
                         .permitAll()
                         .anyRequest().authenticated()
                 )

@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -98,8 +99,7 @@ public class TheaterController {
 
     }
 
-    @PreAuthorize("hasAuthority('MANAGER_THEATER')")
-    @GetMapping("/{id}")
+    @GetMapping("/public/{id}")
     public TheaterDto getTheaterById(@PathVariable("id") long id){
         return TheaterDto.toTheaterView(theaterDao.getTheaterByID(id));
     }
