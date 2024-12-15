@@ -3,7 +3,6 @@ package com.springboot.CinemaSystem.dto;
 import lombok.AllArgsConstructor;
 import com.springboot.CinemaSystem.entity.Booking;
 import com.springboot.CinemaSystem.entity.Ticket;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -75,6 +74,13 @@ public class BookingDto {
         this.email = email;
     }
 
+    public BookingDto(long ID, long movieID,String nameCustomer,String imageCustomer) {
+        this.ID=ID;
+        this.movieID=movieID;
+        this.nameCustomer=nameCustomer;
+        this.imageCustomer=imageCustomer;
+    }
+
     public static BookingDto toBookingDto(Booking booking) {
         List<String> nameSeats = new ArrayList<>();
         for (Ticket t : booking.getTicket()) {
@@ -110,16 +116,9 @@ public class BookingDto {
         dto.setBarcodePayment(booking.getPayment().getBarcode());
         dto.setStatusPayment(booking.getPayment().getStatus());
         if(booking.getFeedback() != null) {
-            dto.setFeedback(booking.getFeedback().toFeedbackDto());
+            dto.setFeedback(FeedbackDto.toFeedbackDto(booking.getFeedback()));
         }
         dto.setTypeBooking(booking.getTypeBooking());
         return dto;
-    }
-
-    public BookingDto(long ID, long movieID,String nameCustomer,String imageCustomer) {
-        this.ID=ID;
-        this.movieID=movieID;
-        this.nameCustomer=nameCustomer;
-    this.imageCustomer=imageCustomer;
     }
 }

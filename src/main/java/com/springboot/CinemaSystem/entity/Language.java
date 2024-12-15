@@ -19,4 +19,32 @@ public class Language {
 	@JsonIgnore
 	private List<Movie> movie;
 
+
+
+	// Default no-argument constructor
+	public Language() {
+	}
+
+	// Constructor with parameters (if needed)
+	public Language(String name) {
+		this.name = name;
+	}
+
+	// Getters and Setters
+	public Long getId() {
+		return ID;
+	}
+
+	public void setId(Long id) {
+		this.ID = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 }

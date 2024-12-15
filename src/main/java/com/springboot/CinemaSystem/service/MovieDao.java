@@ -1,15 +1,16 @@
 package com.springboot.CinemaSystem.service;
 
+import com.springboot.CinemaSystem.dto.FeedbackDto;
 import com.springboot.CinemaSystem.dto.MovieDto;
-import com.springboot.CinemaSystem.dto.MovieRequestDto;
 import com.springboot.CinemaSystem.entity.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
 
 public interface MovieDao {
-	public boolean addMovie(Movie movie);
+	Movie addMovie(Movie movie);
+	Movie updateMovie(Movie movie);
+//	public Movie addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile);
 //	public Movie editMovie(long id, MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile);
 	public List<MovieDto> getCommingSoonMovie();
 	public List<MovieDto> getShowingNowMovie();
@@ -17,12 +18,13 @@ public interface MovieDao {
 //	public Trailer saveOrUpdateTrailer(Trailer trailer);
 	public boolean updateStatusMovie(int movieID);
 	public Movie getMovieByID(int movieID);
-	public List<Movie> getAllMovies();
-	public List<MovieDto> getAllMovie();
+	public List<Movie> getAllMovie();
 	public List<Movie> searchMovies(String title);
 	public Movie getMovieByID(long id);
 	public void deleteMovie(long id);
 	public List<MovieDto> searchMoviesByGenre(String genreName);
+	public Movie getMovieDetails(long movieID);
+
 	public List<Genre> customerGenre(Long customerID);
 	public List<MovieDto> recommendMovies(List<Long> genreIds);
 	public List<Movie> getMoviesByGenre(int genreID);
@@ -39,13 +41,9 @@ public interface MovieDao {
 	public Genre getGenreByID(long genreID);
 	public List<Genre> getAllGenres();
 	public void deleteGenre(Long id);
-	public boolean deleteGenreMovie(int movieID, int genreID);
-
-	public boolean addLanguage(Language language);
-	public boolean updateLanguage(Language language);
-	public Language getLanguageByID(int languageID);
-	public List<Language> getAllLanguages();
 
 
-	public float getMovieStat(Date startDate, Date endDate);
+	public Feedback addFeedback(Feedback feedback);
+	public List<FeedbackDto> getFeedbackByMovie(long movieID);
+
 }

@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MovieDetailDto {
+public class MovieDetailAdminDto {
     private long ID;
     private String title;
     private int duration;

@@ -1,5 +1,7 @@
 package com.springboot.CinemaSystem.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.springboot.CinemaSystem.filter.JwtTokenFilter;
 import com.springboot.CinemaSystem.service.UserDao;
 import com.springboot.CinemaSystem.service.impl.UserDaoImpl;
@@ -20,7 +22,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 @Configuration
@@ -48,6 +53,13 @@ public class SecurityConfig{
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
+
+
+
+//    @Bean
+//    public MultipartResolver multipartResolver() {
+//        return new StandardServletMultipartResolver();
+//    }
 
 
     @Bean

@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.springboot.CinemaSystem")
 @EnableScheduling
 public class CinemaSystemApplication {
 

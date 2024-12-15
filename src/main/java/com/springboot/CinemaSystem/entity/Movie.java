@@ -5,7 +5,6 @@ import com.springboot.CinemaSystem.dto.*;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,18 +34,11 @@ public class Movie {
 	private boolean status;
 	@Transient
 	private float rating;
+
 	private String director;
 
 	@Column(name ="cast", columnDefinition = "TEXT")
 	private String cast;
-
-	@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonIgnore
-	private List<Showtime> showtime;
-
-	@ManyToOne
-	@JoinColumn(name = "languageID")
-	private Language language;
 
 	@Column(name = "image", nullable = false)
 	private String image;
@@ -54,6 +46,13 @@ public class Movie {
 	@Column(name = "trailer", nullable = false)
 	private String trailer;
 
+	@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnore
+	private List<Showtime> showtime = new ArrayList<>();
+
+	@ManyToOne
+	@JoinColumn(name = "languageID")
+	private Language language;
 
 
 	@ManyToMany
@@ -63,7 +62,7 @@ public class Movie {
 			inverseJoinColumns = @JoinColumn(name = "genreID")
 	)
 	@JsonIgnoreProperties("movie") // Bỏ qua trường movie trong Genre
-	private List<Genre> genre;
+	private List<Genre> genre = new ArrayList<>();
 
 	@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnoreProperties("movie") // Bỏ qua trường movie trong Feedback
@@ -73,6 +72,27 @@ public class Movie {
 	@JsonIgnoreProperties("movie")
 	private Slideshow slideshow;
 
+	public static Movie toMovie(MovieRequestDto movieRequestDto) {
+		Movie movie = new Movie();
+		movie.setId(movieRequestDto.getId());
+		movie.setTitle(movieRequestDto.getTitle());
+		movie.setDuration(movieRequestDto.getDuration());
+		movie.setReleaseDate(movieRequestDto.getReleaseDate());
+		movie.setDescription(movieRequestDto.getDescription());
+		movie.setDirector(movieRequestDto.getDirector());
+		movie.setCast(movieRequestDto.getCast());
+		Language language1 = new Language();
+		language1.setId(movieRequestDto.getLanguageID());
+		movie.setLanguage(language1);
+		for(Long id : movieRequestDto.getGenreID()) {
+			Genre genre1 = new Genre();
+			genre1.setID(id);
+			movie.getGenre().add(genre1);
+		}
+		movie.setStatus(true);
+		return movie;
+	}
+
 	public long getId() {
 		return ID;
 	}
@@ -81,23 +101,23 @@ public class Movie {
 		this.ID = ID;
 	}
 
-	public MovieDetailDto toMovieDetailDto(){
+	public MovieDetailAdminDto toMovieDetailAdminDto(){
 		List<GenreDto> genreDtos = new ArrayList<>();
 		List<FeedbackDto> feebackDtos = new ArrayList<>();
 		for(Genre g : this.genre){
 			genreDtos.add(g.toGenreDto());
 		}
 		for(Feedback f : this.feedback) {
-			feebackDtos.add(f.toFeedbackDto());
+			feebackDtos.add(FeedbackDto.toFeedbackDto(f));
 		}
-		return new MovieDetailDto(
+		return new MovieDetailAdminDto(
 				this.ID,
 				this.title,
 				this.duration,
 				this.releaseDate,
 				this.description,
 				this.status,
-				this.rating,
+				this.calculateAverageRating(), // Gọi phương thức tính rating
 				this.director,
 				this.language,
 				this.trailer,
@@ -130,9 +150,7 @@ public class Movie {
 		List<GenreDto> genreDtos = this.getGenre().stream()
 				.map(Genre::toGenreDto)
 				.collect(Collectors.toList());
-		dto.setGenres(genreDtos);
-
-		// Chuyển đổi các thuộc tính khác nếu cần
+		dto.setGenre(genreDtos);
 		return dto;
 	}
 
@@ -141,10 +159,6 @@ public class Movie {
 	public String toString() {
 		return "Movie{id=" + ID + ", title='" + title + "', releaseDate=" + releaseDate + ", status=" + status + "}";
 	}
-
-	// Tính rating phim
-
-
 
 
 	public MovieShowtimeDto toMovieShowtimeDto() {
@@ -155,12 +169,32 @@ public class Movie {
 		return this.image;
 	}
 
-	// Getter và Setter cho genres
-	public List<Genre> getGenres() {
-		return genre;
+	// Tính rating phim
+	public float calculateAverageRating() {
+		if (this.feedback == null || this.feedback.isEmpty()) {
+			return 0; // Nếu không có feedback nào, trả về 0.
+		}
+
+		// Lọc và tính trung bình cộng các giá trị star (int) từ feedback
+		double averageRating = this.feedback.stream()
+				.map(Feedback::getStar) // Lấy star từ feedback
+				.filter(Objects::nonNull) // Bỏ qua các giá trị null
+				.mapToInt(Integer::intValue) // Chuyển đổi từ Integer sang int
+				.average() // Tính trung bình cộng
+				.orElse(0); // Nếu không có giá trị hợp lệ, trả về 0.
+
+		return (float) averageRating; // Trả về kết quả dưới dạng float
 	}
 
-	public void setGenres(List<Genre> genres) {
-		this.genre = genres;
-	}
+
+    // Getter và Setter cho genres
+//    public List<Genre> getGenres() {
+//        return genre;
+//    }
+
+    public void setGenres(List<Genre> genres) {
+        this.genre = genres;
+    }
+
 }
+

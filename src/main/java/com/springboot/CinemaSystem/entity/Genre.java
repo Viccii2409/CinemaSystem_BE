@@ -43,4 +43,9 @@ public class Genre {
 		return new GenreDto(this.ID, this.name, this.description, this.status);
 	}
 
+	// Constructor cần thiết cho Jackson để chuyển đổi từ ID (số)
+	@JsonCreator
+	public Genre(@JsonProperty("id") Long id) {
+		this.ID = id;
+	}
 }
