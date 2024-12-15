@@ -13,10 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -64,7 +62,7 @@ public class TheaterController {
             Theater theater = Theater.convertTheaterAddtoTheater(dto);
             theater.setStatus(false);
             if(file != null && !file.isEmpty()){
-                String imageUrl = fileStorageDao.saveFileFromCloudinary(file, "Image/Theater");
+                String imageUrl = fileStorageDao.saveFileFromCloudinary(file, "Image/Theater", "image");
                 theater.setImage(imageUrl);
             }
             Theater saveTheater = theaterDao.addTheater(theater);
@@ -88,7 +86,7 @@ public class TheaterController {
             theater.setStatus(theater_old.isStatus());
             theater.setRoom(theater_old.getRoom());
             if(file != null && !file.isEmpty()){
-                String imageUrl = fileStorageDao.updateFile(file, theater_old.getImage(), "Image/Theater");
+                String imageUrl = fileStorageDao.updateFile(file, theater_old.getImage(), "Image/Theater", "image");
                 theater.setImage(imageUrl);
             }
             Theater updateTheater = theaterDao.updateTheater(theater);

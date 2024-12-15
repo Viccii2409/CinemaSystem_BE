@@ -1,12 +1,12 @@
 package com.springboot.CinemaSystem.service.impl;
 
 
-import com.springboot.CinemaSystem.dto.GenreDto;
-import com.springboot.CinemaSystem.dto.MovieDto;
-import com.springboot.CinemaSystem.dto.ShowtimeTheaterIDDto;
+import com.springboot.CinemaSystem.dto.*;
 import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.exception.NotFoundException;
+import com.springboot.CinemaSystem.repository.GenreRepository;
+import com.springboot.CinemaSystem.repository.MovieRepository;
 import com.springboot.CinemaSystem.repository.*;
 import com.springboot.CinemaSystem.service.FileStorageDao;
 import com.springboot.CinemaSystem.service.MovieDao;
@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.sql.SQLOutput;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,28 +23,92 @@ import java.util.stream.Collectors;
 @Service
 public class MovieDaoImpl implements MovieDao {
 
-	private GenreRepository genreRepository;
-	private MovieRepository movieRepository;
-    private CustomerRepository customerRepository;
+	private final GenreRepository genreRepository;
+	private final MovieRepository movieRepository;
+	private final FileStorageDao fileStorageService;
+	@Autowired
+	private CustomerRepository customerRepository;
+	@Autowired
 	private SlideshowRepository slideshowRepository;
-    private FileStorageDao fileStorageDao;
+	@Autowired
+	private FeedbackRepository feedbackRepository;
 
 	@Autowired
-	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository, CustomerRepository customerRepository, SlideshowRepository slideshowRepository, FileStorageDao fileStorageDao) {
+	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository, FileStorageDao fileStorageService) {
 		this.genreRepository = genreRepository;
 		this.movieRepository = movieRepository;
-        this.customerRepository=customerRepository;
-		this.slideshowRepository = slideshowRepository;
-		this.fileStorageDao = fileStorageDao;
+		this.fileStorageService = fileStorageService;
 	}
-
 
 
 	@Override
-	public boolean addMovie(Movie movie) {
-		movieRepository.save(movie);
-		return true;
+	public Movie addMovie(Movie movie) {
+		try {
+			return movieRepository.save(movie);
+		} catch (Exception e) {
+			throw new DataProcessingException("Failed addMovie: " + e.getMessage());
+		}
 	}
+
+	@Override
+	public Movie updateMovie(Movie movie) {
+		if(!movieRepository.existsById(movie.getId())) {
+			throw new NotFoundException("Not found movie" + movie.getId());
+		}
+		try {
+			return movieRepository.save(movie);
+		} catch (Exception e) {
+			throw new DataProcessingException("Failed updateMovie: " + e.getMessage());
+		}
+	}
+
+// thêm và sửa phim
+//@Override
+//public Movie addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile) {
+//
+//	// Kiểm tra fileStorageService
+//	if (fileStorageService == null) {
+//		throw new NullPointerException("fileStorageService is not injected!");
+//	}
+//
+//	Movie movie = new Movie();
+//	movie.setTitle(movieRequestDto.getTitle());
+//	movie.setDuration(movieRequestDto.getDuration());
+//	movie.setReleaseDate(movieRequestDto.getReleaseDate());
+//	movie.setDescription(movieRequestDto.getDescription());
+//	movie.setDirector(movieRequestDto.getDirector());
+//	movie.setCast(movieRequestDto.getCast());
+//	movie.setLanguage(movieRequestDto.getLanguage());
+//	movie.setStatus(true);
+//
+//	// Xử lý danh sách thể loại
+//	List<Genre> genre = movieRequestDto.getGenre()
+//			.stream()
+//			.map(dto -> genreRepository.findById(dto.getID())
+//					.orElseThrow(() -> new RuntimeException("Genre not found")))
+//			.collect(Collectors.toList());
+//	movie.setGenres(genre);
+//
+//	try {
+//		// Upload ảnh lên Cloudinary vào thư mục 'Movie'
+//		if (imageFile != null && !imageFile.isEmpty()) {
+//			String imageUrl = fileStorageService.saveFileMovieAndTrailer(imageFile, "Movie");
+//			movie.setImage(imageUrl);
+//		}
+//
+//		// Upload trailer lên Cloudinary vào thư mục 'Trailer'
+//		if (trailerFile != null && !trailerFile.isEmpty()) {
+//			String trailerUrl = fileStorageService.saveFileMovieAndTrailer(trailerFile, "Trailer");
+//			movie.setTrailer(trailerUrl);
+//		}
+//
+//	} catch (Exception e) {
+//		e.printStackTrace();
+//		throw new RuntimeException("Failed to upload files to Cloudinary", e);
+//	}
+//
+//	return movieRepository.save(movie);
+//}
 
 //	@Override
 //	public Movie editMovie(long id, MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile) {
@@ -58,7 +124,7 @@ public class MovieDaoImpl implements MovieDao {
 //			movie.setDescription(movieRequestDto.getDescription());
 //			movie.setDirector(movieRequestDto.getDirector());
 //			movie.setCast(movieRequestDto.getCast());
-//			movie.setLanguage(movieRequestDto.getLanguage());
+////			movie.setLanguage(movieRequestDto.getLanguage());
 //
 //			// Cập nhật thể loại
 //			List<Genre> genres = movieRequestDto.getGenre()
@@ -71,13 +137,13 @@ public class MovieDaoImpl implements MovieDao {
 //			try {
 //				// Upload ảnh lên Cloudinary vào thư mục 'Movie' nếu có thay đổi
 //				if (imageFile != null && !imageFile.isEmpty()) {
-//					String imageUrl = fileStorageDao.saveFileMovieAndTrailer(imageFile, "Movie");
+//					String imageUrl = fileStorageService.saveFileMovieAndTrailer(imageFile, "Movie");
 //					movie.setImage(imageUrl);  // Cập nhật ảnh mới
 //				}
 //
 //				// Upload trailer lên Cloudinary vào thư mục 'Trailer' nếu có thay đổi
 //				if (trailerFile != null && !trailerFile.isEmpty()) {
-//					String trailerUrl = fileStorageDao.saveFileMovieAndTrailer(trailerFile, "Trailer");
+//					String trailerUrl = fileStorageService.saveFileMovieAndTrailer(trailerFile, "Trailer");
 //					movie.setTrailer(trailerUrl);  // Cập nhật trailer mới
 //				}
 //
@@ -92,16 +158,16 @@ public class MovieDaoImpl implements MovieDao {
 //		}
 //	}
 
+    public List<Genre> customerGenre(Long customerID){
+        return customerRepository.findGenresByCustomerId(customerID);
+    }
 
-	public List<Genre> customerGenre(Long customerID){
-		return customerRepository.findGenresByCustomerId(customerID);
-	}
-	public List<MovieDto> recommendMovies(List<Long> genreIds) {
-		List<Movie> movies=movieRepository.findMoviesByGenres(genreIds);
-		return movies.stream()
-				.map(this::convertToDto)
-				.collect(Collectors.toList());
-	}
+    public List<MovieDto> recommendMovies(List<Long> genreIds) {
+        List<Movie> movies=movieRepository.findMoviesByGenres(genreIds);
+        return movies.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
 
 	@Override
 	public List<MovieDto> getCommingSoonMovie() {
@@ -149,6 +215,8 @@ public class MovieDaoImpl implements MovieDao {
 
 
 	private MovieDto convertToDto(Movie movie) {
+		// Kiểm tra danh sách image
+		String link = (movie.getImage() == null || movie.getImage().isEmpty()) ? null : movie.getImage();
 		List<GenreDto> genreDtos = movie.getGenre().stream()
 				.map(Genre::toGenreDto)
 				.collect(Collectors.toList());
@@ -158,6 +226,7 @@ public class MovieDaoImpl implements MovieDao {
 				movie.getImage(),
 				movie.getReleaseDate(),
 				movie.isStatus(),
+				movie.getShowtime().size(),
 				genreDtos,
 				movie.getShowtime()
 						.stream()
@@ -193,28 +262,18 @@ public class MovieDaoImpl implements MovieDao {
 	}
 
 	@Override
-	public List<Movie> getAllMovies() {
-		return movieRepository.findAll();
+	public Movie getMovieDetails(long movieID) {
+		return movieRepository.findById((long) movieID).orElse(null);
 	}
 
-	@Override
-	public List<MovieDto> getAllMovie() {
-		// Get all movie entities from the repository
-		List<Movie> movies = movieRepository.findAll();
-		// Convert each Movie to MovieDto and return the list
-		return movies.stream()
-				.map(this::convertToDto)  // Convert each Movie entity to MovieDto
-				.collect(Collectors.toList());
+	public List<Movie> getAllMovie() {
+		try {
+			return movieRepository.findAll();
+		} catch (Exception e) {
+			throw new DataProcessingException(e.getMessage());
+		}
 	}
 
-//	private MovieDto convertToMovieDto(Movie movie) {
-//		List<GenreDto> genreDtos = movie.getGenre().stream()
-//				.map(genre -> new GenreDto(genre.getID(), genre.getName()))
-//				.collect(Collectors.toList());
-//
-//		return new MovieDto(movie.getId(), movie.getTitle(), movie.getReleaseDate(),
-//				movie.isStatus(), movie.getImage().toString(), genreDtos);
-//	}
 
 	@Override
 	public List<Movie> searchMovies(String title) {
@@ -229,7 +288,12 @@ public class MovieDaoImpl implements MovieDao {
 
 	@Override
 	public void deleteMovie(long id) {
-		movieRepository.deleteById(id);
+		try {
+			movieRepository.deleteById(id);
+		}
+		catch (Exception e) {
+			throw new DataProcessingException(e.getMessage());
+		}
 	}
 
 	@Override
@@ -256,7 +320,7 @@ public class MovieDaoImpl implements MovieDao {
 							.map(genre -> genre.toGenreDto()) // Chuyển Genre thành GenreDto
 							.collect(Collectors.toList());
 
-					dto.setGenres(genreDtos); // Set danh sách GenreDto vào MovieDto
+					dto.setGenre(genreDtos); // Set danh sách GenreDto vào MovieDto
 					return dto;
 				})
 				.collect(Collectors.toList());
@@ -339,34 +403,33 @@ public class MovieDaoImpl implements MovieDao {
 		genreRepository.deleteById(id);
 	}
 
-
 	@Override
-	public boolean deleteGenreMovie(int movieID, int genreID) {
-		return false;
+	public Feedback addFeedback(Feedback feedback) {
+		try {
+			return feedbackRepository.save(feedback);
+		} catch (Exception e) {
+			throw new DataProcessingException("Failed to add feedback: " + e.getMessage());
+		}
 	}
 
 	@Override
-	public boolean addLanguage(Language language) {
-		return false;
+	public List<FeedbackDto> getFeedbackByMovie(long movieID) {
+		return feedbackRepository.findByMovieId(movieID).stream()
+				.map(this::convertToDto)
+				.collect(Collectors.toList());
 	}
-
-	@Override
-	public boolean updateLanguage(Language language) {
-		return false;
-	}
-
-	@Override
-	public Language getLanguageByID(int languageID) {
-		return null;
-	}
-
-	@Override
-	public List<Language> getAllLanguages() {
-		return List.of();
-	}
-
-	@Override
-	public float getMovieStat(Date startDate, Date endDate) {
-		return 0;
-	}
+	private FeedbackDto convertToDto(Feedback feedback){
+		return new FeedbackDto(
+				feedback.getID(),
+				feedback.getText(),
+				feedback.getDate(),
+				feedback.getStar(),
+				new BookingDto(
+						feedback.getBooking().getID(),
+						feedback.getBooking().getShowtime().getMovie().getId(),
+						feedback.getBooking().getUser().getName(),
+						feedback.getBooking().getUser().getImage()
+				)
+		);
+	};
 }

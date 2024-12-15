@@ -181,7 +181,7 @@ public class UserController {
     public String updateImage(@RequestParam(value = "id") long id, @RequestParam(value = "file") MultipartFile file) {
         User user = userDao.getUserByID(id);
         if(user != null) {
-            String imageUrl = fileStorageDao.updateFile(file, user.getImage(), "Image/User");
+            String imageUrl = fileStorageDao.updateFile(file, user.getImage(), "Image/User", "image");
             user.setImage(imageUrl);
             userDao.updateUser(user);
             return imageUrl;
