@@ -198,8 +198,6 @@ public class ShowtimeDaoImpl implements ShowtimeDao {
 				.orElseThrow(() -> new EntityNotFoundException("TimeFrame not found"));
 	}
 
-
-	// Check for schedule conflict
 	// Check for schedule conflict (hỗ trợ cả thêm và cập nhật)
 	private boolean isScheduleConflict(long roomId, Date date, Time startTime, Time endTime, Long showtimeId) {
 		List<Showtime> conflictingShowtimes;

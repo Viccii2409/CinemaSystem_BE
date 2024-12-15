@@ -204,6 +204,7 @@ public Movie addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, 
 
 	@Override
 	public Movie getMovieDetails(long movieID) {
+
 		return movieRepository.findById((long) movieID).orElse(null);
 	}
 
