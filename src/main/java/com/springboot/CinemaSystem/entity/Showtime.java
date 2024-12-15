@@ -3,6 +3,7 @@ package com.springboot.CinemaSystem.entity;
 import com.fasterxml.jackson.annotation.*;
 import com.springboot.CinemaSystem.dto.RoomDto;
 import com.springboot.CinemaSystem.dto.SelectedSeatDto;
+import com.springboot.CinemaSystem.dto.ShowtimeDetailDto;
 import com.springboot.CinemaSystem.dto.ShowtimeRoomDto;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,6 +30,7 @@ public class Showtime {
 	@Column(nullable = false)
 	private Date date;
 	@Column(nullable = false)
+	@JsonFormat(pattern = "HH:mm:ss")
 	private Time startTime;
 	private Time endTime;
 	@Column(nullable = false)
@@ -109,7 +111,32 @@ public class Showtime {
 			this.priceTicket = priceTicket;
 		}
 	}
-
-
+	public ShowtimeDetailDto toShowtimeDetailDto() {
+		return new ShowtimeDetailDto(
+				this.getID(),
+				this.getMovie() != null ? this.getMovie().getId() : 0,  // movieId
+				this.getRoom() != null && this.getRoom().getTheater() != null
+						? this.getRoom().getTheater().getID() : 0,  // theaterId (giả sử Room có phương thức getTheater())
+				this.getRoom() != null ? this.getRoom().getID() : 0,  // roomId
+				this.getDate().toLocalDate(),
+				this.getStartTime().toLocalTime(),
+				this.getEndTime().toLocalTime(),
+				this.getMovie() != null ? this.getMovie().getTitle() : "Unknown",  // movieTitle
+				this.getRoom() != null && this.getRoom().getTheater() != null
+						? this.getRoom().getTheater().getName() : "Unknown",  // theaterName (giả sử Room có phương thức getTheater())
+				this.getRoom() != null ? this.getRoom().getName() : "Unknown",  // roomName
+				this.isStatus() ? "Active" : "Inactive"  // status
+		);
+	}
 
 }
+
+
+
+
+
+
+
+
+
+

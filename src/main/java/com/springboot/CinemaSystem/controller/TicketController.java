@@ -247,7 +247,7 @@ public class TicketController {
             discount.setTypeDiscount(typeDiscount);
             discount.setStatus(true);
             if(file != null && !file.isEmpty()){
-                String imageUrl = fileStorageDao.saveFileFromCloudinary(file, "Image/Discount");
+                String imageUrl = fileStorageDao.saveFileFromCloudinary(file, "Image/Discount", "image");
                 discount.setImage(imageUrl);
             }
             Discount discount_new = discountDao.addDiscount(discount);
@@ -279,7 +279,7 @@ public class TicketController {
         discount.setUser(discount_old.getUser());
         discount.setPayment(discount_old.getPayment());
         if(file != null && !file.isEmpty()){
-            String imageUrl = fileStorageDao.updateFile(file, discount_old.getImage(), "Image/Discount");
+            String imageUrl = fileStorageDao.updateFile(file, discount_old.getImage(), "Image/Discount", "image");
             discount.setImage(imageUrl);
         }
         Discount discount_new = discountDao.updateDiscount(discount);

@@ -33,8 +33,19 @@ public class Genre {
 	@JsonIgnore
 	private List<Customer> customer;
 
+	public Genre(long ID, String name, String description) {
+		this.ID=ID;
+		this.name=name;
+		this.description=description;
+	}
+
 	public GenreDto toGenreDto(){
 		return new GenreDto(this.ID, this.name, this.description, this.status);
 	}
 
+	// Constructor cần thiết cho Jackson để chuyển đổi từ ID (số)
+	@JsonCreator
+	public Genre(@JsonProperty("id") Long id) {
+		this.ID = id;
+	}
 }

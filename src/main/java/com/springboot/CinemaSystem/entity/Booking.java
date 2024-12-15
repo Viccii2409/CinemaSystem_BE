@@ -1,6 +1,6 @@
 package com.springboot.CinemaSystem.entity;
 
-import com.springboot.CinemaSystem.dto.BookingDto;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -42,6 +42,7 @@ public class Booking {
 	private Payment payment;
 
 	@OneToOne(mappedBy = "booking", fetch = FetchType.LAZY)
+	@JsonIgnoreProperties("booking")
 	private Feedback feedback;
 
 	@PrePersist

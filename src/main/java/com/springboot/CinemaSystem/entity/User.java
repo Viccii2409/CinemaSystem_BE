@@ -10,8 +10,6 @@ import java.util.stream.Collectors;
 
 @Data
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
 public class User {
@@ -19,14 +17,14 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "UserID")
 	private long ID;
-	private String name;
+	private String gender;
 	private Date dob;
 	private String address;
 	private String email;
 	private String phone;
 	private String image;
 	private LocalDateTime startDate;
-	private String gender;	//	male, female, other
+	private String name;
 	private boolean status;
 	@Embedded
 	private Account account;

@@ -9,5 +9,6 @@ import java.util.List;
 @Repository
 public interface GenreRepository extends JpaRepository<Genre, Long> {
     List<Genre> findByName(String name);
+    List<Genre> findByCustomer_ID(long customerId);
 
 }
