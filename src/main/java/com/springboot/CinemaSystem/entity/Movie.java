@@ -48,7 +48,7 @@ public class Movie {
 
 	@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnore
-	private List<Showtime> showtime;
+	private List<Showtime> showtime = new ArrayList<>();
 
 	@ManyToOne
 	@JoinColumn(name = "languageID")
@@ -62,7 +62,7 @@ public class Movie {
 			inverseJoinColumns = @JoinColumn(name = "genreID")
 	)
 	@JsonIgnoreProperties("movie") // Bỏ qua trường movie trong Genre
-	private List<Genre> genre;
+	private List<Genre> genre = new ArrayList<>();
 
 	@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnoreProperties("movie") // Bỏ qua trường movie trong Feedback
@@ -71,6 +71,27 @@ public class Movie {
 	@OneToOne(mappedBy = "movie", cascade = CascadeType.ALL)
 	@JsonIgnoreProperties("movie")
 	private Slideshow slideshow;
+
+	public static Movie toMovie(MovieRequestDto movieRequestDto) {
+		Movie movie = new Movie();
+		movie.setId(movieRequestDto.getId());
+		movie.setTitle(movieRequestDto.getTitle());
+		movie.setDuration(movieRequestDto.getDuration());
+		movie.setReleaseDate(movieRequestDto.getReleaseDate());
+		movie.setDescription(movieRequestDto.getDescription());
+		movie.setDirector(movieRequestDto.getDirector());
+		movie.setCast(movieRequestDto.getCast());
+		Language language1 = new Language();
+		language1.setId(movieRequestDto.getLanguageID());
+		movie.setLanguage(language1);
+		for(Long id : movieRequestDto.getGenreID()) {
+			Genre genre1 = new Genre();
+			genre1.setID(id);
+			movie.getGenre().add(genre1);
+		}
+		movie.setStatus(true);
+		return movie;
+	}
 
 	public long getId() {
 		return ID;
@@ -129,7 +150,7 @@ public class Movie {
 		List<GenreDto> genreDtos = this.getGenre().stream()
 				.map(Genre::toGenreDto)
 				.collect(Collectors.toList());
-		dto.setGenres(genreDtos);
+		dto.setGenre(genreDtos);
 		return dto;
 	}
 
@@ -167,9 +188,9 @@ public class Movie {
 
 
     // Getter và Setter cho genres
-    public List<Genre> getGenres() {
-        return genre;
-    }
+//    public List<Genre> getGenres() {
+//        return genre;
+//    }
 
     public void setGenres(List<Genre> genres) {
         this.genre = genres;

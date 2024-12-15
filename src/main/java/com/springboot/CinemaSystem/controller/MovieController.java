@@ -1,17 +1,14 @@
 package com.springboot.CinemaSystem.controller;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.springboot.CinemaSystem.dto.*;
 import com.springboot.CinemaSystem.entity.Movie;
+import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.entity.*;
-import com.springboot.CinemaSystem.repository.MovieRepository;
+import com.springboot.CinemaSystem.mapper.FeedbackMapper;
 import com.springboot.CinemaSystem.service.*;
-import com.springboot.CinemaSystem.service.impl.LanguageDaoImpl;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -32,6 +29,10 @@ public class MovieController {
     private ShowtimeDao showtimeDao;
     @Autowired
     private LanguageDao languageDao;
+    @Autowired
+    private FileStorageDao fileStorageDao;
+    @Autowired
+    private TicketDao ticketDao;
 
 
     @Autowired
@@ -160,45 +161,82 @@ public class MovieController {
     }
 
     @PostMapping("/add")
-    public boolean addMovie(@RequestParam("movie") String movieRequestDtoJson,
-                            @RequestParam("image") MultipartFile imageFile,
-                            @RequestParam("trailer") MultipartFile trailerFile) {
-        try {
-            // Tạo ObjectMapper và đăng ký JavaTimeModule
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.registerModule(new JavaTimeModule());
-            objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
-            // Chuyển đổi JSON movieRequestDto thành đối tượng MovieRequestDto
-            MovieRequestDto movieRequestDto = new ObjectMapper().readValue(movieRequestDtoJson, MovieRequestDto.class);
-
-            // Gọi service để thêm movie
-            return movieService.addMovie(movieRequestDto, imageFile, trailerFile) != null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+    @Transactional
+    public MovieDto addMovie(@ModelAttribute MovieRequestDto movieRequestDto,
+                             @RequestParam(value = "image", required = false) MultipartFile imageFile,
+                             @RequestParam(value = "trailer", required = false) MultipartFile trailerFile) {
+        Movie movie = Movie.toMovie(movieRequestDto);
+        if(!imageFile.isEmpty() && imageFile != null) {
+            String imageUrl = fileStorageDao.saveFileFromCloudinary(imageFile, "Image/Movie", "image");
+            movie.setImage(imageUrl);
         }
+        if(!trailerFile.isEmpty() && trailerFile != null) {
+            String videoUrl = fileStorageDao.saveFileFromCloudinary(trailerFile, "Video/Movie", "video");
+            movie.setTrailer(videoUrl);
+        }
+        return MovieDto.toMovieDto(movieService.addMovie(movie));
     }
 
-    @PutMapping("/{ID}")
-    public boolean editMovie(@PathVariable long ID,
-                             @RequestParam("movie") String movieRequestDtoJson,
-                             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
-                             @RequestParam(value = "trailerFile", required = false) MultipartFile trailerFile) {
-        try {
-            // Chuyển đổi JSON movieRequestDto thành đối tượng MovieRequestDto
-            MovieRequestDto movieRequestDto = new ObjectMapper().readValue(movieRequestDtoJson, MovieRequestDto.class);
+    @PostMapping("/update")
+    @Transactional
+    public MovieDto updateMovie(@ModelAttribute MovieRequestDto movieRequestDto,
+                                @RequestParam(value = "image", required = false) MultipartFile imageFile,
+                                @RequestParam(value = "trailer", required = false) MultipartFile trailerFile) {
+        // Lấy thông tin phim theo ID
+        Movie movie = movieService.getMovieByID(movieRequestDto.getId());
 
-            // Gọi service để sửa movie
-            return movieService.editMovie(ID, movieRequestDto, imageFile, trailerFile) != null;
+        // Cập nhật các thông tin cơ bản của phim
+        movie.setTitle(movieRequestDto.getTitle());
+        movie.setDuration(movieRequestDto.getDuration());
+        movie.setReleaseDate(movieRequestDto.getReleaseDate());
+        movie.setDescription(movieRequestDto.getDescription());
+        movie.setDirector(movieRequestDto.getDirector());
+        movie.setCast(movieRequestDto.getCast());
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+        // Cập nhật ngôn ngữ của phim theo ID
+        Language language = new Language();
+        language.setId(movieRequestDto.getLanguageID());
+        movie.setLanguage(language);
+
+        // Xóa các thể loại cũ và thêm các thể loại mới
+        movie.getGenre().clear();
+        for (Long genreId : movieRequestDto.getGenreID()) {
+            Genre genre = new Genre();
+            genre.setID(genreId);
+            movie.getGenre().add(genre);
         }
+
+        // Kiểm tra và xử lý tệp ảnh nếu có (không phải null và không trống)
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String imageUrl = fileStorageDao.updateFile(imageFile, movie.getImage(), "Image/Movie", "image");
+            movie.setImage(imageUrl);
+        }
+
+        // Kiểm tra và xử lý tệp trailer nếu có (không phải null và không trống)
+        if (trailerFile != null && !trailerFile.isEmpty()) {
+            String videoUrl = fileStorageDao.updateFile(trailerFile, movie.getTrailer(), "Video/Movie", "video");
+            movie.setTrailer(videoUrl);
+        }
+
+        // Lưu và trả về phim đã cập nhật
+        return MovieDto.toMovieDto(movieService.updateMovie(movie));
     }
 
 
+
+    @PreAuthorize("hasAuthority('MANAGER_MOVIE')")
+    @DeleteMapping("/{id}")
+    public boolean deleteMovie(@PathVariable("id") long id) {
+        Movie movie = movieService.getMovieByID(id);
+        if (movie != null) {
+            fileStorageDao.deleteFileFromCloudinary(movie.getImage(), "Image/Movie");
+            fileStorageDao.deleteFileFromCloudinary(movie.getTrailer(), "Video/Movie");
+            movieService.deleteMovie(id);
+            return true;
+        } else {
+            throw new NotFoundException("Movie not found with ID: " + id);
+        }
+    }
 
     @PreAuthorize("hasAuthority('MANAGER_MOVIE')")
     @PutMapping("/update-status/{id}")
@@ -216,19 +254,9 @@ public class MovieController {
     @GetMapping({"/all"})
     public List<MovieDto> getAllMovie() {
         // Call the service layer to get all movies
-        return movieService.getAllMovie();
-    }
-
-    @PreAuthorize("hasAuthority('MANAGER_MOVIE')")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteMovie(@PathVariable("id") long id) {
-        Movie movie = movieService.getMovieByID(id);
-        if (movie != null) {
-            movieService.deleteMovie(id);
-            return ResponseEntity.ok("Xóa phim thành công");
-        } else {
-            throw new NotFoundException("Movie not found with ID: " + id);
-        }
+        return movieService.getAllMovie().stream()
+                .map(entry -> MovieDto.toMovieDto(entry))
+                .collect(Collectors.toList());
     }
 
     @PreAuthorize("hasAuthority('MANAGER_MOVIE')")
@@ -239,7 +267,7 @@ public class MovieController {
 
     @GetMapping("/allMovie")
     public List<Movie> getAllMovies(){
-        return movieService.getAllMovies();
+        return movieService.getAllMovie();
     }
 
     // Thêm trailer mới hoặc cập nhật trailer nếu movieId đã tồn tại
@@ -325,4 +353,31 @@ public class MovieController {
     }
 
 
+
+    @PreAuthorize("hasAuthority('VIEW_CUSTOMER_INFOR')")
+    @PostMapping("/add-feedback")
+    public FeedbackDto addFeedback(@RequestBody FeedbackAddDto feedbackAddDto){
+        try {
+            if (feedbackAddDto == null || feedbackAddDto.getText() == null || feedbackAddDto.getStar() == null) {
+                throw new IllegalArgumentException("Thiếu thông tin cần thiết cho Feedback");
+            }
+
+            // Lấy Booking từ cơ sở dữ liệu
+            Booking booking = ticketDao.getBookingById(feedbackAddDto.getBookingId());
+            if(booking.getFeedback() != null) {
+                throw new DataProcessingException("Feedback đã tồn tại cho booking này");
+            }
+            Feedback feedback = FeedbackMapper.toFeedbackAdd(feedbackAddDto, booking);
+            Feedback saveFeedback = movieService.addFeedback(feedback);
+            return FeedbackMapper.toFeedbackDto(saveFeedback);
+        } catch (Exception e) {
+            throw new DataProcessingException("Lỗi thêm feedback: " + e.getMessage());
+        }
+    }
+
+
+    @GetMapping("/public/feedback/{movieId}")
+    public List<FeedbackDto> getFeedbackByMovie(@PathVariable long movieId) {
+        return movieService.getFeedbackByMovie(movieId);
+    }
 }
