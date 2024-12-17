@@ -40,7 +40,7 @@ public class MovieDaoImpl implements MovieDao {
 		this.fileStorageService = fileStorageService;
 	}
 
-
+// Quản lý phim
 	@Override
 	public Movie addMovie(Movie movie) {
 		try {
@@ -196,24 +196,9 @@ public class MovieDaoImpl implements MovieDao {
 		}
 	}
 
-//	@Override
-//	public Trailer saveOrUpdateTrailer(Trailer trailer) {
-//		// Kiểm tra trailer có sẵn với movieId
-//		Optional<Trailer> existingTrailer = trailerRepository.findByMovieId(trailer.getMovie().getId());
-//
-//		if (existingTrailer.isPresent()) {
-//			// Nếu đã tồn tại trailer cho movieId, cập nhật thông tin trailer
-//			Trailer currentTrailer = existingTrailer.get();
-//			currentTrailer.setDescription(trailer.getDescription());
-//			currentTrailer.setLink(trailer.getLink());
-//			return trailerRepository.save(currentTrailer); // Cập nhật trailer
-//		} else {
-//			// Nếu chưa có trailer cho movieId, lưu mới
-//			return trailerRepository.save(trailer);
-//		}
-//	}
 
 
+// Quản lý phim
 	private MovieDto convertToDto(Movie movie) {
 		// Kiểm tra danh sách image
 		String link = (movie.getImage() == null || movie.getImage().isEmpty()) ? null : movie.getImage();
@@ -326,30 +311,6 @@ public class MovieDaoImpl implements MovieDao {
 				.collect(Collectors.toList());
 	}
 
-	@Override
-	public List<Movie> getMoviesByGenre(int genreID) {
-		return List.of();
-	}
-
-	@Override
-	public List<Movie> getMoviesByLanguage(int languageID) {
-		return List.of();
-	}
-
-	@Override
-	public List<Movie> searchMoviesByTitle(String title) {
-		return List.of();
-	}
-
-	@Override
-	public List<Movie> getMoviesByCastID(int castID) {
-		return List.of();
-	}
-
-	@Override
-	public List<Movie> getMoviesByDirectorID(int directorID) {
-		return List.of();
-	}
 
 
 	// Quản lý thể loại
@@ -379,10 +340,7 @@ public class MovieDaoImpl implements MovieDao {
 		genreRepository.save(genre);
 	}
 
-	@Override
-	public boolean updateStatusGenre(long genreID) {
-		return false;
-	}
+
 
 	@Override
 	public Genre getGenreByID(long genreID) {

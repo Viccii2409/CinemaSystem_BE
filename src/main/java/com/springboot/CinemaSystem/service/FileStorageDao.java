@@ -8,6 +8,5 @@ public interface FileStorageDao {
     public String saveFileFromCloudinary(MultipartFile file, String folder, String type);
     public String updateFile(MultipartFile file, String image, String folder, String type);
     public void deleteFileFromCloudinary(String imageUrl, String folder);
-    public String saveFileMovieAndTrailer(MultipartFile file, String folder) throws IOException;
 
 }

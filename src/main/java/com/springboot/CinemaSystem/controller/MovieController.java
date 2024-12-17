@@ -93,7 +93,7 @@ public class MovieController {
         return showtimeDao.getAllTimeFrames();
     }
 
-    // quản lý thể loại
+    // Quản lý thể loại
     @PreAuthorize("hasAuthority('MANAGER_GENRE')")
     @GetMapping("/genre")
     public List<GenreDto> getAllGenres(){
@@ -183,10 +183,7 @@ public class MovieController {
     public MovieDto updateMovie(@ModelAttribute MovieRequestDto movieRequestDto,
                                 @RequestParam(value = "image", required = false) MultipartFile imageFile,
                                 @RequestParam(value = "trailer", required = false) MultipartFile trailerFile) {
-        // Lấy thông tin phim theo ID
         Movie movie = movieService.getMovieByID(movieRequestDto.getId());
-
-        // Cập nhật các thông tin cơ bản của phim
         movie.setTitle(movieRequestDto.getTitle());
         movie.setDuration(movieRequestDto.getDuration());
         movie.setReleaseDate(movieRequestDto.getReleaseDate());
@@ -194,12 +191,10 @@ public class MovieController {
         movie.setDirector(movieRequestDto.getDirector());
         movie.setCast(movieRequestDto.getCast());
 
-        // Cập nhật ngôn ngữ của phim theo ID
         Language language = new Language();
         language.setId(movieRequestDto.getLanguageID());
         movie.setLanguage(language);
 
-        // Xóa các thể loại cũ và thêm các thể loại mới
         movie.getGenre().clear();
         for (Long genreId : movieRequestDto.getGenreID()) {
             Genre genre = new Genre();
@@ -207,23 +202,19 @@ public class MovieController {
             movie.getGenre().add(genre);
         }
 
-        // Kiểm tra và xử lý tệp ảnh nếu có (không phải null và không trống)
+        // Kiểm tra và xử lý tệp ảnh nếu có
         if (imageFile != null && !imageFile.isEmpty()) {
             String imageUrl = fileStorageDao.updateFile(imageFile, movie.getImage(), "Image/Movie", "image");
             movie.setImage(imageUrl);
         }
 
-        // Kiểm tra và xử lý tệp trailer nếu có (không phải null và không trống)
+        // Kiểm tra và xử lý tệp trailer nếu có
         if (trailerFile != null && !trailerFile.isEmpty()) {
             String videoUrl = fileStorageDao.updateFile(trailerFile, movie.getTrailer(), "Video/Movie", "video");
             movie.setTrailer(videoUrl);
         }
-
-        // Lưu và trả về phim đã cập nhật
         return MovieDto.toMovieDto(movieService.updateMovie(movie));
     }
-
-
 
     @PreAuthorize("hasAuthority('MANAGER_MOVIE')")
     @DeleteMapping("/{id}")
@@ -254,7 +245,6 @@ public class MovieController {
     @PreAuthorize("hasAuthority('MANAGER_MOVIE')")
     @GetMapping({"/all"})
     public List<MovieDto> getAllMovie() {
-        // Call the service layer to get all movies
         return movieService.getAllMovie().stream()
                 .map(entry -> MovieDto.toMovieDto(entry))
                 .collect(Collectors.toList());
@@ -271,13 +261,6 @@ public class MovieController {
         return movieService.getAllMovie();
     }
 
-    // Thêm trailer mới hoặc cập nhật trailer nếu movieId đã tồn tại
-//    @PostMapping("/addTrailer")
-//    public String addTrailer(@RequestBody Trailer trailer) {
-//        // Lưu trailer, nếu trùng movieId thì sẽ cập nhật, không thì sẽ lưu mới
-//        movieService.saveOrUpdateTrailer(trailer);
-//        return "redirect:/movies"; // Quay lại trang danh sách movies
-//    }
     // API lấy danh sách ngôn ngữ
     @GetMapping("/getAllLanguage")
     public List<Language> getAllLanguages() {
@@ -285,20 +268,20 @@ public class MovieController {
     }
 
 
-    ///  LÊN LỊCH CHIẾU     < chưa có hiển thị danh sách lịch chiếu khi chọn ngày + rạp>
+    ///  LÊN LỊCH CHIẾU
+    ///
 // Lấy danh sách phòng chiếu và lịch chiếu theo ngày và rạp
     @GetMapping("/showtimes")
     public ResponseEntity<List<RoomShowtimeDto>> getShowtimesByDateAndTheater(
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam("theaterId") long theaterId) {
 
-        // Lấy danh sách phòng và lịch chiếu theo ngày và rạp
         List<RoomShowtimeDto> rooms = showtimeDao.getRoomsByTheater(theaterId);
 
         // Gán danh sách lịch chiếu vào từng phòng chiếu cho ngày cụ thể
         for (RoomShowtimeDto room : rooms) {
             List<ShowtimeDto> showtimes = showtimeDao.getShowtimesByDateAndRoom(date, room.getRoomId());
-            room.setShowtimes(showtimes);  // Gán danh sách lịch chiếu
+            room.setShowtimes(showtimes);
         }
 
         return ResponseEntity.ok(rooms);
@@ -309,12 +292,12 @@ public class MovieController {
         Showtime showtime = showtimeDao.scheduleShowtime(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(showtime);
     }
-    // Cập nhật trạng thái tự động
-    @PutMapping("/status/update")
-    public ResponseEntity<Void> updateShowtimeStatus() {
-        showtimeDao.updateShowtimeStatus();
-        return ResponseEntity.ok().build();
-    }
+//    // Cập nhật trạng thái tự động
+//    @PutMapping("/status/update")
+//    public ResponseEntity<Void> updateShowtimeStatus() {
+//        showtimeDao.updateShowtimeStatus();
+//        return ResponseEntity.ok().build();
+//    }
 
     // Ẩn hoặc mở lịch chiếu
     @PutMapping("/{id}/toggle-status")
@@ -336,12 +319,7 @@ public class MovieController {
         showtimeDao.deleteShowtime(id);
         return ResponseEntity.noContent().build();
     }
-    // Ẩn lịch chiếu khi phim ngừng chiếu
-    @PutMapping("/movie/{movieId}/hide-showtimes")
-    public ResponseEntity<Void> hideShowtimesByMovie(@PathVariable long movieId) {
-        showtimeDao.hideShowtimesByMovie(movieId);
-        return ResponseEntity.ok().build();
-    }
+
     // API để lấy chi tiết lịch chiếu
     @GetMapping("/showtime/{id}")
     public ResponseEntity<ShowtimeDetailDto> getShowtimeDetail(@PathVariable long id) {
@@ -352,8 +330,6 @@ public class MovieController {
             return ResponseEntity.notFound().build();  // Nếu không tìm thấy lịch chiếu
         }
     }
-
-
 
     @PreAuthorize("hasAuthority('VIEW_CUSTOMER_INFOR')")
     @PostMapping("/add-feedback")
