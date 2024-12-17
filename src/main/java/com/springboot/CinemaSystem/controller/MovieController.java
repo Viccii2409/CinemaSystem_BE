@@ -93,6 +93,7 @@ public class MovieController {
         return showtimeDao.getAllTimeFrames();
     }
 
+    // quản lý thể loại
     @PreAuthorize("hasAuthority('MANAGER_GENRE')")
     @GetMapping("/genre")
     public List<GenreDto> getAllGenres(){
@@ -113,7 +114,7 @@ public class MovieController {
     @PreAuthorize("hasAuthority('MANAGER_GENRE')")
     @PostMapping("/genre/add")
     public Genre addGenre(@RequestBody Genre genre) {
-        System.out.println(genre);
+        genre.setStatus(true);
         return movieService.addGenre(genre);
     }
 

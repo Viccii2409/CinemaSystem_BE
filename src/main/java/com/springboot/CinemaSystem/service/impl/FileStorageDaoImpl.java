@@ -40,34 +40,39 @@ public class FileStorageDaoImpl implements FileStorageDao {
 
     @Override
     public String updateFile(MultipartFile file, String image, String folder, String type) {
-        try{
-            if(image != null) {
+        try {
+            if (image != null) {
                 deleteFileFromCloudinary(image, folder);
             }
             return saveFileFromCloudinary(file, folder, type);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new DataProcessingException("Không cập nhật được tệp: " + e.getMessage());
         }
     }
 
+
     @Override
     public void deleteFileFromCloudinary(String image, String folder) {
         try {
-            URL url = new URL(image);
-            String path = url.getPath();
-            String[] segments = path.split("/");
-            String filename = segments[segments.length - 1];
-            String imageName = filename.substring(0, filename.lastIndexOf('.'));
-            String publicId = folder + "/" + imageName;
+            if (image != null) {
+                URL url = new URL(image);
+                String path = url.getPath();
+                String[] segments = path.split("/");
+                String filename = segments[segments.length - 1];
+                String imageName = filename.substring(0, filename.lastIndexOf('.'));
+                String publicId = folder + "/" + imageName;
 
-            Map checkResult = cloudinary.api().resource(publicId, ObjectUtils.emptyMap());
-            if (checkResult.containsKey("public_id")) {
-                cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("invalidate", true));
+                // Kiểm tra loại tài nguyên (image hay video)
+                String resourceType = image.contains("video") ? "video" : "image";
+
+                Map result = cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("invalidate", true, "resource_type", resourceType));
+                System.out.println("Kết quả xóa từ Cloudinary: " + result);
             }
         } catch (Exception e) {
             throw new DataProcessingException("Không thể xóa tệp trên Cloudinary: " + e.getMessage());
         }
     }
+
 
     @Override
     public String saveFileMovieAndTrailer(MultipartFile file, String folder) throws IOException {
