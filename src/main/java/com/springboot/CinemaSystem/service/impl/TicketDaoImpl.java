@@ -262,7 +262,10 @@ public class TicketDaoImpl implements TicketDao {
 
 	@Override
 	public Booking getBookingByBarcode(String barcode) {
-		Payment payment = paymentRepository.findByBarcode(barcode);
-		return payment.getBooking();
+		try {
+			return bookingRepository.findByBarcode(barcode);
+		} catch (Exception e) {
+			return null;
+		}
 	}
 }

@@ -37,6 +37,7 @@ public class UserDto {
     private int points;
     private LevelDto level;
     private List<GenreDto> genres;
+    private int countGenre;
 
     // employee
     private String position;
@@ -57,6 +58,9 @@ public class UserDto {
     private long managerid;
     private long roleid;
 
+    private long roleid_old;
+    private long managerid_new;
+
 
     public static UserDto toEmployeeDto(Employee employee) {
         UserDto dto = new UserDto();
@@ -74,6 +78,8 @@ public class UserDto {
         dto.setName(user.getName());
         dto.setImage(user.getImage());
         dto.setUsername(user.getAccount().getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
         dto.setStatus(user.isStatus());
         dto.setRole(RoleDto.toRoleDto(user.getRole()));
         List<DiscountDto> discountDtos = user.getDiscount().stream()

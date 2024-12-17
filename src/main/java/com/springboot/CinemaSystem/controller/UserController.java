@@ -2,11 +2,8 @@ package com.springboot.CinemaSystem.controller;
 
 import com.springboot.CinemaSystem.dto.*;
 import com.springboot.CinemaSystem.entity.*;
+import com.springboot.CinemaSystem.service.*;
 import com.springboot.CinemaSystem.util.JwtTokenUtil;
-import com.springboot.CinemaSystem.service.FileStorageDao;
-import com.springboot.CinemaSystem.service.MovieDao;
-import com.springboot.CinemaSystem.service.TheaterDao;
-import com.springboot.CinemaSystem.service.UserDao;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @RestController
@@ -37,6 +35,8 @@ public class UserController {
     private JwtTokenUtil jwtTokenUtil;
     PasswordEncoder passwordEncoder;
     private FileStorageDao fileStorageDao;
+    @Autowired
+    private EmailDao emailDao;
 
     @Autowired
     public UserController(UserDao userDao, TheaterDao theaterDao, MovieDao movieDao, AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil, PasswordEncoder passwordEncoder, FileStorageDao fileStorageDao) {
@@ -72,18 +72,53 @@ public class UserController {
     }
 
     @PostMapping("/public/register")
-    public  String register(@RequestBody UserDto userDto) {
+    @Transactional
+    public boolean register(@RequestBody UserDto userDto) {
+        if(userDao.getUserByUsername(userDto.getEmail()) != null) {
+            return false;
+        }
         String password = userDto.getPassword();
         System.out.println(userDto);
         String encodedPassword = passwordEncoder.encode(userDto.getPassword());
         userDto.setPassword(encodedPassword);
         Customer customer = Customer.toCustomer(userDto);
-        customer.setStatus(true);
+        customer.setStatus(false);
         customer.setRole(userDao.getRoleById(4));
         customer.setLevel(userDao.getLevelById(1));
+
+        String to = customer.getEmail();
+        String subject = "LAL Cinema - Mã xác minh tài khoản";
+        String verificationCode = generateVerificationCode(); // Tạo mã xác minh
+        String verificationLink = "http://localhost:3000/verifyaccount?username=" + to + "&token=" + verificationCode;
+        String text = "<h3>Chào " + customer.getName() + ",</h3>"
+                + "<p>Cảm ơn bạn đã đăng ký tài khoản tại LAL Cinema!</p>"
+                + "<p>Vui lòng nhấn vào link dưới đây để kích hoạt tài khoản của bạn:</p>"
+                + "<a href='" + verificationLink + "'>Xác nhận tài khoản</a>";
+        emailDao.sendEmail(to, subject, text);
+
+        customer.setVerificationCode(verificationCode);
         userDao.addCustomer(customer);
-        return this.login(new Account(userDto.getEmail(), password));
+        return true;
     }
+
+    private String generateVerificationCode() {
+        Random random = new Random();
+        int code = 100000 + random.nextInt(900000);
+        return String.valueOf(code);
+    }
+
+    @PostMapping("/public/verifyaccount")
+    public boolean verifyAccount(@RequestBody Account account){
+            User user = userDao.getUserByUsername(account.getUsername());
+        if(user != null && user.getVerificationCode().equals(account.getPassword())){
+            user.setStatus(true);
+            user.setVerificationCode(null);
+            userDao.updateUser(user);
+            return true;
+        }
+        return false;
+    }
+
 
     @GetMapping("/public/verify")
     public UserDto verifyUser() {
@@ -98,7 +133,9 @@ public class UserController {
             userDto.setStatusEmployee(employee.getStatusEmployee());
         }
         else {
+            Customer customer = userDao.getCustomerById(userDto.getId());
             userDto.setStatusEmployee(false);
+            userDto.setCountGenre(customer.getGenre().size());
         }
         return userDto;
 
@@ -114,6 +151,31 @@ public class UserController {
     @GetMapping("/public/{id}")
     public User getUser(@PathVariable("id") long id) {
         return userDao.getUserByID(id);
+    }
+
+    @GetMapping("/public/forgotpassword/{email}")
+    public String forgotPassword(@PathVariable("email") String email) {
+        User user = userDao.getUserByUsername(email);
+        if(user != null){
+            String to = email;
+            String subject = "LAL Cinema - Quên mật khẩu";
+            String verificationCode = generateVerificationCode();
+            String text = "Chúng tôi nhận được yêu cầu quên mật khẩu từ bạn. Mã xác thực của bạn là: " + verificationCode +
+                    ".\nVui lòng sử dụng mã này để khôi phục mật khẩu.";
+            emailDao.sendEmail(to, subject, text);
+            return verificationCode;
+        }
+        return null;
+    }
+
+    @PutMapping("/public/changepassword")
+    @Transactional
+    public String changePasswordCustomer(@RequestBody UserDto userDto) {
+        User user = userDao.getUserByUsername(userDto.getUsername());
+        String encodedPassword = passwordEncoder.encode(userDto.getPassword());
+        user.setAccount(new Account(userDto.getUsername(), encodedPassword));
+        User user_new = userDao.updateUser(user);
+        return this.login(new Account(userDto.getUsername(), userDto.getPassword()));
     }
 
 
@@ -252,6 +314,28 @@ public class UserController {
                 .collect(Collectors.toList());
     }
 
+    @PreAuthorize("hasAuthority('MANAGER_EMPLOYEE')")
+    @GetMapping("/employee/{id}")
+    public UserDto getEmployeeById(@PathVariable("id") long id) {
+        User user = userDao.getUserByID(id);
+        Employee employee = userDao.getEmployeeById(id);
+        UserDto dto = UserDto.toEmployeeDto(employee);
+        dto.setPosition(employee.getPosition());
+        if(user.getRole().getID() == 1) {
+            Admin admin = userDao.getAdminById(id);
+            dto.setAccessLevel(admin.getAccessLevel());
+        }
+        else if(user.getRole().getID() == 2) {
+            Manager manager = userDao.getManagerById(id);
+            dto.setTheaterid(manager.getTheater().getID());
+        }
+        else if(user.getRole().getID() == 3) {
+            Agent agent = userDao.getAgentById(id);
+            dto.setManagerid(agent.getManager().getID());
+        }
+        return dto;
+    }
+
     @GetMapping("/public/recommend/{customerID}")
     public List<MovieDto> recommendMovies(@PathVariable("customerID") Long customerID) {
         List<Genre> genres = movieDao.customerGenre(customerID);
@@ -273,7 +357,6 @@ public class UserController {
         return null;
     }
 
-
     @PreAuthorize("hasAuthority('MANAGER_EMPLOYEE')")
     @PostMapping("/employee/add")
     @Transactional
@@ -290,6 +373,7 @@ public class UserController {
             Account account = new Account(userDto.getUsername(), encodePassword);
             employee.setAccount(account);
         }
+        employee.setPosition(userDto.getPosition());
         employee.setName(userDto.getName());
         employee.setEmail(userDto.getEmail());
         employee.setDob(userDto.getDob());
@@ -318,6 +402,56 @@ public class UserController {
             Agent agent_new = userDao.addAgent(agent);
         }
         return UserDto.toEmployeeDto(employee_new);
+    }
+
+    @PreAuthorize("hasAuthority('MANAGER_EMPLOYEE')")
+    @PutMapping("/employee/update")
+    @Transactional
+    public UserDto updateEmployee(@RequestBody UserDto userDto) {
+        if(userDto.getRoleid_old() == 1) {
+            Admin admin = userDao.getAdminById(userDto.getId());
+            admin.setAccessLevel(null);
+            userDao.updateAdmin(admin);
+        }
+        else if(userDto.getRoleid_old() == 2) {
+            Manager manager = userDao.getManagerById(userDto.getId());
+            manager.setTheater(null);
+            Manager manager_2 = userDao.getManagerById(userDto.getManagerid_new());
+            for (Agent agent : manager.getAgents()) {
+                agent.setManager(manager_2);
+            }
+            manager_2.getAgents().addAll(manager.getAgents());
+            manager.getAgents().clear();
+            userDao.updateManager(manager);
+            userDao.updateManager(manager_2);
+        }
+        else if(userDto.getRoleid_old() == 3) {
+            Agent agent = userDao.getAgentById(userDto.getId());
+            agent.setManager(null);
+            userDao.updateAgent(agent);
+        }
+        Employee employee = userDao.convertToEmployee(userDto.getId());
+        employee.setPosition(userDto.getPosition());
+        employee.setRole(userDao.getRoleById(userDto.getRoleid()));
+        userDao.updateEmployee(employee);
+        if(userDto.getRoleid() == 1) {
+            Admin admin = userDao.convertToAdmin(employee.getID());
+            admin.setAccessLevel(userDto.getAccessLevel());
+            userDao.addAdmin(admin);
+        }
+        else if (userDto.getRoleid() == 2) {
+            Manager manager = userDao.convertToManager(employee.getID());
+            Theater theater = theaterDao.getTheaterByID(userDto.getTheaterid());
+            manager.setTheater(theater);
+            userDao.addManager(manager);
+        }
+        else if (userDto.getRoleid() == 3) {
+            Agent agent = userDao.convertToAgent(employee.getID());
+            Manager manager = userDao.getManagerById(userDto.getManagerid());
+            agent.setManager(manager);
+            userDao.addAgent(agent);
+        }
+        return UserDto.toEmployeeDto(employee);
     }
 
     @PutMapping("/employee/{id}/updatestatus")

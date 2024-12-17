@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TheaterDto {
-    private long ID;
+    private long id;
     private String name;
     private String phone;
     private String email;
@@ -28,16 +28,17 @@ public class TheaterDto {
     private List<MovieShowtimeDto> movie;
     private List<RoomDto> room;
 
-    public TheaterDto(long ID, String name, List<MovieShowtimeDto> movie) {
-        this.ID = ID;
+    public TheaterDto(long id, String name, List<MovieShowtimeDto> movie) {
+        this.id = id;
         this.name = name;
         this.movie = movie;
     }
 
     public static TheaterDto toNameTheaterDto (Theater theater) {
         TheaterDto dto = new TheaterDto();
-        dto.setID(theater.getID());
+        dto.setId(theater.getID());
         dto.setName(theater.getName());
+        dto.setImage(theater.getImage());
         return dto;
     }
 
@@ -55,6 +56,10 @@ public class TheaterDto {
         dto.setPhone(theater.getPhone());
         dto.setEmail(theater.getEmail());
         dto.setImage(theater.getImage());
+        dto.setAddress(theater.getAddress().getAddressDetail());
+        dto.setWard(theater.getAddress().getWard().getName());
+        dto.setDistrict(theater.getAddress().getDistrict().getName());
+        dto.setCity(theater.getAddress().getCity().getName());
         return dto;
     }
 

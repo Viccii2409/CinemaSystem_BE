@@ -21,9 +21,11 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.Time;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,6 +38,10 @@ public class TicketController {
     private DiscountDao discountDao;
     private UserDao userDao;
     private FileStorageDao fileStorageDao;
+    @Autowired
+    private EmailDao emailDao;
+    @Autowired
+    private PdfDao pdfDao;
 
     @Autowired
     public TicketController(TicketDao ticketDao, TheaterDao theaterDao, ShowtimeDao showtimeDao, DiscountDao discountDao, UserDao userDao, FileStorageDao fileStorageDao) {
@@ -50,6 +56,19 @@ public class TicketController {
     @GetMapping("/public/discount")
     public List<DiscountDto> getAllDiscount() {
         return discountDao.getAllDiscounts().stream()
+                .map(entry -> DiscountDto.toDiscountDto(entry))
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("public/discount/active")
+    public List<DiscountDto> getAllDiscountActive() {
+        java.util.Date currentDate = new java.util.Date();
+        Date date = new Date(currentDate.getTime());
+        return discountDao.getAllDiscounts().stream()
+                .filter(entry -> entry.isStatus()
+                        && !entry.getStart().after(date)
+                        && !entry.getEnd().before(date)
+                        )
                 .map(entry -> DiscountDto.toDiscountDto(entry))
                 .collect(Collectors.toList());
     }
@@ -144,6 +163,12 @@ public class TicketController {
             payment.setStatus("confirmed");
             payment.setDate(localDateTime);
             ticketDao.updatePayment(payment);
+
+            BookingDto booking = BookingDto.toBookingDto(payment.getBooking());
+            String to = payment.getBooking().getEmailCustomer();
+            String subject = "LAL Cinema - Thông tin vé của bạn";
+            String text = emailDao.generateTicketHtmlWithBarcode(booking);
+            emailDao.setEmailwithBarcode(to, subject, text, booking.getBarcode());
         }
         else {
             payment.setStatus("expired");
@@ -154,6 +179,24 @@ public class TicketController {
                 ticketDao.updateSelectSeatStatusToExpired(showtimeID, userID, ticket.getSeat().getID());
             }
         }
+    }
+
+    @PreAuthorize("hasAuthority('MANAGER_SELLING')")
+    @GetMapping("/booking/search/{barcode}")
+    public BookingDto searchBooking(@PathVariable("barcode") String barcode) {
+        Booking booking = ticketDao.getBookingByBarcode(barcode);
+        if(booking != null) {
+            return BookingDto.toBookingDto(booking);
+        }
+        return null;
+    }
+
+    @PreAuthorize("hasAuthority('MANAGER_SELLING')")
+    @GetMapping("/booking/export/{id}")
+    public boolean exportBooking(@PathVariable("id") long id) {
+        Booking booking = ticketDao.getBookingById(id);
+        pdfDao.generateMovieTicketPdf(BookingDto.toBookingDto(booking));
+        return true;
     }
 
     @PreAuthorize("hasAuthority('VIEW_CUSTOMER_INFOR')")
@@ -302,13 +345,20 @@ public class TicketController {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     private long createPayment(PaymentDto paymentDto, String orderId) {
         Booking booking = new Booking();
+        booking.setTypeBooking(paymentDto.getTypeBooking());
+        if(paymentDto.getTypeBooking().equals("ONLINE")){
+            booking.setNameCustomer(paymentDto.getNameCustomer());
+            booking.setEmailCustomer(paymentDto.getEmailCustomer());
+            booking.setPhoneCustomer(paymentDto.getPhoneCustomer());
+        }
+        booking.setStatus(true);
         Showtime showtime = showtimeDao.getShowtimeByID(paymentDto.getShowtimeid());
         booking.setShowtime(showtime);
         User user = userDao.getUserByID(paymentDto.getUserid());
         booking.setUser(user);
-        booking.setTypeBooking(paymentDto.getTypeBooking());
         Booking booking_new = ticketDao.addBooking(booking);
 
         List<Ticket> tickets = new ArrayList<>();

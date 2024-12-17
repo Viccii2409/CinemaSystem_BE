@@ -20,12 +20,14 @@ public class User {
 	private String gender;
 	private Date dob;
 	private String address;
+	@Column(nullable = false, unique = true)
 	private String email;
 	private String phone;
 	private String image;
 	private LocalDateTime startDate;
 	private String name;
 	private boolean status;
+	private String verificationCode;
 	@Embedded
 	private Account account;
 //    @Column(insertable = false, updatable = false)	// không được phép thay đổi (update) hoặc chèn (insert) thông qua các thao tác của JPA

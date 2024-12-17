@@ -39,6 +39,11 @@ public class TheaterController {
         return theaters;
     }
 
+    @GetMapping("/public/{id}")
+    public TheaterDto getTheaterById(@PathVariable("id") long id){
+        return TheaterDto.toTheaterView(theaterDao.getTheaterByID(id));
+    }
+
     @PreAuthorize("hasAuthority('MANAGER_THEATER')")
     @GetMapping("/all")
     public List<TheaterDto> getListTheater(){
@@ -76,45 +81,49 @@ public class TheaterController {
     @PreAuthorize("hasAuthority('MANAGER_THEATER')")
     @PutMapping("/update")
     public TheaterDto editTheater(@ModelAttribute TheaterDto dto,
-                                  @RequestParam(value = "file", required = false) MultipartFile file
-    ){
-        try {
-            Theater theater = Theater.convertTheaterEdittoTheater(dto);
-            Theater theater_old = theaterDao.getTheaterByID(theater.getID());
-            theater.setImage(theater_old.getImage());
-            theater.setQuantityRoom(theater_old.getQuantityRoom());
-            theater.setStatus(theater_old.isStatus());
-            theater.setRoom(theater_old.getRoom());
-            if(file != null && !file.isEmpty()){
-                String imageUrl = fileStorageDao.updateFile(file, theater_old.getImage(), "Image/Theater", "image");
-                theater.setImage(imageUrl);
-            }
-            Theater updateTheater = theaterDao.updateTheater(theater);
-            return TheaterDto.toTheaterDto(updateTheater);
-        } catch (Exception e) {
-            throw new DataProcessingException("Lỗi thêm rạp: " + e.getMessage());
+                                  @RequestParam(value = "file", required = false) MultipartFile file){
+        Theater theater = theaterDao.getTheaterByID(dto.getId());
+        theater.setName(dto.getName());
+        theater.setPhone(dto.getPhone());
+        theater.setEmail(dto.getEmail());
+        theater.setDescription(dto.getDescription());
+        Ward ward = new Ward(dto.getWard());
+        District district = new District(dto.getDistrict());
+        City city = new City(dto.getCity());
+        Address address = new Address(dto.getAddress(), ward, district, city);
+        theater.setAddress(address);
+        if(file != null && !file.isEmpty()){
+            String imageUrl = fileStorageDao.updateFile(file, theater.getImage(), "Image/Theater", "image");
+            theater.setImage(imageUrl);
         }
-
-    }
-
-    @GetMapping("/public/{id}")
-    public TheaterDto getTheaterById(@PathVariable("id") long id){
-        return TheaterDto.toTheaterView(theaterDao.getTheaterByID(id));
+        Theater updateTheater = theaterDao.updateTheater(theater);
+        return TheaterDto.toTheaterDto(updateTheater);
     }
 
     @PreAuthorize("hasAuthority('MANAGER_THEATER')")
     @DeleteMapping("/{id}/delete")
     public boolean deleteTheater(@PathVariable("id") long id) {
+        Theater theater = theaterDao.getTheaterByID(id);
+        fileStorageDao.deleteFileFromCloudinary(theater.getImage(), "Image/Theater");
         return theaterDao.deleteTheater(id);
     }
 
+//    @PreAuthorize("hasAuthority('MANAGER_ROOM')")
+//    @GetMapping("/room")
+//    public List<TheaterDto> getTheaterRoomDtos() {
+//        List<TheaterDto> dtos = theaterDao.getAllTheater().stream()
+//                .map(entry -> TheaterDto.toTheaterRoomDto(entry))
+//                .collect(Collectors.toList());
+//        return dtos;
+//    }
+
     @PreAuthorize("hasAuthority('MANAGER_ROOM')")
-    @GetMapping("/room")
-    public List<TheaterDto> getTheaterRoomDtos() {
-        List<TheaterDto> dtos = theaterDao.getAllTheater().stream()
-                .map(entry -> TheaterDto.toTheaterRoomDto(entry))
+    @GetMapping("/{id}/room")
+    public List<RoomDto> getRoomByTheaterID(@PathVariable("id") long id) {
+        Theater theater = theaterDao.getTheaterByID(id);
+        return theater.getRoom().stream()
+                .map(entry -> RoomDto.toRoomDto(entry))
                 .collect(Collectors.toList());
-        return dtos;
     }
 
     @PreAuthorize("hasAuthority('MANAGER_ROOM')")

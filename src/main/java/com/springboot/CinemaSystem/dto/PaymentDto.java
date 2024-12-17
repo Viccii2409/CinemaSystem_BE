@@ -22,4 +22,8 @@ public class PaymentDto {
     private float moneyReturned;
     private Map<Long, Map<Long, Integer>> paytypecustomer;
     private List<TicketDto> ticket;
+
+    private String nameCustomer;
+    private String emailCustomer;
+    private String phoneCustomer;
 }

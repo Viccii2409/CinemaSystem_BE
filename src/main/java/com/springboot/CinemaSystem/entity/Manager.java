@@ -18,7 +18,7 @@ public class Manager extends Employee {
 	@JoinColumn(name = "theaterID")
 	private Theater theater;
 
-	@OneToMany(mappedBy = "manager")
+	@OneToMany(mappedBy = "manager", cascade = CascadeType.PERSIST)
 	private List<Agent> agents;
 
 }

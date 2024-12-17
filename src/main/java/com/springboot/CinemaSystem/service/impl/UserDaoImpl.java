@@ -68,6 +68,42 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
 	}
 
 	@Override
+	public Admin updateAdmin(Admin admin) {
+		if(!adminRepository.existsById(admin.getID())) {
+			throw new NotFoundException("No found admin:" +admin.getID());
+		}
+		try {
+			return adminRepository.save(admin);
+		} catch (Exception e) {
+			throw new DataProcessingException("Error updateAdmin: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public Manager updateManager(Manager manager) {
+		if(!managerRepository.existsById(manager.getID())){
+			throw new NotFoundException("No found manager:" +manager.getID());
+		}
+		try {
+			return managerRepository.save(manager);
+		} catch (Exception e) {
+			throw new DataProcessingException("Error updateManager: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public Agent updateAgent(Agent agent) {
+		if(!agentRepository.existsById(agent.getID())){
+			throw new NotFoundException("No found manager:" +agent.getID());
+		}
+		try {
+			return agentRepository.save(agent);
+		} catch (Exception e) {
+			throw new DataProcessingException("Error updateAgent: " + e.getMessage());
+		}
+	}
+
+	@Override
 	public Customer getCustomerById(long id) {
 		return customerRepository.findById(id)
 				.orElseThrow(() -> new NotFoundException("Error getCustomerById: " + id));
@@ -124,8 +160,7 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
 
 	@Override
 	public User getUserByUsername(String username) {
-		return userRepository.findByUsername(username)
-				.orElseThrow(() -> new NotFoundException("Error findByUsername: " + username));
+		return userRepository.findByUsername(username).orElse(null);
 	}
 
 	@Override

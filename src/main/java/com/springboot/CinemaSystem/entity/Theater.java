@@ -64,12 +64,13 @@ public class Theater {
 		City city = new City(dto.getCity());
 		Address address = new Address(dto.getAddress(), ward, district, city);
 		theater.setAddress(address);
+		theater.setStatus(true);
 		return theater;
 	}
 
 	public static Theater convertTheaterEdittoTheater(TheaterDto dto) {
 		Theater theater = convertTheaterAddtoTheater(dto);
-		theater.setID(dto.getID());
+		theater.setID(dto.getId());
 		return theater;
 	}
 

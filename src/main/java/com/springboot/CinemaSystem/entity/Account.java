@@ -11,6 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Account {
+	@Column(nullable = false, unique = true)
 	private String username;
 	private String password;
 }

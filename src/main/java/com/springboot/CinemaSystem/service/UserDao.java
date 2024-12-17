@@ -9,6 +9,9 @@ import java.util.List;
 public interface UserDao {
 	public User getUserByID(long userID);
 	public User updateUser(User user);
+	Admin updateAdmin(Admin admin);
+	Manager updateManager(Manager manager);
+	Agent updateAgent(Agent agent);
 	public Customer getCustomerById(long id);
 	public Customer addCustomer(Customer customer);
 	public void updateCustomer(Customer customer);
@@ -42,4 +45,5 @@ public interface UserDao {
 
 	List<Permission> getAllPermision();
 	Permission getPermissionById(Long id);
+
 }

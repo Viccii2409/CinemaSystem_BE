@@ -20,6 +20,7 @@ public class BookingDto {
     private LocalDateTime dateBooking;
     private String barcode;
     private String typeBooking;
+    private boolean statusBooking;
 
 
     private List<String> nameSeats;
@@ -51,7 +52,7 @@ public class BookingDto {
     private String statusPayment;
     private FeedbackDto feedback;
 
-    public BookingDto(long ID, LocalDateTime dateBooking, String barcode, List<String> nameSeats, Date dateShowtime, Time startTime, Time endTime,long movieID, String nameMovie, String image, String nameTheater, String address, String nameRoom, String typeRoom, float totalPrice, float discountPrice, float amount, String nameCustomer, String phone, String email) {
+    public BookingDto(long ID, LocalDateTime dateBooking, String barcode, List<String> nameSeats, Date dateShowtime, Time startTime, Time endTime,long movieID, String nameMovie, String image, String nameTheater, String address, String nameRoom, String typeRoom, float totalPrice, float discountPrice, float amount, String nameCustomer, String phone, String email, boolean statusBooking) {
         this.ID = ID;
         this.dateBooking = dateBooking;
         this.barcode = barcode;
@@ -72,6 +73,7 @@ public class BookingDto {
         this.nameCustomer = nameCustomer;
         this.phone = phone;
         this.email = email;
+        this.statusBooking = statusBooking;
     }
 
     public BookingDto(long ID, long movieID,String nameCustomer,String imageCustomer) {
@@ -104,9 +106,10 @@ public class BookingDto {
                 booking.getPayment().getTotalPrice(),
                 booking.getPayment().getDiscountPrice(),
                 booking.getPayment().getAmount(),
-                (booking.getUser() != null) ? booking.getUser().getName() : "",
-                (booking.getUser() != null) ? booking.getUser().getPhone() : "",
-                (booking.getUser() != null) ? booking.getUser().getEmail() : ""
+                (booking.getNameCustomer() != null) ? booking.getNameCustomer() : "",
+                (booking.getEmailCustomer() != null) ? booking.getEmailCustomer() : "",
+                (booking.getPhoneCustomer() != null) ? booking.getPhoneCustomer() : "",
+                booking.isStatus()
         );
         return dto;
     }

@@ -116,6 +116,25 @@
 			<version>2.15.0</version> <!-- Bạn có thể thay đổi phiên bản phù hợp với dự án của bạn -->
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>core</artifactId>
+			<version>3.4.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.itextpdf/itext7-core -->
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>itext7-core</artifactId>
+			<version>9.0.0</version>
+			<type>pom</type>
+		</dependency>
+
 	</dependencies>
 
 	<build>

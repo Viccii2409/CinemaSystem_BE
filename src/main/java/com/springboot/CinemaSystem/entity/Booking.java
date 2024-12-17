@@ -24,8 +24,11 @@ public class Booking {
 	private String barcode;
 	private String typeBooking;	//	ONLINE, OFFLINE
 
-	@Transient
-	private float amount;
+	private String nameCustomer;
+	private String emailCustomer;
+	private String phoneCustomer;
+	private boolean status;
+
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "showtimeID")
