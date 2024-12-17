@@ -23,6 +23,6 @@ public class ShowtimeRoomDto {
     private float priceTicket;
 
     private MovieShowtimeDto movie;
-    private RoomSeatDto room;
+    private RoomDto room;
     private List<SelectedSeatDto> selectedSeats;
 }

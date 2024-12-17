@@ -43,24 +43,6 @@ public class ShowtimeDaoImpl implements ShowtimeDao {
 	@Autowired
 	private TheaterRepository theaterRepository;
 
-	@Override
-	@Scheduled(fixedRate = 60000 * 30)
-//	@Scheduled(cron = "0 0 * * * *")	// chạy mỗi giờ
-//	@Scheduled(cron = "*/5 * * * * *")
-	@Transactional
-	public void updateShowtimeAction() {
-		LocalDate localDate = LocalDate.now();
-		Date currentDate = Date.valueOf(localDate);
-		LocalTime localTime = LocalTime.now();
-		Time currentTime = Time.valueOf(localTime);
-		try {
-			showtimeRepository.updateActionToRunning(currentDate, currentTime);
-			showtimeRepository.updateActionToEnded(currentDate, currentTime);
-			showtimeRepository.updateActionToUpcoming(currentDate, currentTime);
-		} catch (Exception e) {
-			throw new DataProcessingException("Error update action showtime");
-		}
-	}
 
 	@Override
 	public ShowtimeRoomDto getRoomByShowtime(long id) {
@@ -69,40 +51,11 @@ public class ShowtimeDaoImpl implements ShowtimeDao {
 		return showtime.toShowtimeRoomDto();
 	}
 
-	@Override
-	public boolean addShowtime(Showtime showtime) {
-		return false;
-	}
-
-
-	public boolean updateShowtime(Showtime showtime) {
-		return false;
-	}
-
-	@Override
-	public List<Showtime> getShowtimeByMovie(int movieID) {
-		return List.of();
-	}
-
-	@Override
-	public boolean updateStatusShowtime(int showtimeID) {
-		return false;
-	}
 
 	@Override
 	public Showtime getShowtimeByID(long showtimeID) {
 		return showtimeRepository.findById(showtimeID)
 				.orElseThrow(() -> new NotFoundException("Error get showtime by id"));
-	}
-
-	@Override
-	public List<Showtime> getShowtimesByRoomID(int roomID) {
-		return List.of();
-	}
-
-	@Override
-	public boolean checkAvailability(int showtimeID) {
-		return false;
 	}
 
 	// thêm
@@ -122,7 +75,7 @@ public class ShowtimeDaoImpl implements ShowtimeDao {
 		BasePrice basePrice = basePriceRepository.findTopByOrderByCreatedAtDesc()
 				.orElseThrow(() -> new EntityNotFoundException("Base price not found"));
 
-		// Tính toán endTime bằng cách cộng thời gian bắt đầu (startTime) với độ dài phim (duration)
+		// Tính toán endTime
 		LocalTime startTime = dto.getStartTime().toLocalTime();
 		LocalTime endTime = startTime.plusMinutes((long) movie.getDuration());  // Thêm duration vào startTime
 
@@ -137,7 +90,6 @@ public class ShowtimeDaoImpl implements ShowtimeDao {
 		}
 
 		// 1. Tính toán DayOfWeek từ date
-		// Chuyển java.sql.Date sang LocalDate
 		LocalDate localDate = dto.getDate().toLocalDate();
 		DayOfWeek dayOfWeek = dayOfWeekRepository.findByName(getDayOfWeekFromDate(localDate));
 		if (dayOfWeek == null) {
@@ -150,23 +102,18 @@ public class ShowtimeDaoImpl implements ShowtimeDao {
 		// 3. Tính giá vé (priceTicket) dựa trên BasePrice, DayOfWeek, và TimeFrame
 		Float priceTicket = basePrice.getDefaultPrice() + dayOfWeek.getSurcharge() + timeFrame.getSurcharge();
 
-		// Tạo đối tượng Showtime mới
 		Showtime showtime = new Showtime();
 		showtime.setMovie(movie);
 		showtime.setRoom(room);
 		showtime.setDate(dto.getDate());
 		showtime.setStartTime(dto.getStartTime());
 		showtime.setEndTime(endTimeObj);
-		showtime.setBasePrice(basePrice);  // Thiết lập BasePrice cho Showtime
+		showtime.setBasePrice(basePrice);
 		showtime.setDayOfWeek(dayOfWeek);
 		showtime.setTimeFrame(timeFrame);
-		showtime.setPriceTicket(priceTicket);  // Thiết lập giá vé cho Showtime
-//	showtime.setStatus(dto.isStatus());
+		showtime.setPriceTicket(priceTicket);
 		showtime.setAction("upcoming");
-
 		showtime.setStatus(true);
-
-		// Lưu Showtime vào database
 		return showtimeRepository.save(showtime);
 	}
 
@@ -176,7 +123,7 @@ public class ShowtimeDaoImpl implements ShowtimeDao {
 		// Lấy tên ngày trong tuần từ LocalDate
 		String dayOfWeekName = date.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.forLanguageTag("vi"));
 
-		// Xử lý tên ngày để trả về chuỗi phù hợp
+		// Xử lý tên ngày
 		switch (dayOfWeekName) {
 			case "Thứ Hai":
 			case "Thứ Ba":
@@ -188,7 +135,7 @@ public class ShowtimeDaoImpl implements ShowtimeDao {
 			case "Chủ Nhật":
 				return "Thứ 7, Chủ nhật";
 			default:
-				return "Từ thứ 2 đến thứ 6"; // Mặc định cho các ngày còn lại
+				return "Từ thứ 2 đến thứ 6";
 		}
 	}
 
@@ -198,29 +145,18 @@ public class ShowtimeDaoImpl implements ShowtimeDao {
 				.orElseThrow(() -> new EntityNotFoundException("TimeFrame not found"));
 	}
 
-	// Check for schedule conflict (hỗ trợ cả thêm và cập nhật)
+
+	// Check for schedule conflict
 	private boolean isScheduleConflict(long roomId, Date date, Time startTime, Time endTime, Long showtimeId) {
 		List<Showtime> conflictingShowtimes;
 		if (showtimeId != null) {
-			// Loại trừ lịch chiếu hiện tại khi cập nhật
 			conflictingShowtimes = showtimeRepository.findConflictingShowtimesExcludeCurrent(roomId, date, startTime, endTime, showtimeId);
 		} else {
-			// Kiểm tra xung đột thông thường khi thêm mới
 			conflictingShowtimes = showtimeRepository.findConflictingShowtimes(roomId, date, startTime, endTime);
 		}
 		return !conflictingShowtimes.isEmpty();
 	}
 
-
-	// Update showtime status based on current time
-	@Override
-	public void updateShowtimeStatus() {
-		Date currentDate = Date.valueOf(LocalDate.now());
-		Time currentTime = Time.valueOf(LocalTime.now());
-		showtimeRepository.updateActionToUpcoming(currentDate, currentTime);
-		showtimeRepository.updateActionToRunning(currentDate, currentTime);
-		showtimeRepository.updateActionToEnded(currentDate, currentTime);
-	}
 
 	// Toggle showtime status (active/inactive)
 	public void toggleShowtimeStatus(long showtimeId) {
@@ -233,35 +169,8 @@ public class ShowtimeDaoImpl implements ShowtimeDao {
 	}
 
 
-	// Update an existing showtime
-//	@Override
-//	public void updateShowtime(long showtimeId, ShowtimeRequestDto showtimeRequestDto) {
-//		// Tìm Showtime theo ID
-//		Showtime showtime = showtimeRepository.findById(showtimeId)
-//				.orElseThrow(() -> new RuntimeException("Showtime not found"));
-//
-//		// Tìm movie để lấy thông tin duration
-//		Movie movie = movieRepository.findById(showtimeRequestDto.getMovieId())
-//				.orElseThrow(() -> new RuntimeException("Movie not found"));
-//
-//		// Tính toán endTime bằng cách cộng thời gian bắt đầu (startTime) với độ dài phim (duration)
-//		LocalTime startTime = showtimeRequestDto.getStartTime().toLocalTime();
-//		LocalTime endTime = startTime.plusMinutes((long) movie.getDuration());  // Thêm duration vào startTime
-//
-//		// Chuyển endTime thành đối tượng Time
-//		Time endTimeObj = Time.valueOf(endTime);
-//
-//		// Cập nhật các trường thông tin của Showtime
-//		showtime.setDate(showtimeRequestDto.getDate());
-//		showtime.setStartTime(showtimeRequestDto.getStartTime());
-//		showtime.setEndTime(endTimeObj);  // Cập nhật endTime đã tính toán
-////		showtime.setStatus(showtimeRequestDto.isStatus());
-//
-//		showtimeRepository.save(showtime);
-//	}
 @Override
 public Showtime updateShowtime(Long showtimeId, ShowtimeRequestDto showtimeRequestDto) {
-	// Tìm lịch chiếu (Showtime) theo ID
 	Showtime showtime = showtimeRepository.findById(showtimeId)
 			.orElseThrow(() -> new EntityNotFoundException("Showtime not found"));
 
@@ -305,7 +214,6 @@ public Showtime updateShowtime(Long showtimeId, ShowtimeRequestDto showtimeReque
 	// Tính lại giá vé
 	Float priceTicket = basePrice.getDefaultPrice() + dayOfWeek.getSurcharge() + timeFrame.getSurcharge();
 
-	// Cập nhật thông tin lịch chiếu
 	showtime.setMovie(movie);
 	showtime.setRoom(room);
 	showtime.setDate(showtimeRequestDto.getDate());
@@ -316,7 +224,6 @@ public Showtime updateShowtime(Long showtimeId, ShowtimeRequestDto showtimeReque
 	showtime.setTimeFrame(timeFrame);
 	showtime.setPriceTicket(priceTicket);
 
-	// Lưu lại lịch chiếu
 	return showtimeRepository.save(showtime);
 }
 
@@ -329,35 +236,15 @@ public Showtime updateShowtime(Long showtimeId, ShowtimeRequestDto showtimeReque
 		showtimeRepository.deleteById(id);
 	}
 
-	// Hide showtimes when the movie is no longer available
-	@Override
-	@Transactional
-	public void hideShowtimesByMovie(long movieId) {
-		Movie movie = movieRepository.findById(movieId)
-				.orElseThrow(() -> new EntityNotFoundException("Movie not found"));
-
-		System.out.println("Movie Status: " + movie.isStatus());  // Debugging
-
-		if (!movie.isStatus()) {
-			System.out.println("Hiding showtimes for movie ID: " + movieId);  // Debugging
-			showtimeRepository.hideShowtimesByMovieStatus(movieId);
-
-			// Optional: Flush lại để đảm bảo dữ liệu được cập nhật vào cơ sở dữ liệu
-			showtimeRepository.flush();
-		} else {
-			System.out.println("Movie is active, no action taken.");  // Debugging
-		}
-	}
 	//	// Lấy danh sách lịch chiếu theo theaterId
 	// Lấy danh sách phòng chiếu của một rạp
 	public List<RoomShowtimeDto> getRoomsByTheater(long theaterId) {
-		// Lấy danh sách phòng chiếu từ repository
 		List<RoomShowtimeDto> rooms = showtimeRepository.findRoomsByTheater(theaterId);
 
 		// Duyệt qua từng phòng và lấy lịch chiếu tương ứng
 		for (RoomShowtimeDto room : rooms) {
 			List<ShowtimeDto> showtimes = showtimeRepository.findShowtimesByDateAndRoom(LocalDate.now(), room.getRoomId());
-			room.setShowtimes(showtimes);  // Gán danh sách lịch chiếu cho phòng
+			room.setShowtimes(showtimes);
 		}
 
 		return rooms;
@@ -379,7 +266,63 @@ public Showtime updateShowtime(Long showtimeId, ShowtimeRequestDto showtimeReque
 			Showtime showtime = showtimeOptional.get();
 			return showtime.toShowtimeDetailDto();  // Chuyển đổi thành ShowtimeDetailDto
 		}
-		return null;  // Nếu không tìm thấy lịch chiếu, trả về null
+		return null;
+	}
+
+
+	@Override
+	public BasePrice getBasePrice() {
+		try {
+			return basePriceRepository.findTopByOrderByIDDesc();
+		} catch (Exception e) {
+			throw new NotFoundException("Error get baseprice" + e.getMessage());
+		}
+	}
+
+	@Override
+	public List<DayOfWeek> getAllDayOfWeeks() {
+		try {
+			return dayOfWeekRepository.findAll();
+		} catch (Exception e) {
+			throw new NotFoundException("Error get all day of week" + e.getMessage());
+		}
+	}
+
+	@Override
+	public DayOfWeek getDayOfWeekById(Long key) {
+		return dayOfWeekRepository.findById(key)
+				.orElseThrow(() -> new NotFoundException("Error get dayofweek by ID"));
+	}
+
+	@Override
+	public void updateDayOfWeek(DayOfWeek dayOfWeek) {
+		if(!dayOfWeekRepository.existsById(dayOfWeek.getID())){
+			throw new NotFoundException("Error get dayofweek by ID");
+		}
+		dayOfWeekRepository.save(dayOfWeek);
+	}
+
+	@Override
+	public List<TimeFrame> getAllTimeFrames() {
+		try {
+			return timeFrameRepository.findAll();
+		} catch (Exception e) {
+			throw new NotFoundException("Error get all timeframe" + e.getMessage());
+		}
+	}
+
+	@Override
+	public TimeFrame getTimeFrameById(Long key) {
+		return timeFrameRepository.findById(key)
+				.orElseThrow(() -> new NotFoundException("Error timeframe by ID"));
+	}
+
+	@Override
+	public void updateTimeFrame(TimeFrame timeFrame) {
+		if(!timeFrameRepository.existsById(timeFrame.getID())){
+			throw new NotFoundException("Error timeframe by ID");
+		}
+		timeFrameRepository.save(timeFrame);
 	}
 
 }

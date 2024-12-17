@@ -26,16 +26,16 @@ public class PayCash extends Payment {
 		}
 	}
 
-	@Override
-	public String toString() {
-		return "PayCash{" +
-				"received=" + received +
-				", moneyReturned=" + moneyReturned +
-				", amount=" + super.getAmount() +
-				", booking=" + super.getBooking() +
-				", agent=" + super.getAgent() +
-				", date=" + super.getDate() +
-				", barcode='" + super.getBarcode() + '\'' +
-				'}';
-	}
+//	@Override
+//	public String toString() {
+//		return "PayCash{" +
+//				"received=" + received +
+//				", moneyReturned=" + moneyReturned +
+//				", amount=" + super.getAmount() +
+//				", booking=" + super.getBooking() +
+//				", agent=" + super.getAgent() +
+//				", date=" + super.getDate() +
+//				", barcode='" + super.getBarcode() + '\'' +
+//				'}';
+//	}
 }

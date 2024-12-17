@@ -1,5 +1,6 @@
 package com.springboot.CinemaSystem.dto;
 
+import com.springboot.CinemaSystem.entity.Seat;
 import com.springboot.CinemaSystem.entity.TypeSeat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,4 +17,14 @@ public class SeatDto {
     private boolean status;
     private TypeSeatDto typeSeat;
 
+    public static SeatDto toSeatDto (Seat seat) {
+        SeatDto dto = new SeatDto();
+        dto.setId(seat.getID());
+        dto.setName(seat.getName());
+        dto.setSeatNum(seat.getSeatNum());
+        dto.setRowNum(seat.getRowNum());
+        dto.setStatus(seat.isStatus());
+        dto.setTypeSeat(TypeSeatDto.toTypeSeatDto(seat.getTypeSeat()));
+        return dto;
+    }
 }

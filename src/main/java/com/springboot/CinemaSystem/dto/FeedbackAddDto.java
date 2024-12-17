@@ -5,9 +5,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class TicketRequestDto {
-    private long id;
-    private long selectedSeatID;
+@NoArgsConstructor
+public class FeedbackAddDto {
+    private long bookingId;
+    private String text;
+    private String star;
 }

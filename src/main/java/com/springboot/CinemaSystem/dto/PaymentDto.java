@@ -6,20 +6,20 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PayCashRequestDto {
+public class PaymentDto {
     private long showtimeid;
-    private long agentid;
-    private long customerid;
+    private long userid;
     private long discountid;
-    private float totalPrice;
-    private float discountPrice;
-    private float amount;
+    private long totalPrice;
+    private long discountPrice;
+    private long amount;
+    private String typePay;
+    private String typeBooking;
     private float received;
     private float moneyReturned;
     private Map<Long, Map<Long, Integer>> paytypecustomer;
-    private List<TicketRequestDto> ticket;
+    private List<TicketDto> ticket;
 }

@@ -36,13 +36,12 @@ public class Theater {
 	@Column(nullable = false)
 	private boolean status;
 
-	@OneToMany(mappedBy = "theater", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-	@JsonManagedReference(value = "theater-agent")
-	private List<Agent> agent;
+	@OneToOne(mappedBy = "theater", fetch = FetchType.LAZY)
+	private Manager manager;
 
 	@OneToMany(mappedBy = "theater", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference(value = "theater-room")
-	private List<Room> room;
+	private List<Room> room = new ArrayList<>();
 
 	@Embedded
 	private Address address;
@@ -54,46 +53,24 @@ public class Theater {
 				this.getAddress().getCity().getName();
 	}
 
-	public TheaterRoomDto toTheaterRoomDto() {
-		TheaterRoomDto theaterRoomDto = new TheaterRoomDto();
-		theaterRoomDto.setId(this.getID());
-		theaterRoomDto.setName(this.getName());
-
-		// Sử dụng Optional để tránh NullPointerException nếu danh sách rooms là null
-		List<RoomDto> roomDtos = Optional.ofNullable(this.getRoom())
-				.orElse(Collections.emptyList()) // Trả về danh sách trống nếu null
-				.stream()
-				.map(Room::toRoomDto)
-				.collect(Collectors.toList());
-
-		theaterRoomDto.setRoom(roomDtos);
-		theaterRoomDto.setStatus(this.isStatus());
-
-		return theaterRoomDto;
+	public static Theater convertTheaterAddtoTheater(TheaterDto dto) {
+		Theater theater = new Theater();
+		theater.setName(dto.getName());
+		theater.setPhone(dto.getPhone());
+		theater.setEmail(dto.getEmail());
+		theater.setDescription(dto.getDescription());
+		Ward ward = new Ward(dto.getWard());
+		District district = new District(dto.getDistrict());
+		City city = new City(dto.getCity());
+		Address address = new Address(dto.getAddress(), ward, district, city);
+		theater.setAddress(address);
+		return theater;
 	}
 
-	public TheaterViewDto toTheaterViewDto() {
-		return new TheaterViewDto(this.ID, this.name, this.description, this.phone,
-				this.email, this.image, this.quantityRoom, this.status, this.address);
+	public static Theater convertTheaterEdittoTheater(TheaterDto dto) {
+		Theater theater = convertTheaterAddtoTheater(dto);
+		theater.setID(dto.getID());
+		return theater;
 	}
-	public TheaterDetailDto toTheaterDetailDto(Theater theater) {
-		String address = theater.getAddress().getAddressDetail() + ", "
-				+ theater.getAddress().getWard().getName() + ", "
-				+ theater.getAddress().getDistrict().getName() + ", "
-				+ theater.getAddress().getCity().getName() ;
-		return new TheaterDetailDto(this.ID, this.name, this.description, this.phone, this.email, this.image,address);
-	}
-
-//	//LÊN LỊCH CHIẾU
-//	public TheaterDto toTheaterDto() {
-//		TheaterDto theaterDto = new TheaterDto();
-//		theaterDto.setID(this.getID());
-//		theaterDto.setName(this.getName());
-//		theaterDto.setAddress(this.getFullAddress());  // Dùng phương thức getFullAddress() để lấy địa chỉ
-//		theaterDto.setQuantityRoom(this.getQuantityRoom());  // Lấy số lượng phòng
-//		theaterDto.setStatus(this.isStatus());
-//
-//		return theaterDto;
-//	}
 
 }

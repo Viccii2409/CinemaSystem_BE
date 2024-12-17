@@ -13,22 +13,26 @@ import java.util.stream.Collectors;
 public class MovieDto {
     private Long id;
     private String title;
-    private String link;
+    private String image;
     private LocalDate releaseDate;
     private boolean status;
-    private List<GenreDto> genres;
+    private long countShowtime;
+    private List<GenreDto> genre;
     private List<ShowtimeTheaterIDDto> showtime;
 
-    public MovieDto toMovieDto(Movie movie) {
+    public static MovieDto toMovieDto(Movie movie) {
         MovieDto dto = new MovieDto();
         dto.setId(movie.getId());
         dto.setTitle(movie.getTitle());
-
+        dto.setReleaseDate(movie.getReleaseDate());
+        dto.setStatus(movie.isStatus());
+        dto.setImage(movie.getImage());
+        dto.setCountShowtime(movie.getShowtime().size());
         // Chuyển đổi các thể loại của phim thành danh sách GenreDto
         List<GenreDto> genreDtos = movie.getGenre().stream()
                 .map(Genre::toGenreDto)
                 .collect(Collectors.toList());
-        dto.setGenres(genreDtos);
+        dto.setGenre(genreDtos);
 
         return dto;
     }

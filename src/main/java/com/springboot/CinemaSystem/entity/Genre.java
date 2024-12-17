@@ -17,7 +17,7 @@ public class Genre {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "genreID")
-	private long ID;
+	private Long ID;
 	private String name;
 
 	@Lob
@@ -32,6 +32,12 @@ public class Genre {
 	@ManyToMany(mappedBy = "genre")
 	@JsonIgnore
 	private List<Customer> customer;
+
+	public Genre(Long ID, String name, String description) {
+		this.ID=ID;
+		this.name=name;
+		this.description=description;
+	}
 
 	public GenreDto toGenreDto(){
 		return new GenreDto(this.ID, this.name, this.description, this.status);

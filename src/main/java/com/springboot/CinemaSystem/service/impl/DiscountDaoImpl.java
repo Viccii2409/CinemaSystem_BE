@@ -95,14 +95,9 @@ public class DiscountDaoImpl implements DiscountDao {
 	}
 
 	@Override
-	public List<TypeDiscountDto> getAllTypeDiscount() {
-		List<TypeDiscountDto> typeDiscountDtos = new ArrayList<>();
+	public List<TypeDiscount> getAllTypeDiscount() {
 		try {
-			List<TypeDiscount> typeDiscounts = typeDiscountRepository.findAll();
-			for(TypeDiscount typeDiscount : typeDiscounts) {
-				typeDiscountDtos.add(typeDiscount.toTypeDiscountDto());
-			}
-			return typeDiscountDtos;
+			return typeDiscountRepository.findAll();
 		} catch (Exception e) {
 			throw new NotFoundException("Error getAllTypeDiscount: " + e.getMessage());
 		}
@@ -112,40 +107,5 @@ public class DiscountDaoImpl implements DiscountDao {
 	public TypeDiscount getTypeDiscountByID(long typeDiscountID) {
 		return typeDiscountRepository.findById(typeDiscountID)
 				.orElseThrow(() -> new NotFoundException("Error getTypeDiscountByID: " + typeDiscountID));
-	}
-
-	@Override
-	public boolean updateStatusDiscount(int discountID) {
-		return false;
-	}
-
-	@Override
-	public boolean validateDiscount(String discountCode) {
-		return false;
-	}
-
-	@Override
-	public Discount getDiscountByCode(String discountCode) {
-		return null;
-	}
-
-	@Override
-	public List<Discount> getDiscountsByType(int typeDiscountID) {
-		return List.of();
-	}
-
-	@Override
-	public boolean addTypeDiscount(TypeDiscount typeDiscount) {
-		return false;
-	}
-
-	@Override
-	public boolean editTypeDiscount(TypeDiscount typeDiscount) {
-		return false;
-	}
-
-	@Override
-	public List<TypeDiscount> getAllTypeDiscounts() {
-		return List.of();
 	}
 }

@@ -45,10 +45,6 @@ public class Seat {
 	@JsonIgnore
 	private List<Ticket> ticket;
 
-	public SeatDto toSeatDto() {
-		return new SeatDto(this.getID(), this.getName(), this.seatNum, this.rowNum, this.status, this.typeSeat.toTypeSeatDto());
-	}
-
 	@OneToMany(mappedBy = "seat", fetch = FetchType.LAZY)
 	private List<SelectedSeat> selectedSeats;
 
