@@ -4,8 +4,10 @@ import com.springboot.CinemaSystem.dto.FeedbackDto;
 import com.springboot.CinemaSystem.dto.MovieDto;
 import com.springboot.CinemaSystem.entity.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public interface MovieDao {
 	Movie addMovie(Movie movie);
@@ -36,5 +38,7 @@ public interface MovieDao {
 
 	public Feedback addFeedback(Feedback feedback);
 	public List<FeedbackDto> getFeedbackByMovie(long movieID);
+
+	List<Map<String, Object>> getTop3Movies();
 
 }

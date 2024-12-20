@@ -396,5 +396,26 @@ public class MovieDaoImpl implements MovieDao {
 		);
 	};
 
+	@Override
+	public List<Map<String, Object>> getTop3Movies() {
+		LocalDateTime startDate = getStartDate();
+		LocalDateTime endDate = getEndDate();
+
+		List<Map<String, Object>> movies = bookingRepository.getTop3Movies(startDate, endDate);
+
+		// Trả về top 3 phim
+		return movies.stream().limit(3).collect(Collectors.toList());
+	}
+
+	private LocalDateTime getStartDate() {
+		LocalDateTime now = LocalDateTime.now();
+
+		return now.minusMonths(1).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+	}
+
+	private LocalDateTime getEndDate() {
+		return LocalDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+	}
+
 
 }

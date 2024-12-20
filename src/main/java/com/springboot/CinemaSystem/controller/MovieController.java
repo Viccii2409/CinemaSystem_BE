@@ -387,4 +387,11 @@ public class MovieController {
 
         return ResponseEntity.ok(Map.of("details", revenue, "totalRevenue", totalRevenue));
     }
+
+    // Top 3 phim
+
+    @GetMapping("/public/topMovies")
+    public List<Map<String, Object>> getTop3Movies() {
+        return movieService.getTop3Movies();
+    }
 }

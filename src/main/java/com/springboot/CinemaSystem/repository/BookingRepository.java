@@ -19,7 +19,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "GROUP BY DATE(b.date) " +
             "ORDER BY DATE(b.date)")
     List<Object[]> revenueByDate(@Param("startDate") LocalDateTime startDate,
-                                               @Param("endDate") LocalDateTime endDate);
+                                 @Param("endDate") LocalDateTime endDate);
 
 
     // 2. Thống kê doanh thu theo rạp và thời gian
@@ -29,9 +29,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "GROUP BY t.name, DATE(b.date) " +
             "ORDER BY DATE(b.date)")
     List<Object[]> revenueByTheater(@Param("theaterId") Long theaterId,
-                                             @Param("startDate") LocalDateTime startDate,
-                                             @Param("endDate") LocalDateTime endDate);
-
+                                    @Param("startDate") LocalDateTime startDate,
+                                    @Param("endDate") LocalDateTime endDate);
 
 
     // 3. Thống kê doanh thu theo phim và thời gian
@@ -41,12 +40,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "GROUP BY m.title, DATE(b.date) " +
             "ORDER BY DATE(b.date)")
     List<Object[]> revenueByMovie(@Param("movieId") Long movieId,
-                                           @Param("startDate") LocalDateTime startDate,
-                                           @Param("endDate") LocalDateTime endDate);
+                                  @Param("startDate") LocalDateTime startDate,
+                                  @Param("endDate") LocalDateTime endDate);
 
 
     // Thống kê doanh thu theo tháng/năm
-    @Query("SELECT new map(MONTH(b.date) AS month, YEAR(b.date) AS year, SUM(p.totalPrice) AS totalRevenue) " +
+    @Query("SELECT new map(MONTH(b.date) AS month, YEAR(b.date) AS year, SUM(p.amount) AS totalRevenue) " +
             "FROM Booking b JOIN b.payment p " +
             "WHERE b.date BETWEEN :startDate AND :endDate " +
             "GROUP BY YEAR(b.date), MONTH(b.date)")
@@ -54,7 +53,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
 
-    @Query("SELECT SUM(p.totalPrice) " +
+    @Query("SELECT SUM(p.amount) " +
             "FROM Booking b JOIN b.payment p " +
             "WHERE b.date BETWEEN :startDate AND :endDate")
     Double getTotalRevenueByMonthOrYear(
@@ -62,7 +61,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("endDate") LocalDateTime endDate);
 
     // Thống kê doanh thu tất cả phim
-    @Query("SELECT new map(m.title AS movieTitle, SUM(p.totalPrice) AS totalRevenue) " +
+    @Query("SELECT new map(m.title AS movieTitle, SUM(p.amount) AS totalRevenue) " +
             "FROM Booking b JOIN b.payment p JOIN b.showtime s JOIN s.movie m " +
             "WHERE b.date BETWEEN :startDate AND :endDate " +
             "GROUP BY m.id, m.title")
@@ -70,7 +69,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
 
-    @Query("SELECT SUM(p.totalPrice) " +
+    @Query("SELECT SUM(p.amount) " +
             "FROM Booking b JOIN b.payment p JOIN b.showtime s JOIN s.movie m " +
             "WHERE b.date BETWEEN :startDate AND :endDate")
     Double getTotalRevenueByMovie(
@@ -78,7 +77,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("endDate") LocalDateTime endDate);
 
     // Thống kê doanh thu tất cả rạp
-    @Query("SELECT new map(t.name AS theaterName, SUM(p.totalPrice) AS totalRevenue) " +
+    @Query("SELECT new map(t.name AS theaterName, SUM(p.amount) AS totalRevenue) " +
             "FROM Booking b JOIN b.payment p JOIN b.showtime s JOIN s.room r JOIN r.theater t " +
             "WHERE b.date BETWEEN :startDate AND :endDate " +
             "GROUP BY t.id, t.name")
@@ -86,11 +85,23 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
 
-    @Query("SELECT SUM(p.totalPrice) " +
+    @Query("SELECT SUM(p.amount) " +
             "FROM Booking b JOIN b.payment p JOIN b.showtime s JOIN s.room r JOIN r.theater t " +
             "WHERE b.date BETWEEN :startDate AND :endDate")
     Double getTotalRevenueByTheater(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
 
+
+    // Lấy top 3 phim có tổng doanh thu cao nhất trong 3 tháng gần nhất với trạng thái phim = true
+    @Query("SELECT new map(m.id AS movieId, m.title AS movieTitle, m.image AS movieImage, SUM(p.totalPrice) AS totalRevenue) " +
+            "FROM Booking b " +
+            "JOIN b.payment p " +
+            "JOIN b.showtime s " +
+            "JOIN s.movie m " +
+            "WHERE b.date BETWEEN :startDate AND :endDate AND m.status = true " +
+            "GROUP BY m.id, m.title, m.image " +
+            "ORDER BY totalRevenue DESC")
+    List<Map<String, Object>> getTop3Movies(@Param("startDate") LocalDateTime startDate,
+                                                                  @Param("endDate") LocalDateTime endDate);
 }
