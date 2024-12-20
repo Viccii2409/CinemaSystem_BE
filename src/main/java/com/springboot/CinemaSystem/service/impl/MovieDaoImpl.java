@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.sql.SQLOutput;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,9 @@ public class MovieDaoImpl implements MovieDao {
 	private SlideshowRepository slideshowRepository;
 	@Autowired
 	private FeedbackRepository feedbackRepository;
+
+	@Autowired
+	private BookingRepository bookingRepository;
 
 	@Autowired
 	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository, FileStorageDao fileStorageService) {
@@ -391,4 +395,6 @@ public class MovieDaoImpl implements MovieDao {
 				)
 		);
 	};
+
+
 }

@@ -18,8 +18,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,11 +37,15 @@ public class MovieController {
     @Autowired
     private TicketDao ticketDao;
 
+    @Autowired
+    private RevenueDao revenueDao;
+
 
     @Autowired
-    public MovieController(MovieDao movieService, ShowtimeDao showtimeDao) {
+    public MovieController(MovieDao movieService, ShowtimeDao showtimeDao,RevenueDao revenueDao) {
         this.movieService = movieService;
         this.showtimeDao = showtimeDao;
+        this.revenueDao = revenueDao;
     }
 
 
@@ -327,7 +334,7 @@ public class MovieController {
         if (showtimeDetail != null) {
             return ResponseEntity.ok(showtimeDetail);
         } else {
-            return ResponseEntity.notFound().build();  // Nếu không tìm thấy lịch chiếu
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -356,5 +363,28 @@ public class MovieController {
     @GetMapping("/public/feedback/{movieId}")
     public List<FeedbackDto> getFeedbackByMovie(@PathVariable long movieId) {
         return movieService.getFeedbackByMovie(movieId);
+    }
+
+    // Thống kê doanh thu theo phim và thời gian
+    @GetMapping("/movie-revenue")
+    public ResponseEntity<?> getRevenueByMovie(
+            @RequestParam Long movieId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        return ResponseEntity.ok(revenueDao.getRevenueByMovie(movieId, startDate, endDate));
+    }
+
+    // Thống kê doanh thu tất cả phim +  có thể chọn tgian hoặc không
+    @GetMapping("/by-movie")
+    public ResponseEntity<?> getRevenueByMovie(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        if (startDate == null) startDate = LocalDateTime.of(2000, 1, 1, 0, 0);
+        if (endDate == null) endDate = LocalDateTime.now();
+
+        List<Map<String, Object>> revenue = revenueDao.getRevenueByMovie(startDate, endDate);
+        Double totalRevenue = revenueDao.getTotalRevenueByMovie(startDate, endDate);
+
+        return ResponseEntity.ok(Map.of("details", revenue, "totalRevenue", totalRevenue));
     }
 }
