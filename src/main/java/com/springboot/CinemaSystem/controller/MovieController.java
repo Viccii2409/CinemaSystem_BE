@@ -168,60 +168,75 @@ public class MovieController {
         throw new NotFoundException("Movie not found with ID: " + id);
     }
 
+//    @PostMapping("/add")
+//    @Transactional
+//    public MovieDto addMovie(@ModelAttribute MovieRequestDto movieRequestDto,
+//                             @RequestParam(value = "image", required = false) MultipartFile imageFile,
+//                             @RequestParam(value = "trailer", required = false) MultipartFile trailerFile) {
+//        Movie movie = Movie.toMovie(movieRequestDto);
+//        if(!imageFile.isEmpty() && imageFile != null) {
+//            String imageUrl = fileStorageDao.saveFileFromCloudinary(imageFile, "Image/Movie", "image");
+//            movie.setImage(imageUrl);
+//        }
+//        if(!trailerFile.isEmpty() && trailerFile != null) {
+//            String videoUrl = fileStorageDao.saveFileFromCloudinary(trailerFile, "Video/Movie", "video");
+//            movie.setTrailer(videoUrl);
+//        }
+//        return MovieDto.toMovieDto(movieService.addMovie(movie));
+//    }
+//
+//    @PostMapping("/update")
+//    @Transactional
+//    public MovieDto updateMovie(@ModelAttribute MovieRequestDto movieRequestDto,
+//                                @RequestParam(value = "image", required = false) MultipartFile imageFile,
+//                                @RequestParam(value = "trailer", required = false) MultipartFile trailerFile) {
+//        Movie movie = movieService.getMovieByID(movieRequestDto.getId());
+//        movie.setTitle(movieRequestDto.getTitle());
+//        movie.setDuration(movieRequestDto.getDuration());
+//        movie.setReleaseDate(movieRequestDto.getReleaseDate());
+//        movie.setDescription(movieRequestDto.getDescription());
+//        movie.setDirector(movieRequestDto.getDirector());
+//        movie.setCast(movieRequestDto.getCast());
+//
+//        Language language = new Language();
+//        language.setId(movieRequestDto.getLanguageID());
+//        movie.setLanguage(language);
+//
+//        movie.getGenre().clear();
+//        for (Long genreId : movieRequestDto.getGenreID()) {
+//            Genre genre = new Genre();
+//            genre.setID(genreId);
+//            movie.getGenre().add(genre);
+//        }
+//
+//        // Kiểm tra và xử lý tệp ảnh nếu có
+//        if (imageFile != null && !imageFile.isEmpty()) {
+//            String imageUrl = fileStorageDao.updateFile(imageFile, movie.getImage(), "Image/Movie", "image");
+//            movie.setImage(imageUrl);
+//        }
+//
+//        // Kiểm tra và xử lý tệp trailer nếu có
+//        if (trailerFile != null && !trailerFile.isEmpty()) {
+//            String videoUrl = fileStorageDao.updateFile(trailerFile, movie.getTrailer(), "Video/Movie", "video");
+//            movie.setTrailer(videoUrl);
+//        }
+//        return MovieDto.toMovieDto(movieService.updateMovie(movie));
+//    }
     @PostMapping("/add")
     @Transactional
     public MovieDto addMovie(@ModelAttribute MovieRequestDto movieRequestDto,
                              @RequestParam(value = "image", required = false) MultipartFile imageFile,
                              @RequestParam(value = "trailer", required = false) MultipartFile trailerFile) {
-        Movie movie = Movie.toMovie(movieRequestDto);
-        if(!imageFile.isEmpty() && imageFile != null) {
-            String imageUrl = fileStorageDao.saveFileFromCloudinary(imageFile, "Image/Movie", "image");
-            movie.setImage(imageUrl);
-        }
-        if(!trailerFile.isEmpty() && trailerFile != null) {
-            String videoUrl = fileStorageDao.saveFileFromCloudinary(trailerFile, "Video/Movie", "video");
-            movie.setTrailer(videoUrl);
-        }
-        return MovieDto.toMovieDto(movieService.addMovie(movie));
+        return movieService.addMovie(movieRequestDto, imageFile, trailerFile);
     }
 
-    @PostMapping("/update")
-    @Transactional
-    public MovieDto updateMovie(@ModelAttribute MovieRequestDto movieRequestDto,
-                                @RequestParam(value = "image", required = false) MultipartFile imageFile,
-                                @RequestParam(value = "trailer", required = false) MultipartFile trailerFile) {
-        Movie movie = movieService.getMovieByID(movieRequestDto.getId());
-        movie.setTitle(movieRequestDto.getTitle());
-        movie.setDuration(movieRequestDto.getDuration());
-        movie.setReleaseDate(movieRequestDto.getReleaseDate());
-        movie.setDescription(movieRequestDto.getDescription());
-        movie.setDirector(movieRequestDto.getDirector());
-        movie.setCast(movieRequestDto.getCast());
-
-        Language language = new Language();
-        language.setId(movieRequestDto.getLanguageID());
-        movie.setLanguage(language);
-
-        movie.getGenre().clear();
-        for (Long genreId : movieRequestDto.getGenreID()) {
-            Genre genre = new Genre();
-            genre.setID(genreId);
-            movie.getGenre().add(genre);
+        @PostMapping("/update")
+        @Transactional
+        public MovieDto updateMovie(@ModelAttribute MovieRequestDto movieRequestDto,
+                                    @RequestParam(value = "image", required = false) MultipartFile imageFile,
+                                    @RequestParam(value = "trailer", required = false) MultipartFile trailerFile) {
+            return movieService.updateMovie(movieRequestDto, imageFile, trailerFile);
         }
-
-        // Kiểm tra và xử lý tệp ảnh nếu có
-        if (imageFile != null && !imageFile.isEmpty()) {
-            String imageUrl = fileStorageDao.updateFile(imageFile, movie.getImage(), "Image/Movie", "image");
-            movie.setImage(imageUrl);
-        }
-
-        // Kiểm tra và xử lý tệp trailer nếu có
-        if (trailerFile != null && !trailerFile.isEmpty()) {
-            String videoUrl = fileStorageDao.updateFile(trailerFile, movie.getTrailer(), "Video/Movie", "video");
-            movie.setTrailer(videoUrl);
-        }
-        return MovieDto.toMovieDto(movieService.updateMovie(movie));
-    }
 
     @PreAuthorize("hasAuthority('MANAGER_MOVIE')")
     @DeleteMapping("/{id}")
