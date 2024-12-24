@@ -175,22 +175,16 @@ public class Movie {
 			return 0; // Nếu không có feedback nào, trả về 0.
 		}
 
-		// Lọc và tính trung bình cộng các giá trị star (int) từ feedback
 		double averageRating = this.feedback.stream()
-				.map(Feedback::getStar) // Lấy star từ feedback
-				.filter(Objects::nonNull) // Bỏ qua các giá trị null
+				.map(Feedback::getStar)
+				.filter(Objects::nonNull)
 				.mapToInt(Integer::intValue) // Chuyển đổi từ Integer sang int
-				.average() // Tính trung bình cộng
+				.average()
 				.orElse(0); // Nếu không có giá trị hợp lệ, trả về 0.
 
-		return (float) averageRating; // Trả về kết quả dưới dạng float
+		return (float) averageRating;
 	}
 
-
-    // Getter và Setter cho genres
-//    public List<Genre> getGenres() {
-//        return genre;
-//    }
 
     public void setGenres(List<Genre> genres) {
         this.genre = genres;
