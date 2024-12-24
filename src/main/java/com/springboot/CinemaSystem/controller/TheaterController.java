@@ -258,6 +258,7 @@ public class TheaterController {
 
 
     // Thống kê doanh thu theo rạp và thời gian
+    @PreAuthorize("hasAuthority('MANAGER_REVENUE')")
     @GetMapping("/theater-revenue")
     public ResponseEntity<?> getRevenueByTheater(
             @RequestParam Long theaterId,
@@ -266,6 +267,7 @@ public class TheaterController {
         return ResponseEntity.ok(revenueDao.getRevenueByTheater(theaterId, startDate, endDate));
     }
  // Thống kê doanh thu tất cả rạp +  có thể chọn ngày hoặc ko
+    @PreAuthorize("hasAuthority('MANAGER_REVENUE')")
     @GetMapping("/by-theater")
     public ResponseEntity<?> getRevenueByTheater(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,

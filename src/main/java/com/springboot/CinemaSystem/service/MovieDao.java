@@ -35,7 +35,6 @@ public MovieDto addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFil
 	public Genre addGenre(Genre genre);
 	public  List<Genre> searchGenres(String name);
 	public Genre updateGenre(Long id, Genre genre);
-	public void hideGenre(Long id);
 	public Genre getGenreByID(long genreID);
 	public List<Genre> getAllGenres();
 	public void deleteGenre(Long id);

@@ -64,6 +64,16 @@ public class TicketController {
                 .collect(Collectors.toList());
     }
 
+    @GetMapping("/public/discount/homepage")
+    public List<DiscountDto> getLatestDiscountsById() {
+        // Lấy toàn bộ danh sách discounts
+        return discountDao.getAllDiscounts().stream()
+                .map(entry -> DiscountDto.toDiscountDto(entry)) // Chuyển đổi thành DTO
+                .sorted(Comparator.comparing(DiscountDto::getId).reversed()) // Sắp xếp giảm dần theo ID
+                .limit(4) // Lấy 4 phần tử đầu tiên
+                .collect(Collectors.toList());
+    }
+
     @GetMapping("public/discount/active")
     public List<DiscountDto> getAllDiscountActive() {
         java.util.Date currentDate = new java.util.Date();
@@ -512,6 +522,7 @@ public class TicketController {
     }
 
     // Thống kê doanh thu theo thời gian  -> chọn tgian -> trả về doanh thu mỗi ngày trong rangeDate
+    @PreAuthorize("hasAuthority('MANAGER_REVENUE')")
     @GetMapping("/daily-revenue")
     public ResponseEntity<?> getRevenue(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
@@ -520,6 +531,7 @@ public class TicketController {
     }
 
 // thống kê tất cả doanh thu -> trả về tháng
+    @PreAuthorize("hasAuthority('MANAGER_REVENUE')")
     @GetMapping("/by-month")
     public ResponseEntity<?> getRevenueByMonth(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,

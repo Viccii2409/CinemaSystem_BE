@@ -12,7 +12,6 @@ public class GenreDto {
     private long ID;
     private String name;
     private String description;
-    private boolean status;
 
     public GenreDto(long ID, String name) {
         this.name = name;

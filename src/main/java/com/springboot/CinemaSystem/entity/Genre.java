@@ -23,7 +23,6 @@ public class Genre {
 	@Lob
 	@Column(name = "description", columnDefinition = "TEXT", nullable = true)
 	private String description;
-	private boolean status;
 
 	@ManyToMany(mappedBy = "genre")
 	@JsonIgnore
@@ -40,7 +39,7 @@ public class Genre {
 	}
 
 	public GenreDto toGenreDto(){
-		return new GenreDto(this.ID, this.name, this.description, this.status);
+		return new GenreDto(this.ID, this.name, this.description);
 	}
 
 	// Constructor cần thiết cho Jackson để chuyển đổi từ ID (số)

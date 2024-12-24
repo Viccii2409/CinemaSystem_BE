@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -342,7 +343,17 @@ public class UserController {
         List<Long> genreIds = genres.stream()
                 .map(Genre::getID)
                 .collect(Collectors.toList());
-        return  movieDao.recommendMovies(genreIds);
+
+        // Lấy danh sách phim phù hợp với thể loại
+        List<MovieDto> movies = movieDao.recommendMovies(genreIds);
+
+        // Trộn ngẫu nhiên danh sách phim
+        Collections.shuffle(movies);
+
+        // Lấy tối đa 6 phim (nếu danh sách có ít hơn 6 phim thì trả về toàn bộ)
+        return movies.stream()
+                .limit(6)
+                .collect(Collectors.toList());
     }
 
 
