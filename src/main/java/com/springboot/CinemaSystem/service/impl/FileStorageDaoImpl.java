@@ -40,34 +40,16 @@ public class FileStorageDaoImpl implements FileStorageDao {
 
     @Override
     public String updateFile(MultipartFile file, String image, String folder, String type) {
-        try{
-            if(image != null) {
+        try {
+            if (image != null) {
                 deleteFileFromCloudinary(image, folder);
             }
             return saveFileFromCloudinary(file, folder, type);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new DataProcessingException("Không cập nhật được tệp: " + e.getMessage());
         }
     }
 
-//    @Override
-//    public void deleteFileFromCloudinary(String image, String folder) {
-//        try {
-//            URL url = new URL(image);
-//            String path = url.getPath();
-//            String[] segments = path.split("/");
-//            String filename = segments[segments.length - 1];
-//            String imageName = filename.substring(0, filename.lastIndexOf('.'));
-//            String publicId = folder + "/" + imageName;
-//
-//            Map checkResult = cloudinary.api().resource(publicId, ObjectUtils.emptyMap());
-//            if (checkResult.containsKey("public_id")) {
-//                cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("invalidate", true));
-//            }
-//        } catch (Exception e) {
-//            throw new DataProcessingException("Không thể xóa tệp trên Cloudinary: " + e.getMessage());
-//        }
-//    }
 
     @Override
     public void deleteFileFromCloudinary(String image, String folder) {
@@ -91,21 +73,5 @@ public class FileStorageDaoImpl implements FileStorageDao {
         }
     }
 
-    @Override
-    public String saveFileMovieAndTrailer(MultipartFile file, String folder) throws IOException {
-        // Chuyển MultipartFile thành mảng byte
-        byte[] fileBytes = file.getBytes();
-
-        // Xác định loại tài nguyên (ảnh, video)
-        String resourceType = file.getContentType().startsWith("image") ? "image" : "video";
-
-        // Upload tệp lên Cloudinary
-        Map uploadResult = cloudinary.uploader().upload(fileBytes, ObjectUtils.asMap(
-                "folder", folder,           // Chỉ định thư mục trên Cloudinary
-                "resource_type", resourceType)); // Xác định loại tài nguyên (image hoặc video)
-
-        // Trả về URL của tệp đã upload
-        return (String) uploadResult.get("url");
-    }
 
 }

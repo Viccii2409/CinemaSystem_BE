@@ -18,8 +18,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,11 +37,15 @@ public class MovieController {
     @Autowired
     private TicketDao ticketDao;
 
+    @Autowired
+    private RevenueDao revenueDao;
+
 
     @Autowired
-    public MovieController(MovieDao movieService, ShowtimeDao showtimeDao) {
+    public MovieController(MovieDao movieService, ShowtimeDao showtimeDao,RevenueDao revenueDao) {
         this.movieService = movieService;
         this.showtimeDao = showtimeDao;
+        this.revenueDao = revenueDao;
     }
 
 
@@ -93,6 +100,7 @@ public class MovieController {
         return showtimeDao.getAllTimeFrames();
     }
 
+    // Quản lý thể loại
     @PreAuthorize("hasAuthority('MANAGER_GENRE')")
     @GetMapping("/genre")
     public List<GenreDto> getAllGenres(){
@@ -113,7 +121,7 @@ public class MovieController {
     @PreAuthorize("hasAuthority('MANAGER_GENRE')")
     @PostMapping("/genre/add")
     public Genre addGenre(@RequestBody Genre genre) {
-        System.out.println(genre);
+        genre.setStatus(true);
         return movieService.addGenre(genre);
     }
 
@@ -160,69 +168,75 @@ public class MovieController {
         throw new NotFoundException("Movie not found with ID: " + id);
     }
 
+//    @PostMapping("/add")
+//    @Transactional
+//    public MovieDto addMovie(@ModelAttribute MovieRequestDto movieRequestDto,
+//                             @RequestParam(value = "image", required = false) MultipartFile imageFile,
+//                             @RequestParam(value = "trailer", required = false) MultipartFile trailerFile) {
+//        Movie movie = Movie.toMovie(movieRequestDto);
+//        if(!imageFile.isEmpty() && imageFile != null) {
+//            String imageUrl = fileStorageDao.saveFileFromCloudinary(imageFile, "Image/Movie", "image");
+//            movie.setImage(imageUrl);
+//        }
+//        if(!trailerFile.isEmpty() && trailerFile != null) {
+//            String videoUrl = fileStorageDao.saveFileFromCloudinary(trailerFile, "Video/Movie", "video");
+//            movie.setTrailer(videoUrl);
+//        }
+//        return MovieDto.toMovieDto(movieService.addMovie(movie));
+//    }
+//
+//    @PostMapping("/update")
+//    @Transactional
+//    public MovieDto updateMovie(@ModelAttribute MovieRequestDto movieRequestDto,
+//                                @RequestParam(value = "image", required = false) MultipartFile imageFile,
+//                                @RequestParam(value = "trailer", required = false) MultipartFile trailerFile) {
+//        Movie movie = movieService.getMovieByID(movieRequestDto.getId());
+//        movie.setTitle(movieRequestDto.getTitle());
+//        movie.setDuration(movieRequestDto.getDuration());
+//        movie.setReleaseDate(movieRequestDto.getReleaseDate());
+//        movie.setDescription(movieRequestDto.getDescription());
+//        movie.setDirector(movieRequestDto.getDirector());
+//        movie.setCast(movieRequestDto.getCast());
+//
+//        Language language = new Language();
+//        language.setId(movieRequestDto.getLanguageID());
+//        movie.setLanguage(language);
+//
+//        movie.getGenre().clear();
+//        for (Long genreId : movieRequestDto.getGenreID()) {
+//            Genre genre = new Genre();
+//            genre.setID(genreId);
+//            movie.getGenre().add(genre);
+//        }
+//
+//        // Kiểm tra và xử lý tệp ảnh nếu có
+//        if (imageFile != null && !imageFile.isEmpty()) {
+//            String imageUrl = fileStorageDao.updateFile(imageFile, movie.getImage(), "Image/Movie", "image");
+//            movie.setImage(imageUrl);
+//        }
+//
+//        // Kiểm tra và xử lý tệp trailer nếu có
+//        if (trailerFile != null && !trailerFile.isEmpty()) {
+//            String videoUrl = fileStorageDao.updateFile(trailerFile, movie.getTrailer(), "Video/Movie", "video");
+//            movie.setTrailer(videoUrl);
+//        }
+//        return MovieDto.toMovieDto(movieService.updateMovie(movie));
+//    }
     @PostMapping("/add")
     @Transactional
     public MovieDto addMovie(@ModelAttribute MovieRequestDto movieRequestDto,
                              @RequestParam(value = "image", required = false) MultipartFile imageFile,
                              @RequestParam(value = "trailer", required = false) MultipartFile trailerFile) {
-        Movie movie = Movie.toMovie(movieRequestDto);
-        if(!imageFile.isEmpty() && imageFile != null) {
-            String imageUrl = fileStorageDao.saveFileFromCloudinary(imageFile, "Image/Movie", "image");
-            movie.setImage(imageUrl);
-        }
-        if(!trailerFile.isEmpty() && trailerFile != null) {
-            String videoUrl = fileStorageDao.saveFileFromCloudinary(trailerFile, "Video/Movie", "video");
-            movie.setTrailer(videoUrl);
-        }
-        return MovieDto.toMovieDto(movieService.addMovie(movie));
+        return movieService.addMovie(movieRequestDto, imageFile, trailerFile);
     }
 
-    @PostMapping("/update")
-    @Transactional
-    public MovieDto updateMovie(@ModelAttribute MovieRequestDto movieRequestDto,
-                                @RequestParam(value = "image", required = false) MultipartFile imageFile,
-                                @RequestParam(value = "trailer", required = false) MultipartFile trailerFile) {
-        // Lấy thông tin phim theo ID
-        Movie movie = movieService.getMovieByID(movieRequestDto.getId());
-
-        // Cập nhật các thông tin cơ bản của phim
-        movie.setTitle(movieRequestDto.getTitle());
-        movie.setDuration(movieRequestDto.getDuration());
-        movie.setReleaseDate(movieRequestDto.getReleaseDate());
-        movie.setDescription(movieRequestDto.getDescription());
-        movie.setDirector(movieRequestDto.getDirector());
-        movie.setCast(movieRequestDto.getCast());
-
-        // Cập nhật ngôn ngữ của phim theo ID
-        Language language = new Language();
-        language.setId(movieRequestDto.getLanguageID());
-        movie.setLanguage(language);
-
-        // Xóa các thể loại cũ và thêm các thể loại mới
-        movie.getGenre().clear();
-        for (Long genreId : movieRequestDto.getGenreID()) {
-            Genre genre = new Genre();
-            genre.setID(genreId);
-            movie.getGenre().add(genre);
+        @PostMapping("/update")
+        @Transactional
+        public MovieDto updateMovie(@ModelAttribute MovieRequestDto movieRequestDto,
+                                    @RequestParam(value = "image", required = false) MultipartFile imageFile,
+                                    @RequestParam(value = "trailer", required = false) MultipartFile trailerFile) {
+            return movieService.updateMovie(movieRequestDto, imageFile, trailerFile);
         }
-
-        // Kiểm tra và xử lý tệp ảnh nếu có (không phải null và không trống)
-        if (imageFile != null && !imageFile.isEmpty()) {
-            String imageUrl = fileStorageDao.updateFile(imageFile, movie.getImage(), "Image/Movie", "image");
-            movie.setImage(imageUrl);
-        }
-
-        // Kiểm tra và xử lý tệp trailer nếu có (không phải null và không trống)
-        if (trailerFile != null && !trailerFile.isEmpty()) {
-            String videoUrl = fileStorageDao.updateFile(trailerFile, movie.getTrailer(), "Video/Movie", "video");
-            movie.setTrailer(videoUrl);
-        }
-
-        // Lưu và trả về phim đã cập nhật
-        return MovieDto.toMovieDto(movieService.updateMovie(movie));
-    }
-
-
 
     @PreAuthorize("hasAuthority('MANAGER_MOVIE')")
     @DeleteMapping("/{id}")
@@ -253,7 +267,6 @@ public class MovieController {
     @PreAuthorize("hasAuthority('MANAGER_MOVIE')")
     @GetMapping({"/all"})
     public List<MovieDto> getAllMovie() {
-        // Call the service layer to get all movies
         return movieService.getAllMovie().stream()
                 .map(entry -> MovieDto.toMovieDto(entry))
                 .collect(Collectors.toList());
@@ -270,13 +283,6 @@ public class MovieController {
         return movieService.getAllMovie();
     }
 
-    // Thêm trailer mới hoặc cập nhật trailer nếu movieId đã tồn tại
-//    @PostMapping("/addTrailer")
-//    public String addTrailer(@RequestBody Trailer trailer) {
-//        // Lưu trailer, nếu trùng movieId thì sẽ cập nhật, không thì sẽ lưu mới
-//        movieService.saveOrUpdateTrailer(trailer);
-//        return "redirect:/movies"; // Quay lại trang danh sách movies
-//    }
     // API lấy danh sách ngôn ngữ
     @GetMapping("/getAllLanguage")
     public List<Language> getAllLanguages() {
@@ -284,20 +290,20 @@ public class MovieController {
     }
 
 
-    ///  LÊN LỊCH CHIẾU     < chưa có hiển thị danh sách lịch chiếu khi chọn ngày + rạp>
+    ///  LÊN LỊCH CHIẾU
+    ///
 // Lấy danh sách phòng chiếu và lịch chiếu theo ngày và rạp
     @GetMapping("/showtimes")
     public ResponseEntity<List<RoomShowtimeDto>> getShowtimesByDateAndTheater(
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam("theaterId") long theaterId) {
 
-        // Lấy danh sách phòng và lịch chiếu theo ngày và rạp
         List<RoomShowtimeDto> rooms = showtimeDao.getRoomsByTheater(theaterId);
 
         // Gán danh sách lịch chiếu vào từng phòng chiếu cho ngày cụ thể
         for (RoomShowtimeDto room : rooms) {
             List<ShowtimeDto> showtimes = showtimeDao.getShowtimesByDateAndRoom(date, room.getRoomId());
-            room.setShowtimes(showtimes);  // Gán danh sách lịch chiếu
+            room.setShowtimes(showtimes);
         }
 
         return ResponseEntity.ok(rooms);
@@ -308,12 +314,12 @@ public class MovieController {
         Showtime showtime = showtimeDao.scheduleShowtime(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(showtime);
     }
-    // Cập nhật trạng thái tự động
-    @PutMapping("/status/update")
-    public ResponseEntity<Void> updateShowtimeStatus() {
-        showtimeDao.updateShowtimeStatus();
-        return ResponseEntity.ok().build();
-    }
+//    // Cập nhật trạng thái tự động
+//    @PutMapping("/status/update")
+//    public ResponseEntity<Void> updateShowtimeStatus() {
+//        showtimeDao.updateShowtimeStatus();
+//        return ResponseEntity.ok().build();
+//    }
 
     // Ẩn hoặc mở lịch chiếu
     @PutMapping("/{id}/toggle-status")
@@ -335,12 +341,7 @@ public class MovieController {
         showtimeDao.deleteShowtime(id);
         return ResponseEntity.noContent().build();
     }
-    // Ẩn lịch chiếu khi phim ngừng chiếu
-    @PutMapping("/movie/{movieId}/hide-showtimes")
-    public ResponseEntity<Void> hideShowtimesByMovie(@PathVariable long movieId) {
-        showtimeDao.hideShowtimesByMovie(movieId);
-        return ResponseEntity.ok().build();
-    }
+
     // API để lấy chi tiết lịch chiếu
     @GetMapping("/showtime/{id}")
     public ResponseEntity<ShowtimeDetailDto> getShowtimeDetail(@PathVariable long id) {
@@ -348,11 +349,9 @@ public class MovieController {
         if (showtimeDetail != null) {
             return ResponseEntity.ok(showtimeDetail);
         } else {
-            return ResponseEntity.notFound().build();  // Nếu không tìm thấy lịch chiếu
+            return ResponseEntity.notFound().build();
         }
     }
-
-
 
     @PreAuthorize("hasAuthority('VIEW_CUSTOMER_INFOR')")
     @PostMapping("/add-feedback")
@@ -379,5 +378,35 @@ public class MovieController {
     @GetMapping("/public/feedback/{movieId}")
     public List<FeedbackDto> getFeedbackByMovie(@PathVariable long movieId) {
         return movieService.getFeedbackByMovie(movieId);
+    }
+
+    // Thống kê doanh thu theo phim và thời gian
+    @GetMapping("/movie-revenue")
+    public ResponseEntity<?> getRevenueByMovie(
+            @RequestParam Long movieId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        return ResponseEntity.ok(revenueDao.getRevenueByMovie(movieId, startDate, endDate));
+    }
+
+    // Thống kê doanh thu tất cả phim +  có thể chọn tgian hoặc không
+    @GetMapping("/by-movie")
+    public ResponseEntity<?> getRevenueByMovie(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        if (startDate == null) startDate = LocalDateTime.of(2000, 1, 1, 0, 0);
+        if (endDate == null) endDate = LocalDateTime.now();
+
+        List<Map<String, Object>> revenue = revenueDao.getRevenueByMovie(startDate, endDate);
+        Double totalRevenue = revenueDao.getTotalRevenueByMovie(startDate, endDate);
+
+        return ResponseEntity.ok(Map.of("details", revenue, "totalRevenue", totalRevenue));
+    }
+
+    // Top 3 phim
+
+    @GetMapping("/public/topMovies")
+    public List<Map<String, Object>> getTop3Movies() {
+        return movieService.getTop3Movies();
     }
 }

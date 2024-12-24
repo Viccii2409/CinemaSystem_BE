@@ -17,7 +17,7 @@ public class Genre {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "genreID")
-	private long ID;
+	private Long ID;
 	private String name;
 
 	@Lob
@@ -33,7 +33,7 @@ public class Genre {
 	@JsonIgnore
 	private List<Customer> customer;
 
-	public Genre(long ID, String name, String description) {
+	public Genre(Long ID, String name, String description) {
 		this.ID=ID;
 		this.name=name;
 		this.description=description;

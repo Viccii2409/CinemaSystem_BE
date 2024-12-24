@@ -6,13 +6,17 @@ import com.springboot.CinemaSystem.entity.*;
 import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.exception.NotFoundException;
 import com.springboot.CinemaSystem.service.FileStorageDao;
+import com.springboot.CinemaSystem.service.RevenueDao;
 import com.springboot.CinemaSystem.service.TheaterDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,11 +26,13 @@ import java.util.stream.Collectors;
 public class TheaterController {
     private TheaterDao theaterDao;
     private FileStorageDao fileStorageDao;
+    private RevenueDao revenueDao;
 
     @Autowired
-    public TheaterController(TheaterDao theaterDao, FileStorageDao fileStorageDao) {
+    public TheaterController(TheaterDao theaterDao, FileStorageDao fileStorageDao, RevenueDao revenueDao) {
         this.theaterDao = theaterDao;
         this.fileStorageDao = fileStorageDao;
+        this.revenueDao =revenueDao;
     }
 
     @GetMapping("/public/all")
@@ -248,5 +254,28 @@ public class TheaterController {
     @GetMapping("/typeseat")
     public List<TypeSeat> getTypeSeat() {
         return theaterDao.getAllTypeSeats();
+    }
+
+
+    // Thống kê doanh thu theo rạp và thời gian
+    @GetMapping("/theater-revenue")
+    public ResponseEntity<?> getRevenueByTheater(
+            @RequestParam Long theaterId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        return ResponseEntity.ok(revenueDao.getRevenueByTheater(theaterId, startDate, endDate));
+    }
+ // Thống kê doanh thu tất cả rạp +  có thể chọn ngày hoặc ko
+    @GetMapping("/by-theater")
+    public ResponseEntity<?> getRevenueByTheater(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        if (startDate == null) startDate = LocalDateTime.of(2000, 1, 1, 0, 0);
+        if (endDate == null) endDate = LocalDateTime.now();
+
+        List<Map<String, Object>> revenue = revenueDao.getRevenueByTheater(startDate, endDate);
+        Double totalRevenue = revenueDao.getTotalRevenueByTheater(startDate, endDate);
+
+        return ResponseEntity.ok(Map.of("details", revenue, "totalRevenue", totalRevenue));
     }
 }
