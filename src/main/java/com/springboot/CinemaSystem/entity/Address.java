@@ -13,14 +13,8 @@ import lombok.NoArgsConstructor;
 public class Address {
 
 	private String addressDetail;
-
-	@Embedded
-	private Ward ward;
-
-	@Embedded
-	private District district;
-
-	@Embedded
-	private City city;
+	private String ward;
+	private String district;
+	private String city;
 
 }

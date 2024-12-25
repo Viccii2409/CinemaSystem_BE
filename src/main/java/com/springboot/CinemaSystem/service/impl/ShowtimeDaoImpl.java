@@ -255,11 +255,7 @@ public Showtime updateShowtime(Long showtimeId, ShowtimeRequestDto showtimeReque
 		return showtimeRepository.findShowtimesByDateAndRoom(date, roomId);
 	}
 
-	// Lấy thông tin chi tiết của một lịch chiếu
 	@Override
-	public Optional<Showtime> getShowtimeById(long showtimeId) {
-		return showtimeRepository.findById(showtimeId);
-	}
 	public ShowtimeDetailDto getShowtimeDetailById(long id) {
 		Optional<Showtime> showtimeOptional = showtimeRepository.findById(id);
 		if (showtimeOptional.isPresent()) {

@@ -11,7 +11,4 @@ import java.util.List;
 
 @Repository
 public interface DiscountRepository extends JpaRepository<Discount, Long> {
-    @Query("SELECT d FROM Discount d WHERE d.end < :currentDate AND d.status = true")
-    List<Discount> getActiveDiscounts(@Param("currentDate") Date currentDate);
-
 }

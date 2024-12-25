@@ -11,10 +11,6 @@ public class Ticket {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ticketID")
 	private long ID;
-
-	@Transient
-	private float price;
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "seatID")
 	private Seat seat;

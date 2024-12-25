@@ -6,7 +6,6 @@ import com.springboot.CinemaSystem.entity.TypeDiscount;
 import java.util.List;
 
 public interface DiscountDao {
-	public void updateStatusDiscount();
 	public Discount addDiscount(Discount discount);
 	public Discount getDiscountByID(long discountID);
 	public Discount updateDiscount(Discount discount);

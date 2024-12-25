@@ -12,16 +12,13 @@ import java.util.List;
 import java.util.Map;
 
 public interface MovieDao {
-//	Movie addMovie(MovieDto movieDto);
-//	Movie updateMovie(MovieDto movieDto);
-public MovieDto addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile);
+	public MovieDto addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile);
 	public MovieDto updateMovie(MovieRequestDto movieRequestDto, MultipartFile imageFile, MultipartFile trailerFile) ;
 
 	public List<MovieDto> getCommingSoonMovie();
 	public List<MovieDto> getShowingNowMovie();
 	public List<Slideshow> getAllSlideshow();
 	public boolean updateStatusMovie(int movieID);
-	public Movie getMovieByID(int movieID);
 	public List<Movie> getAllMovie();
 	public List<Movie> searchMovies(String title);
 	public Movie getMovieByID(long id);
@@ -44,5 +41,7 @@ public MovieDto addMovie(MovieRequestDto movieRequestDto, MultipartFile imageFil
 	public List<FeedbackDto> getFeedbackByMovie(long movieID);
 
 	List<Map<String, Object>> getTop3Movies();
+
+	public List<Language> getAllLanguages();
 
 }

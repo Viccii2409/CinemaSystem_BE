@@ -57,9 +57,9 @@ public class TheaterDto {
         dto.setEmail(theater.getEmail());
         dto.setImage(theater.getImage());
         dto.setAddress(theater.getAddress().getAddressDetail());
-        dto.setWard(theater.getAddress().getWard().getName());
-        dto.setDistrict(theater.getAddress().getDistrict().getName());
-        dto.setCity(theater.getAddress().getCity().getName());
+        dto.setWard(theater.getAddress().getWard());
+        dto.setDistrict(theater.getAddress().getDistrict());
+        dto.setCity(theater.getAddress().getCity());
         return dto;
     }
 

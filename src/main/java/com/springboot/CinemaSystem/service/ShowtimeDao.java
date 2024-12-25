@@ -19,7 +19,6 @@ public interface ShowtimeDao {
 	public Showtime updateShowtime(Long showtimeId, ShowtimeRequestDto showtimeRequestDto);
 	public Showtime getShowtimeByID(long showtimeID);
 	// Lịch chiếu theo ID
-	Optional<Showtime> getShowtimeById(long showtimeId);
 	public ShowtimeDetailDto getShowtimeDetailById(long id);
 	public List<ShowtimeDto> getShowtimesByDateAndRoom(LocalDate date, long roomId);
 	public List<RoomShowtimeDto> getRoomsByTheater(long theaterId);
