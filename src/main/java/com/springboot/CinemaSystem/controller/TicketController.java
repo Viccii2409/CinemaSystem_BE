@@ -12,6 +12,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,25 +40,37 @@ public class TicketController {
     private DiscountDao discountDao;
     private UserDao userDao;
     private FileStorageDao fileStorageDao;
+    private RevenueDao revenueDao;
     @Autowired
     private EmailDao emailDao;
     @Autowired
     private PdfDao pdfDao;
 
     @Autowired
-    public TicketController(TicketDao ticketDao, TheaterDao theaterDao, ShowtimeDao showtimeDao, DiscountDao discountDao, UserDao userDao, FileStorageDao fileStorageDao) {
+    public TicketController(TicketDao ticketDao, TheaterDao theaterDao, ShowtimeDao showtimeDao, DiscountDao discountDao, UserDao userDao, FileStorageDao fileStorageDao, RevenueDao revenueDao) {
         this.ticketDao = ticketDao;
         this.theaterDao = theaterDao;
         this.showtimeDao = showtimeDao;
         this.discountDao = discountDao;
         this.userDao = userDao;
         this.fileStorageDao = fileStorageDao;
+        this.revenueDao = revenueDao;
     }
 
     @GetMapping("/public/discount")
     public List<DiscountDto> getAllDiscount() {
         return discountDao.getAllDiscounts().stream()
                 .map(entry -> DiscountDto.toDiscountDto(entry))
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/public/discount/homepage")
+    public List<DiscountDto> getLatestDiscountsById() {
+        // Lấy toàn bộ danh sách discounts
+        return discountDao.getAllDiscounts().stream()
+                .map(entry -> DiscountDto.toDiscountDto(entry)) // Chuyển đổi thành DTO
+                .sorted(Comparator.comparing(DiscountDto::getId).reversed()) // Sắp xếp giảm dần theo ID
+                .limit(4) // Lấy 4 phần tử đầu tiên
                 .collect(Collectors.toList());
     }
 
@@ -505,6 +519,30 @@ public class TicketController {
             e.printStackTrace();
         }
         return null;
+    }
+
+    // Thống kê doanh thu theo thời gian  -> chọn tgian -> trả về doanh thu mỗi ngày trong rangeDate
+    @PreAuthorize("hasAuthority('MANAGER_REVENUE')")
+    @GetMapping("/daily-revenue")
+    public ResponseEntity<?> getRevenue(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        return ResponseEntity.ok(revenueDao.getRevenueByTime(startDate, endDate));
+    }
+
+// thống kê tất cả doanh thu -> trả về tháng
+    @PreAuthorize("hasAuthority('MANAGER_REVENUE')")
+    @GetMapping("/by-month")
+    public ResponseEntity<?> getRevenueByMonth(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        if (startDate == null) startDate = LocalDateTime.of(2000, 1, 1, 0, 0);
+        if (endDate == null) endDate = LocalDateTime.now();
+
+        List<Map<String, Object>> revenue = revenueDao.getRevenueByMonthOrYear(startDate, endDate);
+        Double totalRevenue = revenueDao.getTotalRevenueByMonthOrYear(startDate, endDate);
+
+        return ResponseEntity.ok(Map.of("details", revenue, "totalRevenue", totalRevenue));
     }
 
 }

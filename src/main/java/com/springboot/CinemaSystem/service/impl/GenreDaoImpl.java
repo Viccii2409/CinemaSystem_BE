@@ -33,14 +33,12 @@ public class GenreDaoImpl implements GenreDao {
         Genre genre = genreRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy thể loại"));
         genre.setName(genreDetails.getName());
         genre.setDescription(genreDetails.getDescription());
-        genre.setStatus(genreDetails.isStatus());
         return genreRepository.save(genre);
     }
 
     @Override
     public void hideGenre(Long id){
         Genre genre = genreRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy thể loại"));
-        genre.setStatus(!genre.isStatus());
         genreRepository.save(genre);
     }
 

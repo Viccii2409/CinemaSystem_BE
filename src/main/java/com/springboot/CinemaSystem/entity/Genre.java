@@ -17,13 +17,12 @@ public class Genre {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "genreID")
-	private long ID;
+	private Long ID;
 	private String name;
 
 	@Lob
 	@Column(name = "description", columnDefinition = "TEXT", nullable = true)
 	private String description;
-	private boolean status;
 
 	@ManyToMany(mappedBy = "genre")
 	@JsonIgnore
@@ -33,14 +32,14 @@ public class Genre {
 	@JsonIgnore
 	private List<Customer> customer;
 
-	public Genre(long ID, String name, String description) {
+	public Genre(Long ID, String name, String description) {
 		this.ID=ID;
 		this.name=name;
 		this.description=description;
 	}
 
 	public GenreDto toGenreDto(){
-		return new GenreDto(this.ID, this.name, this.description, this.status);
+		return new GenreDto(this.ID, this.name, this.description);
 	}
 
 	// Constructor cần thiết cho Jackson để chuyển đổi từ ID (số)
