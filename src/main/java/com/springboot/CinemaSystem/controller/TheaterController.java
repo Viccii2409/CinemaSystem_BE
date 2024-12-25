@@ -93,10 +93,7 @@ public class TheaterController {
         theater.setPhone(dto.getPhone());
         theater.setEmail(dto.getEmail());
         theater.setDescription(dto.getDescription());
-        Ward ward = new Ward(dto.getWard());
-        District district = new District(dto.getDistrict());
-        City city = new City(dto.getCity());
-        Address address = new Address(dto.getAddress(), ward, district, city);
+        Address address = new Address(dto.getAddress(), dto.getWard(), dto.getDistrict(), dto.getCity());
         theater.setAddress(address);
         if(file != null && !file.isEmpty()){
             String imageUrl = fileStorageDao.updateFile(file, theater.getImage(), "Image/Theater", "image");

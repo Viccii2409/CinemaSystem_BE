@@ -30,24 +30,6 @@ public class DiscountDaoImpl implements DiscountDao {
 	}
 
 	@Override
-	@Scheduled(fixedRate = 60000*60*24)
-	@Transactional
-	public void updateStatusDiscount() {
-		LocalDate localDate = LocalDate.now();
-		Date currentDate = Date.valueOf(localDate);
-		try {
-			List<Discount> discounts = discountRepository.getActiveDiscounts(currentDate);
-			for(Discount discount: discounts){
-				discount.setStatus(!discount.isStatus());
-				this.updateDiscount(discount);
-			}
-		} catch (Exception e) {
-			throw new DataProcessingException("Error updateStatusDiscount: " + e.getMessage());
-		}
-
-	}
-
-	@Override
 	public Discount addDiscount(Discount discount) {
 		try {
 			return discountRepository.save(discount);

@@ -185,27 +185,9 @@ public class TicketDaoImpl implements TicketDao {
 	}
 
 	@Override
-	public void addTicket(List<Ticket> tickets) {
-		try {
-			ticketRepository.saveAll(tickets);
-		} catch (Exception e) {
-			throw new DataProcessingException("Error addTicket: " + e.getMessage());
-		}
-	}
-
-	@Override
 	public Booking getBookingById(long id) {
 		return bookingRepository.findById(id)
 				.orElseThrow(() -> new NotFoundException("Error getBookingById: " + id));
-	}
-
-	@Override
-	public Payment addPayment(Payment payment) {
-		try {
-			return paymentRepository.save(payment);
-		} catch (Exception e) {
-			throw new DataProcessingException("Error addPayment: " + e.getMessage());
-		}
 	}
 
 	@Override
@@ -236,19 +218,6 @@ public class TicketDaoImpl implements TicketDao {
 		} catch (Exception e) {
 			throw new DataProcessingException("Error addPayOnline: " + e.getMessage());
 		}
-	}
-
-	@Override
-	public PayOnline getPayOnlineByBarcode(String orderId) {
-		return null;
-	}
-
-	@Override
-	public PayOnline updatePayOnline(PayOnline payOnline) {
-		if(!payOnlineRepository.existsById(payOnline.getID())){
-			throw new NotFoundException("Error updatePayOnline by ID");
-		}
-		return payOnlineRepository.save(payOnline);
 	}
 
 	@Override

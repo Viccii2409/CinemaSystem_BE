@@ -27,44 +27,25 @@ public class MovieDaoImpl implements MovieDao {
 	private final GenreRepository genreRepository;
 	private final MovieRepository movieRepository;
 	private final FileStorageDao fileStorageService;
-	@Autowired
 	private CustomerRepository customerRepository;
-	@Autowired
 	private SlideshowRepository slideshowRepository;
-	@Autowired
 	private FeedbackRepository feedbackRepository;
-
-	@Autowired
 	private BookingRepository bookingRepository;
+	private LanguageRepository languageRepository;
 
 	@Autowired
-	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository, FileStorageDao fileStorageService) {
+	public MovieDaoImpl(GenreRepository genreRepository, MovieRepository movieRepository, FileStorageDao fileStorageService, CustomerRepository customerRepository, SlideshowRepository slideshowRepository, FeedbackRepository feedbackRepository, BookingRepository bookingRepository, LanguageRepository languageRepository) {
 		this.genreRepository = genreRepository;
 		this.movieRepository = movieRepository;
 		this.fileStorageService = fileStorageService;
+		this.customerRepository = customerRepository;
+		this.slideshowRepository = slideshowRepository;
+		this.feedbackRepository = feedbackRepository;
+		this.bookingRepository = bookingRepository;
+		this.languageRepository = languageRepository;
 	}
 
-// Quản lý phim
-//	@Override
-//	public Movie addMovie(Movie movie) {
-//		try {
-//			return movieRepository.save(movie);
-//		} catch (Exception e) {
-//			throw new DataProcessingException("Failed addMovie: " + e.getMessage());
-//		}
-//	}
-//
-//	@Override
-//	public Movie updateMovie(Movie movie) {
-//		if(!movieRepository.existsById(movie.getId())) {
-//			throw new NotFoundException("Not found movie" + movie.getId());
-//		}
-//		try {
-//			return movieRepository.save(movie);
-//		} catch (Exception e) {
-//			throw new DataProcessingException("Failed updateMovie: " + e.getMessage());
-//		}
-//	}
+
 
 	// Thêm phim mới
 	// Phương thức addMovie mới
@@ -216,11 +197,6 @@ public class MovieDaoImpl implements MovieDao {
 	}
 
 	@Override
-	public Movie getMovieByID(int movieID) {
-		return movieRepository.findById((long) movieID).orElse(null);
-	}
-
-	@Override
 	public Movie getMovieDetails(long movieID) {
 
 		return movieRepository.findById((long) movieID).orElse(null);
@@ -365,6 +341,12 @@ public class MovieDaoImpl implements MovieDao {
 
 		// Trả về top 3 phim
 		return movies.stream().limit(3).collect(Collectors.toList());
+	}
+
+	@Override
+
+	public List<Language> getAllLanguages() {
+		return languageRepository.findAll();
 	}
 
 	private LocalDateTime getStartDate() {

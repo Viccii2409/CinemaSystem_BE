@@ -6,7 +6,6 @@ import lombok.*;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Data
 @Entity
@@ -30,11 +29,6 @@ public class User {
 	private String verificationCode;
 	@Embedded
 	private Account account;
-//    @Column(insertable = false, updatable = false)	// không được phép thay đổi (update) hoặc chèn (insert) thông qua các thao tác của JPA
-//    private String userType;
-
-	@Transient
-	private double totalSpending;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "roleID")

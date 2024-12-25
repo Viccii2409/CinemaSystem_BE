@@ -47,7 +47,6 @@ public class Showtime {
 			" JOIN day_of_week dow ON s.day_of_weekid = dow.day_of_weekid " +
 			" JOIN time_frame tf ON s.time_frameid = tf.time_frameid " +
 			" WHERE s.showtimeid = showtimeID) ")
-
 	private Float priceTicket;
 
 	@ManyToOne

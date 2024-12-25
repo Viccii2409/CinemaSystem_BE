@@ -48,9 +48,9 @@ public class Theater {
 
 	public String getFullAddress() {
 		return this.getAddress().getAddressDetail() + ", " +
-				this.getAddress().getWard().getName() + ", " +
-				this.getAddress().getDistrict().getName() + ", " +
-				this.getAddress().getCity().getName();
+				this.getAddress().getWard() + ", " +
+				this.getAddress().getDistrict() + ", " +
+				this.getAddress().getCity();
 	}
 
 	public static Theater convertTheaterAddtoTheater(TheaterDto dto) {
@@ -59,10 +59,7 @@ public class Theater {
 		theater.setPhone(dto.getPhone());
 		theater.setEmail(dto.getEmail());
 		theater.setDescription(dto.getDescription());
-		Ward ward = new Ward(dto.getWard());
-		District district = new District(dto.getDistrict());
-		City city = new City(dto.getCity());
-		Address address = new Address(dto.getAddress(), ward, district, city);
+		Address address = new Address(dto.getAddress(), dto.getWard(), dto.getDistrict(), dto.getCity());
 		theater.setAddress(address);
 		theater.setStatus(true);
 		return theater;

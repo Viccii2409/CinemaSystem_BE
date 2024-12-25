@@ -20,15 +20,11 @@ public interface TicketDao {
 	public Booking updateBooking(Booking booking);
 	public PayCash addPayCash(PayCash payCash);
 	public void addPayTypeCustomer(List<PayTypeCustomer> payTypeCustomers);
-	public void addTicket(List<Ticket> tickets);
 	public Booking getBookingById(long id);
 
-	public Payment addPayment(Payment payment);
 	public Payment updatePayment(Payment paymentNew);
 	public Payment getPaymentByBarcode(String barcode);
 	public PayOnline addPayOnline(PayOnline payOnline);
-	public PayOnline getPayOnlineByBarcode(String orderId);
-	public PayOnline updatePayOnline(PayOnline payOnline);
 	public void updateSelectSeatStatusToExpired(long showtimeID, long userid, long seatid);
 	public Booking getBookingByBarcode(String barcode);
 

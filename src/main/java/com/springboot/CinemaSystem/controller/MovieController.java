@@ -31,8 +31,6 @@ public class MovieController {
     private MovieDao movieService;
     private ShowtimeDao showtimeDao;
     @Autowired
-    private LanguageDao languageDao;
-    @Autowired
     private FileStorageDao fileStorageDao;
     @Autowired
     private TicketDao ticketDao;
@@ -225,7 +223,7 @@ public class MovieController {
     @PreAuthorize("hasAuthority('MANAGER_MOVIE')")
     @GetMapping("/getAllLanguage")
     public List<Language> getAllLanguages() {
-        return languageDao.getAllLanguages();
+        return movieService.getAllLanguages();
     }
 
 
