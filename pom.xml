@@ -116,6 +116,18 @@
 			<version>2.15.0</version> <!-- Bạn có thể thay đổi phiên bản phù hợp với dự án của bạn -->
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>5.2.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.2.3</version>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>
