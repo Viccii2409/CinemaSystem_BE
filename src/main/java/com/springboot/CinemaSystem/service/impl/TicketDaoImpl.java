@@ -29,9 +29,12 @@ public class TicketDaoImpl implements TicketDao {
 	private PayOnlineRepository payOnlineRepository;
 	private SimpMessagingTemplate simpMessagingTemplate;
 	private PaymentRepository paymentRepository;
+	private DiscountRepository discountRepository;
+	private TypeDiscountRepository typeDiscountRepository;
+
 
 	@Autowired
-	public TicketDaoImpl(DayOfWeekRepository dayOfWeekRepository, TimeFrameRepository timeFrameRepository, TypeCustomerRepository typeCustomerRepository, BasePriceRepository basePriceRepository, SelectedSeatRepository selectedSeatRepository, BookingRepository bookingRepository, PayCashRepository payCashRepository, PayTypeCustomerRepository payTypeCustomerRepository, TicketRepository ticketRepository, PayOnlineRepository payOnlineRepository, SimpMessagingTemplate simpMessagingTemplate, PaymentRepository paymentRepository) {
+	public TicketDaoImpl(DayOfWeekRepository dayOfWeekRepository, TimeFrameRepository timeFrameRepository, TypeCustomerRepository typeCustomerRepository, BasePriceRepository basePriceRepository, SelectedSeatRepository selectedSeatRepository, BookingRepository bookingRepository, PayCashRepository payCashRepository, PayTypeCustomerRepository payTypeCustomerRepository, TicketRepository ticketRepository, PayOnlineRepository payOnlineRepository, SimpMessagingTemplate simpMessagingTemplate, PaymentRepository paymentRepository, DiscountRepository discountRepository, TypeDiscountRepository typeDiscountRepository) {
 		this.dayOfWeekRepository = dayOfWeekRepository;
 		this.timeFrameRepository = timeFrameRepository;
 		this.typeCustomerRepository = typeCustomerRepository;
@@ -44,7 +47,10 @@ public class TicketDaoImpl implements TicketDao {
 		this.payOnlineRepository = payOnlineRepository;
 		this.simpMessagingTemplate = simpMessagingTemplate;
 		this.paymentRepository = paymentRepository;
+		this.discountRepository = discountRepository;
+		this.typeDiscountRepository = typeDiscountRepository;
 	}
+
 
 
 	@Override
@@ -236,5 +242,67 @@ public class TicketDaoImpl implements TicketDao {
 		} catch (Exception e) {
 			return null;
 		}
+	}
+
+	@Override
+	public Discount addDiscount(Discount discount) {
+		try {
+			return discountRepository.save(discount);
+		} catch (Exception e) {
+			throw new DataProcessingException("Error addDiscount: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public Discount getDiscountByID(long discountID) {
+		return discountRepository.findById(discountID)
+				.orElseThrow(() -> new NotFoundException("Error getDiscountByID: " + discountID));
+	}
+
+	@Override
+	public Discount updateDiscount(Discount discount) {
+		if(!discountRepository.existsById(discount.getID())) {
+			throw new NotFoundException("Error updateDiscount");
+		}
+		try {
+			return discountRepository.save(discount);
+		} catch (Exception e) {
+			throw new DataProcessingException("Error updateDiscount: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public List<Discount> getAllDiscounts() {
+		try {
+			return discountRepository.findAll();
+		} catch (Exception e) {
+			throw new DataProcessingException("Error getAllDiscounts: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public boolean deleteDiscount(long id) {
+		Discount discount = this.getDiscountByID(id);
+		try {
+			discountRepository.delete(discount);
+			return true;
+		} catch (Exception e) {
+			throw new DataProcessingException("Error deleteDiscount: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public List<TypeDiscount> getAllTypeDiscount() {
+		try {
+			return typeDiscountRepository.findAll();
+		} catch (Exception e) {
+			throw new NotFoundException("Error getAllTypeDiscount: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public TypeDiscount getTypeDiscountByID(long typeDiscountID) {
+		return typeDiscountRepository.findById(typeDiscountID)
+				.orElseThrow(() -> new NotFoundException("Error getTypeDiscountByID: " + typeDiscountID));
 	}
 }

@@ -28,4 +28,14 @@ public interface TicketDao {
 	public void updateSelectSeatStatusToExpired(long showtimeID, long userid, long seatid);
 	public Booking getBookingByBarcode(String barcode);
 
+
+	public Discount addDiscount(Discount discount);
+	public Discount getDiscountByID(long discountID);
+	public Discount updateDiscount(Discount discount);
+	public List<Discount> getAllDiscounts();
+	public boolean deleteDiscount(long id);
+
+	public List<TypeDiscount> getAllTypeDiscount();
+	public TypeDiscount getTypeDiscountByID(long typeDiscountID);
+
 }
