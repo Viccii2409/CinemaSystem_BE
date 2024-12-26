@@ -37,7 +37,6 @@ public class TicketController {
     private TicketDao ticketDao;
     private TheaterDao theaterDao;
     private ShowtimeDao showtimeDao;
-    private DiscountDao discountDao;
     private UserDao userDao;
     private FileStorageDao fileStorageDao;
     private RevenueDao revenueDao;
@@ -47,11 +46,10 @@ public class TicketController {
     private PdfDao pdfDao;
 
     @Autowired
-    public TicketController(TicketDao ticketDao, TheaterDao theaterDao, ShowtimeDao showtimeDao, DiscountDao discountDao, UserDao userDao, FileStorageDao fileStorageDao, RevenueDao revenueDao) {
+    public TicketController(TicketDao ticketDao, TheaterDao theaterDao, ShowtimeDao showtimeDao, UserDao userDao, FileStorageDao fileStorageDao, RevenueDao revenueDao) {
         this.ticketDao = ticketDao;
         this.theaterDao = theaterDao;
         this.showtimeDao = showtimeDao;
-        this.discountDao = discountDao;
         this.userDao = userDao;
         this.fileStorageDao = fileStorageDao;
         this.revenueDao = revenueDao;
@@ -59,7 +57,7 @@ public class TicketController {
 
     @GetMapping("/public/discount")
     public List<DiscountDto> getAllDiscount() {
-        return discountDao.getAllDiscounts().stream()
+        return ticketDao.getAllDiscounts().stream()
                 .map(entry -> DiscountDto.toDiscountDto(entry))
                 .collect(Collectors.toList());
     }
@@ -67,7 +65,7 @@ public class TicketController {
     @GetMapping("/public/discount/homepage")
     public List<DiscountDto> getLatestDiscountsById() {
         // Lấy toàn bộ danh sách discounts
-        return discountDao.getAllDiscounts().stream()
+        return ticketDao.getAllDiscounts().stream()
                 .map(entry -> DiscountDto.toDiscountDto(entry)) // Chuyển đổi thành DTO
                 .sorted(Comparator.comparing(DiscountDto::getId).reversed()) // Sắp xếp giảm dần theo ID
                 .limit(4) // Lấy 4 phần tử đầu tiên
@@ -78,7 +76,7 @@ public class TicketController {
     public List<DiscountDto> getAllDiscountActive() {
         java.util.Date currentDate = new java.util.Date();
         Date date = new Date(currentDate.getTime());
-        return discountDao.getAllDiscounts().stream()
+        return ticketDao.getAllDiscounts().stream()
                 .filter(entry -> entry.isStatus()
                         && !entry.getStart().after(date)
                         && !entry.getEnd().before(date)
@@ -300,14 +298,14 @@ public class TicketController {
                                    @RequestParam(value = "file", required = false) MultipartFile file) {
         try {
             Discount discount = Discount.toDiscount(dto);
-            TypeDiscount typeDiscount = discountDao.getTypeDiscountByID(dto.getTypeDiscountid());
+            TypeDiscount typeDiscount = ticketDao.getTypeDiscountByID(dto.getTypeDiscountid());
             discount.setTypeDiscount(typeDiscount);
             discount.setStatus(true);
             if(file != null && !file.isEmpty()){
                 String imageUrl = fileStorageDao.saveFileFromCloudinary(file, "Image/Discount", "image");
                 discount.setImage(imageUrl);
             }
-            Discount discount_new = discountDao.addDiscount(discount);
+            Discount discount_new = ticketDao.addDiscount(discount);
             DiscountDto discountDto = DiscountDto.toDiscountDto(discount_new);
             return discountDto;
         } catch (Exception e) {
@@ -318,9 +316,9 @@ public class TicketController {
     @PreAuthorize("hasAuthority('MANAGER_DISCOUNT')")
     @PutMapping("/discount/{id}/updatestatus")
     public boolean updateStatusDiscount(@PathVariable("id") long id) {
-        Discount discount = discountDao.getDiscountByID(id);
+        Discount discount = ticketDao.getDiscountByID(id);
         discount.setStatus(!discount.isStatus());
-        Discount discount_new = discountDao.updateDiscount(discount);
+        Discount discount_new = ticketDao.updateDiscount(discount);
         return true;
     }
 
@@ -328,9 +326,9 @@ public class TicketController {
     @PutMapping("/discount/update")
     public DiscountDto updateDiscount(@ModelAttribute DiscountDto dto,
                                       @RequestParam(value = "file", required = false) MultipartFile file) {
-        Discount discount_old = discountDao.getDiscountByID(dto.getId());
+        Discount discount_old = ticketDao.getDiscountByID(dto.getId());
         Discount discount = Discount.toDiscount(dto);
-        TypeDiscount typeDiscount = discountDao.getTypeDiscountByID(dto.getTypeDiscountid());
+        TypeDiscount typeDiscount = ticketDao.getTypeDiscountByID(dto.getTypeDiscountid());
         discount.setTypeDiscount(typeDiscount);
         discount.setImage(discount_old.getImage());
         discount.setUser(discount_old.getUser());
@@ -339,22 +337,22 @@ public class TicketController {
             String imageUrl = fileStorageDao.updateFile(file, discount_old.getImage(), "Image/Discount", "image");
             discount.setImage(imageUrl);
         }
-        Discount discount_new = discountDao.updateDiscount(discount);
+        Discount discount_new = ticketDao.updateDiscount(discount);
         return DiscountDto.toDiscountDto(discount_new);
     }
 
     @PreAuthorize("hasAuthority('MANAGER_DISCOUNT')")
     @DeleteMapping("/discount/{id}/delete")
     public boolean deleteDiscount(@PathVariable("id") long id) {
-        Discount discount = discountDao.getDiscountByID(id);
+        Discount discount = ticketDao.getDiscountByID(id);
         fileStorageDao.deleteFileFromCloudinary(discount.getImage(), "Image/Discount");
-        return discountDao.deleteDiscount(id);
+        return ticketDao.deleteDiscount(id);
     }
 
     @PreAuthorize("hasAuthority('MANAGER_DISCOUNT')")
     @GetMapping("/typediscount")
     public List<TypeDiscountDto> getTypeDiscountDtos() {
-        return discountDao.getAllTypeDiscount().stream()
+        return ticketDao.getAllTypeDiscount().stream()
                 .map(entry -> TypeDiscountDto.toTypeDiscountDto(entry))
                 .collect(Collectors.toList());
     }
@@ -412,7 +410,7 @@ public class TicketController {
             payOnline.setStatus("pending");
             payOnline.setBooking(booking_new_2);
             if(paymentDto.getDiscountid() > 0){
-                Discount discount = discountDao.getDiscountByID(paymentDto.getDiscountid());
+                Discount discount = ticketDao.getDiscountByID(paymentDto.getDiscountid());
                 user.getDiscount().add(discount);
                 userDao.updateUser(user);
                 payOnline.setDiscount(discount);
