@@ -169,20 +169,16 @@ public class MovieDaoImpl implements MovieDao {
                 .collect(Collectors.toList());
     }
 
-	@Override
 	public List<MovieDto> getCommingSoonMovie() {
 		LocalDate today = LocalDate.now();
-		return movieRepository.findAll().stream()
-				.filter(movie -> movie.getReleaseDate().isAfter(today))
+		return movieRepository.findMoviesComingSoon(today).stream()
 				.map(this::convertToDto)
 				.collect(Collectors.toList());
 	}
 
-	@Override
 	public List<MovieDto> getShowingNowMovie() {
 		LocalDate today = LocalDate.now();
-		return movieRepository.findAll().stream()
-				.filter(movie -> movie.getReleaseDate().isBefore(today) || movie.getReleaseDate().isEqual(today))
+		return movieRepository.findMoviesNowShowing(today).stream()
 				.map(this::convertToDto)
 				.collect(Collectors.toList());
 	}
