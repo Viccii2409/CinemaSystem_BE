@@ -55,13 +55,6 @@ public class SecurityConfig{
     }
 
 
-
-//    @Bean
-//    public MultipartResolver multipartResolver() {
-//        return new StandardServletMultipartResolver();
-//    }
-
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -73,7 +66,8 @@ public class SecurityConfig{
                                 "/api/movie/public/**",
                                 "/api/ticket/public/**",
                                 "/api/user/public/**",
-                                "/api/feedback/public/*")
+                                "/api/feedback/public/*",
+                                "/ws/**")
                         .permitAll()
                         .anyRequest().authenticated()
                 )
