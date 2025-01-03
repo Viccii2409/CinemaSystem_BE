@@ -16,7 +16,11 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     List<Movie> findByReleaseDateAfter(LocalDate date);
     List<Movie> findByStatus(boolean status);
 
+    @Query("SELECT m FROM Movie m WHERE m.releaseDate > :today and status=true ORDER BY m.releaseDate ASC")
+    List<Movie> findMoviesComingSoon(@Param("today") LocalDate today);
 
+    @Query("SELECT m FROM Movie m WHERE m.releaseDate <= :today and status=true ORDER BY m.releaseDate ASC")
+    List<Movie> findMoviesNowShowing(@Param("today") LocalDate today);
     @Query("SELECT m FROM Movie m JOIN m.genre g WHERE g.name = :genreName")
     List<Movie> findByGenreName(String genreName);
 
