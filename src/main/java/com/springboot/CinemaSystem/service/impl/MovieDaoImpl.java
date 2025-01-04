@@ -120,21 +120,27 @@ public class MovieDaoImpl implements MovieDao {
     public List<MovieDto> recommendMovies(List<Long> genreIds) {
         List<Movie> movies=movieRepository.findMoviesByGenres(genreIds);
         return movies.stream()
-                .map(this::convertToDto)
+				.map(entry -> entry.toMovieDto())
+				.sorted(Comparator.comparing(MovieDto::getId).reversed())
+				.limit(6)
                 .collect(Collectors.toList());
     }
 
 	public List<MovieDto> getCommingSoonMovie() {
 		LocalDate today = LocalDate.now();
 		return movieRepository.findMoviesComingSoon(today).stream()
-				.map(this::convertToDto)
+				.map(entry -> entry.toMovieDto())
+				.sorted(Comparator.comparing(MovieDto::getId).reversed())
+				.limit(6)
 				.collect(Collectors.toList());
 	}
 
 	public List<MovieDto> getShowingNowMovie() {
 		LocalDate today = LocalDate.now();
 		return movieRepository.findMoviesNowShowing(today).stream()
-				.map(this::convertToDto)
+				.map(entry -> entry.toMovieDto())
+				.sorted(Comparator.comparing(MovieDto::getId).reversed())
+				.limit(6)
 				.collect(Collectors.toList());
 	}
 
@@ -150,36 +156,36 @@ public class MovieDaoImpl implements MovieDao {
 
 
 // Quản lý phim
-	private MovieDto convertToDto(Movie movie) {
-		// Kiểm tra danh sách image
-		String link = (movie.getImage() == null || movie.getImage().isEmpty()) ? null : movie.getImage();
-		List<GenreDto> genreDtos = movie.getGenre().stream()
-				.map(Genre::toGenreDto)
-				.collect(Collectors.toList());
-		return new MovieDto(
-				movie.getId(),
-				movie.getTitle(),
-				movie.getImage(),
-				movie.getReleaseDate(),
-				movie.isStatus(),
-				movie.getShowtime().size(),
-				genreDtos,
-				movie.getShowtime()
-						.stream()
-						.filter(showtime -> showtime.getRoom().isStatus() == true && ("upcoming".equals(showtime.getAction()) || "running".equals(showtime.getAction())))
-						.map(showtime -> new ShowtimeTheaterIDDto(
-								showtime.getID(),
-								showtime.getDate(),
-								showtime.getStartTime(),
-								showtime.getEndTime(),
-								showtime.getAction(),
-								showtime.getRoom().getTheater().getID(),
-								showtime.getRoom().getSeat().size() - showtime.getAvailableSeats(),
-								showtime.getRoom().getTypeRoom().getName()
-						))
-						.collect(Collectors.toList())
-		);
-	};
+//	private MovieDto convertToDto(Movie movie) {
+//		// Kiểm tra danh sách image
+//		String link = (movie.getImage() == null || movie.getImage().isEmpty()) ? null : movie.getImage();
+//		List<GenreDto> genreDtos = movie.getGenre().stream()
+//				.map(Genre::toGenreDto)
+//				.collect(Collectors.toList());
+//		return new MovieDto(
+//				movie.getId(),
+//				movie.getTitle(),
+//				movie.getImage(),
+//				movie.getReleaseDate(),
+//				movie.isStatus(),
+//				movie.getShowtime().size(),
+//				genreDtos,
+//				movie.getShowtime()
+//						.stream()
+//						.filter(showtime -> showtime.getRoom().isStatus() == true && ("upcoming".equals(showtime.getAction()) || "running".equals(showtime.getAction())))
+//						.map(showtime -> new ShowtimeTheaterIDDto(
+//								showtime.getID(),
+//								showtime.getDate(),
+//								showtime.getStartTime(),
+//								showtime.getEndTime(),
+//								showtime.getAction(),
+//								showtime.getRoom().getTheater().getID(),
+//								showtime.getRoom().getSeat().size() - showtime.getAvailableSeats(),
+//								showtime.getRoom().getTypeRoom().getName()
+//						))
+//						.collect(Collectors.toList())
+//		);
+//	};
 
 	@Override
 	public boolean updateStatusMovie(int movieID) {

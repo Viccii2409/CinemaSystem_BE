@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.*;
 
 @Data
@@ -23,8 +24,8 @@ public class Discount {
 	private float reducedValue;
 	private String discountCode;
 	private String image;
-	private Date start;
-	private Date end;
+	private LocalDate start;
+	private LocalDate end;
 
   	@Lob
 	@Column(name = "description", columnDefinition = "TEXT")

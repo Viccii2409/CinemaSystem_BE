@@ -145,12 +145,30 @@ public class Movie {
 		MovieDto dto = new MovieDto();
 		dto.setId(this.getId());
 		dto.setTitle(this.getTitle());
-
-		// Chuyển đổi các thể loại của phim thành danh sách GenreDto
+		dto.setImage(this.getImage());
+		dto.setReleaseDate(this.getReleaseDate());
+		dto.setStatus(this.isStatus());
+		dto.setCountShowtime(this.getShowtime().size());
 		List<GenreDto> genreDtos = this.getGenre().stream()
 				.map(Genre::toGenreDto)
 				.collect(Collectors.toList());
 		dto.setGenre(genreDtos);
+		dto.setShowtime(
+				this.getShowtime()
+				.stream()
+				.filter(showtime -> showtime.getRoom().isStatus() == true && ("upcoming".equals(showtime.getAction()) || "running".equals(showtime.getAction())))
+				.map(showtime -> new ShowtimeTheaterIDDto(
+						showtime.getID(),
+						showtime.getDate(),
+						showtime.getStartTime(),
+						showtime.getEndTime(),
+						showtime.getAction(),
+						showtime.getRoom().getTheater().getID(),
+						showtime.getRoom().getSeat().size() - showtime.getAvailableSeats(),
+						showtime.getRoom().getTypeRoom().getName()
+				))
+				.collect(Collectors.toList())
+		);
 		return dto;
 	}
 

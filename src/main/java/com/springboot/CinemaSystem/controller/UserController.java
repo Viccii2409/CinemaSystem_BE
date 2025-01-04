@@ -343,14 +343,8 @@ public class UserController {
         List<Long> genreIds = genres.stream()
                 .map(Genre::getID)
                 .collect(Collectors.toList());
-
-        // Lấy danh sách phim phù hợp với thể loại
         List<MovieDto> movies = movieDao.recommendMovies(genreIds);
-
-        // Trộn ngẫu nhiên danh sách phim
         Collections.shuffle(movies);
-
-        // Lấy tối đa 6 phim (nếu danh sách có ít hơn 6 phim thì trả về toàn bộ)
         return movies.stream()
                 .limit(6)
                 .collect(Collectors.toList());
@@ -425,16 +419,21 @@ public class UserController {
             userDao.updateAdmin(admin);
         }
         else if(userDto.getRoleid_old() == 2) {
+            System.out.println(userDto.getId());
+
             Manager manager = userDao.getManagerById(userDto.getId());
-            manager.setTheater(null);
-            Manager manager_2 = userDao.getManagerById(userDto.getManagerid_new());
-            for (Agent agent : manager.getAgents()) {
-                agent.setManager(manager_2);
+            System.out.println(userDto.getManagerid_new());
+            if(userDto.getManagerid_new() > 0) {
+                manager.setTheater(null);
+                Manager manager_2 = userDao.getManagerById(userDto.getManagerid_new());
+                for (Agent agent : manager.getAgents()) {
+                    agent.setManager(manager_2);
+                }
+                manager_2.getAgents().addAll(manager.getAgents());
+                manager.getAgents().clear();
+                userDao.updateManager(manager);
+                userDao.updateManager(manager_2);
             }
-            manager_2.getAgents().addAll(manager.getAgents());
-            manager.getAgents().clear();
-            userDao.updateManager(manager);
-            userDao.updateManager(manager_2);
         }
         else if(userDto.getRoleid_old() == 3) {
             Agent agent = userDao.getAgentById(userDto.getId());

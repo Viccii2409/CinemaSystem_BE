@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -18,14 +19,16 @@ public class DiscountDto {
     private float reducedValue;
     private String discountCode;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private Date start;
+    private LocalDate start;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private Date end;
+    private LocalDate end;
     private String description;
     private String image;
     private boolean status;
 
     private long typeDiscountid;
+
+    private boolean used;
 
     public static DiscountDto toDiscountDto(Discount discount) {
         DiscountDto dto = new DiscountDto();
@@ -39,6 +42,7 @@ public class DiscountDto {
         dto.setDescription(discount.getDescription());
         dto.setImage(discount.getImage());
         dto.setStatus(discount.isStatus());
+        dto.setUsed(discount.getPayment().size() > 0);
         return dto;
     }
 }

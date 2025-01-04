@@ -72,13 +72,13 @@ public class MovieController {
         return movieService.getAllSlideshow();
     }
 
-//    @GetMapping("/public/genre")
-//    public List<GenreDto> getAllGenre() {
-//        return movieService.getAllGenres().stream()
-//                .filter(entry -> entry.isStatus())
-//                .map(entry -> GenreDto.toGenreDto(entry))
-//                .collect(Collectors.toList());
-//    }
+    @GetMapping("/public/all")
+    public List<MovieDto> getAllMoviePublic() {
+        return movieService.getAllMovie().stream()
+                .filter(entry -> entry.isStatus())
+                .map(entry -> entry.toMovieDto())
+                .collect(Collectors.toList());
+    }
 
     @PreAuthorize("hasAuthority('MANAGER_PRICETICKET')")
     @GetMapping("/baseprice")
@@ -99,7 +99,6 @@ public class MovieController {
     }
 
     // Quản lý thể loại
-//    @PreAuthorize("hasAuthority('MANAGER_GENRE')")
     @GetMapping("/public/genre")
     public List<GenreDto> getAllGenres(){
         List<GenreDto> genreDtos = new ArrayList<>();

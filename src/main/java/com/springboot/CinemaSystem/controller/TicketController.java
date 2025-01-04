@@ -74,12 +74,11 @@ public class TicketController {
 
     @GetMapping("public/discount/active")
     public List<DiscountDto> getAllDiscountActive() {
-        java.util.Date currentDate = new java.util.Date();
-        Date date = new Date(currentDate.getTime());
+        LocalDate localDate = LocalDate.now();
         return ticketDao.getAllDiscounts().stream()
                 .filter(entry -> entry.isStatus()
-                        && !entry.getStart().after(date)
-                        && !entry.getEnd().before(date)
+                        && !entry.getStart().isAfter(localDate)
+                        && !entry.getEnd().isBefore(localDate)
                         )
                 .map(entry -> DiscountDto.toDiscountDto(entry))
                 .collect(Collectors.toList());
@@ -326,6 +325,7 @@ public class TicketController {
     @PutMapping("/discount/update")
     public DiscountDto updateDiscount(@ModelAttribute DiscountDto dto,
                                       @RequestParam(value = "file", required = false) MultipartFile file) {
+        System.out.println(dto);
         Discount discount_old = ticketDao.getDiscountByID(dto.getId());
         Discount discount = Discount.toDiscount(dto);
         TypeDiscount typeDiscount = ticketDao.getTypeDiscountByID(dto.getTypeDiscountid());

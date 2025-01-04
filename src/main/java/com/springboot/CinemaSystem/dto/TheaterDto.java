@@ -27,6 +27,7 @@ public class TheaterDto {
 
     private List<MovieShowtimeDto> movie;
     private List<RoomDto> room;
+    private boolean checkManager;
 
     public TheaterDto(long id, String name, List<MovieShowtimeDto> movie) {
         this.id = id;
@@ -39,6 +40,7 @@ public class TheaterDto {
         dto.setId(theater.getID());
         dto.setName(theater.getName());
         dto.setImage(theater.getImage());
+        dto.setCheckManager(theater.getManager() != null);
         return dto;
     }
 
