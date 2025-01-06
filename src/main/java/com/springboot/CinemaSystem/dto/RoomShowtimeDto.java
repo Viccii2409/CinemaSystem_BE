@@ -13,13 +13,15 @@ import java.util.List;
 public class RoomShowtimeDto {
     private long roomId;
     private String roomName;
+    private String nameTypeRoom;
     private List<ShowtimeDto> showtimes;
 
     // Constructor cho câu truy vấn JPQL
-    public RoomShowtimeDto(long roomId, String roomName) {
+    public RoomShowtimeDto(long roomId, String roomName, String nameTypeRoom) {
         this.roomId = roomId;
         this.roomName = roomName;
-        this.showtimes = new ArrayList<>(); // Khởi tạo danh sách showtimes rỗng
+        this.nameTypeRoom = nameTypeRoom;
+        this.showtimes = new ArrayList<>();
     }
 
     // Getter và Setter cho showtimes

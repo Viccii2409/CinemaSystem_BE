@@ -26,7 +26,7 @@ public class Genre {
 
 	@ManyToMany(mappedBy = "genre")
 	@JsonIgnore
-	private List<Movie> movie;
+	private List<Movie> movie = new ArrayList<>();
 
 	@ManyToMany(mappedBy = "genre")
 	@JsonIgnore
@@ -39,7 +39,7 @@ public class Genre {
 	}
 
 	public GenreDto toGenreDto(){
-		return new GenreDto(this.ID, this.name, this.description);
+		return new GenreDto(this.ID, this.name, this.description, this.getMovie().size());
 	}
 
 	// Constructor cần thiết cho Jackson để chuyển đổi từ ID (số)

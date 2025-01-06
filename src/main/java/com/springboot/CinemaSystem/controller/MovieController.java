@@ -19,10 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -101,11 +98,10 @@ public class MovieController {
     // Quản lý thể loại
     @GetMapping("/public/genre")
     public List<GenreDto> getAllGenres(){
-        List<GenreDto> genreDtos = new ArrayList<>();
-        List<Genre> genres = movieService.getAllGenres();
-        for(Genre g : genres) {
-            genreDtos.add(g.toGenreDto());
-        }
+        List<GenreDto> genreDtos = movieService.getAllGenres().stream()
+                .map(entry -> entry.toGenreDto())
+                .sorted(Comparator.comparing(GenreDto::getID).reversed())
+                .collect(Collectors.toList());
         return genreDtos;
     }
 
@@ -203,6 +199,7 @@ public class MovieController {
     public List<MovieDto> getAllMovie() {
         return movieService.getAllMovie().stream()
                 .map(entry -> MovieDto.toMovieDto(entry))
+                .sorted(Comparator.comparing(MovieDto::getId).reversed())
                 .collect(Collectors.toList());
     }
 

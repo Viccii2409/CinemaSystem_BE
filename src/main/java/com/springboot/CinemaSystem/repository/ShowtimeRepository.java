@@ -96,7 +96,7 @@ public interface ShowtimeRepository extends JpaRepository<Showtime, Long> {
 //    List<ShowtimeDto> findShowtimesByDateAndRoom(@Param("date") LocalDate date, @Param("roomId") long roomId);
 
     // Lấy danh sách phòng chiếu và lịch chiếu theo ngày và rạp
-    @Query("SELECT new com.springboot.CinemaSystem.dto.RoomShowtimeDto(r.ID, r.name) " +
+    @Query("SELECT new com.springboot.CinemaSystem.dto.RoomShowtimeDto(r.ID, r.name, r.typeRoom.name) " +
             "FROM Room r WHERE r.theater.ID = :theaterId")
     List<RoomShowtimeDto> findRoomsByTheater(@Param("theaterId") long theaterId);
 

@@ -38,10 +38,10 @@ public class Discount {
 
 	@ManyToMany(mappedBy = "discount")
 	@JsonIgnore
-	private List<User> user;
+	private List<User> user = new ArrayList<>();
 
 	@OneToMany(mappedBy = "discount")
-	private List<Payment> payment;
+	private List<Payment> payment = new ArrayList<>();
 
 	public Discount(long ID) {
 		this.ID = ID;

@@ -2,6 +2,7 @@ package com.springboot.CinemaSystem.controller;
 
 import com.springboot.CinemaSystem.dto.*;
 import com.springboot.CinemaSystem.entity.*;
+import com.springboot.CinemaSystem.exception.DataProcessingException;
 import com.springboot.CinemaSystem.service.*;
 import com.springboot.CinemaSystem.util.JwtTokenUtil;
 import jakarta.transaction.Transactional;
@@ -387,6 +388,7 @@ public class UserController {
         Role role = userDao.getRoleById(userDto.getRoleid());
         employee.setRole(role);
         employee.setStatusEmployee(true);
+        employee.setStatus(true);
         Employee employee_new = userDao.addEmployee(employee);
         System.out.println(role.getName());
         if(role.getName().equals("ADMIN")) {

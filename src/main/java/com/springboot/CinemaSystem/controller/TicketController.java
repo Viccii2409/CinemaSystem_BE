@@ -317,7 +317,7 @@ public class TicketController {
     public boolean updateStatusDiscount(@PathVariable("id") long id) {
         Discount discount = ticketDao.getDiscountByID(id);
         discount.setStatus(!discount.isStatus());
-        Discount discount_new = ticketDao.updateDiscount(discount);
+        ticketDao.updateDiscount(discount);
         return true;
     }
 
