@@ -104,5 +104,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "ORDER BY totalRevenue DESC")
     List<Map<String, Object>> getTop3Movies(@Param("startDate") LocalDateTime startDate,
                                                                   @Param("endDate") LocalDateTime endDate);
+
     Booking findByBarcode(String barcode);
 }

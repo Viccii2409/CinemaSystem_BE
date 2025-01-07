@@ -132,7 +132,8 @@ public class TicketController {
     @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_SELLING')")
     @GetMapping("/booking/payonline/{barcode}")
     public BookingDto getBookingByBarcode(@PathVariable("barcode") String barcode) {
-        return BookingDto.toBookingDto(ticketDao.getBookingByBarcode(barcode));
+        Payment payment = ticketDao.getPaymentByBarcode(barcode);
+        return BookingDto.toBookingDto(payment.getBooking());
     }
 
     @PreAuthorize("hasAnyAuthority('BOOKING', 'MANAGER_SELLING')")
